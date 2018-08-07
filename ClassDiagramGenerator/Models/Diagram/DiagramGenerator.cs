@@ -100,7 +100,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 				if(!IsTargetAccessModifier(field.Modifier, accessFilter))
 					continue;
 
-				builder.Append($"\t\t{AccessSymbol(field.Modifier)} {ModifierText(field.Modifier, true)}{field.Type} {field.Name}")
+				builder.Append($"\t\t{AccessSymbol(field.Modifier)} {ModifierText(field.Modifier, true)}{field.Name} : {field.Type}")
 					.Append(NewLine);
 			}
 
@@ -109,15 +109,15 @@ namespace ClassDiagramGenerator.Models.Diagram
 				if(!IsTargetAccessModifier(method.Modifier, accessFilter))
 					continue;
 
+				var args = method.Arguments.Select(a => $"{a.Name} : {a.Type}") ?? Enumerable.Empty<string>();
+
 				builder.Append($"\t\t{AccessSymbol(method.Modifier)} ")
 					.Append($"{ModifierText(method.Modifier, true)}")
-					.Append($"{method.ReturnType}{((method.ReturnType != null) ? " " : "")}")
-					.Append($"{method.Name}(");
-				
-				var args = method.Arguments.Select(a => $"{a.Type} {a.Name}") ?? Enumerable.Empty<string>();
-				builder.Append(string.Join(", ", args));
-
-				builder.Append(")").Append(NewLine);
+					.Append($"{method.Name}(")
+					.Append(string.Join(", ", args))
+					.Append(")")
+					.Append($"{((method.ReturnType != null) ? " : " : "")}{method.ReturnType}")
+					.Append(NewLine);
 			}
 
 			builder.Append("\t}").Append(NewLine)

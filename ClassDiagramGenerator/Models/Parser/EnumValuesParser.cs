@@ -47,7 +47,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <returns><see cref="FieldInfo"/></returns>
 		private FieldInfo CreateFieldFromValueName(string name)
 		{
-			return new FieldInfo((this.classInfo?.Modifier ?? Modifier.Public) & Modifier.AllAccessLevels, name, new TypeInfo("int"));
+			return new FieldInfo(Modifier.Public | Modifier.Static, name, new TypeInfo("int"));
 		}
 	}
 }
