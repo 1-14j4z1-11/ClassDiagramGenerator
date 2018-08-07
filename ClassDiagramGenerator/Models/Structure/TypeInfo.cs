@@ -17,7 +17,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// </summary>
 		/// <param name="name">Type name</param>
 		/// <param name="typeArgs">Collection of type arguments</param>
-		public TypeInfo(string name, IEnumerable<TypeInfo> typeArgs)
+		public TypeInfo(string name, IEnumerable<TypeInfo> typeArgs = null)
 		{
 			this.Name = name;
 			this.TypeArgs = new ReadOnlyCollection<TypeInfo>(

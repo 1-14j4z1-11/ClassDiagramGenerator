@@ -9,6 +9,9 @@ using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
+	/// <summary>
+	/// Class parsing a field of C# and Java.
+	/// </summary>
 	public class FieldParser : ComponentParser<FieldInfo>
 	{
 		// Groups : [1] Modifier, [2] Return type, [3] Field name
@@ -26,7 +29,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Try to parse field definition line.
+		/// Tries to parse field definition line.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
 		/// <param name="info">[out] Parsed <see cref="FieldInfo"/> (only succeeded in parsing)</param>

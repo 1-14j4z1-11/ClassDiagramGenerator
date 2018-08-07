@@ -40,6 +40,8 @@ namespace ClassDiagramGenerator.Models.Structure
 		Event = 1 << 11,
 
 		Async = 1 << 12,
+
+		AllAccessLevels = Public | Protected | Internal | Private,
 	}
 
 	/// <summary>
@@ -66,10 +68,10 @@ namespace ClassDiagramGenerator.Models.Structure
 		};
 
 		/// <summary>
-		/// Parse modifiers from string.
+		/// Parse <see cref="Modifier"/> from string.
 		/// <para>If argument string contains no modifiers, returns <see cref="Modifier.None"/>.</para>
 		/// </summary>
-		/// <param name="str">文字列</param>
+		/// <param name="str">String to be parsed</param>
 		/// <returns><see cref="Modifier"/> parsed from string</returns>
 		/// <exception cref="ArgumentNullException">If argument is null.</exception>
 		public static Modifier Parse(string str)
@@ -92,7 +94,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// Convert <see cref="Modifier"/> into string.
 		/// </summary>
 		/// <param name="modifier"></param>
-		/// <returns>string of <see cref="Modifier"/></returns>
+		/// <returns>String of <see cref="Modifier"/></returns>
 		public static string ToModifierString(this Modifier modifier)
 		{
 			var containedValues = new List<Modifier>();

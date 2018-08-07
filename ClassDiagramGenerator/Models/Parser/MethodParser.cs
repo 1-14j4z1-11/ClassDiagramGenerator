@@ -9,14 +9,17 @@ using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
+	/// <summary>
+	/// Class parsing a method of C# and Java.
+	/// </summary>
 	public class MethodParser : ComponentParser<MethodInfo>
 	{
+		// In order to support Java and C# methods, Type argument declarations are included twice.
 		// Groups : [1] Modifier, [2] Return type, [3] Method name, [4] Arguments
 		private static readonly Regex MethodRegex = new Regex(
-			$"^\\s*{AttributePattern}?((?:{ModifierPattern}\\s+)*)(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeArgPattern}>\\s*)?"
-			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");
-
-		private static readonly Regex CreateObjectRegex = new Regex($"\\s*new\\s+({NamePattern})\\s*");
+			$"^\\s*{AttributePattern}?((?:{ModifierPattern}\\s+)*)(?:<{TypeArgPattern}>\\s*)?"	// Attributes + Modifier + TypeArgDeclaration
+			+ $"(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeArgPattern}>\\s*)?"         // ReturnType + Name + TypeArgDeclaration
+			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");		// Arguments
 		
 		public override bool TryParse(SourceCodeReader reader, out MethodInfo info)
 		{
@@ -28,7 +31,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Try to parse method definition line.
+		/// Tries to parse method definition line.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
 		/// <param name="info">[out] Parsed <see cref="MethodInfo"/> (only succeeded in parsing)</param>
@@ -78,7 +81,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				reader.TryRead(out var sub);
 
 				// Skip implementation lines
-				// TODO Gets using type in implementation lines
+				// TODO Gets used types in implementation lines
 			}
 		}
 	}

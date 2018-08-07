@@ -11,7 +11,8 @@ namespace ClassDiagramGenerator.Models.Parser
 {
 	public class ClassParser : ComponentParser<ClassInfo>
 	{
-		private static readonly string ClassCategoryPattern = "(?:class|interface|enum)";
+		private static readonly IEnumerable<string> Categories = Enum.GetValues(typeof(ClassCategory)).Cast<ClassCategory>().Select(c => c.ToCategoryString());
+		private static readonly string ClassCategoryPattern = "(?:" + string.Join("|", Categories) + ")";
 
 		// Groups : [1] Modifier, [2] Class category, [3] Class name, [4] Inherited classes
 		private static readonly Regex ClassRegex = new Regex(
@@ -41,17 +42,17 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Try to parse class definition line.
+		/// Tries to parse class definition line.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
-		/// <param name="info">[out] Parsed <see cref="ClassInfo"/> (only succeeded in parsing)</param>
+		/// <param name="classInfo">[out] Parsed <see cref="ClassInfo"/> (only succeeded in parsing)</param>
 		/// <param name="depth">[out] Depth of class definition line (only succeeded in parsing)</param>
 		/// <returns>Whether succeeded in parsing or not</returns>
-		private bool TryParseDefinitionLine(SourceCodeReader reader, out ClassInfo info, out int depth)
+		private bool TryParseDefinitionLine(SourceCodeReader reader, out ClassInfo classInfo, out int depth)
 		{
 			if(!reader.TryRead(out var text))
 			{
-				info = null;
+				classInfo = null;
 				depth = 0;
 				return false;
 			}
@@ -62,7 +63,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			if(!match.Success)
 			{
 				reader.Position--;
-				info = null;
+				classInfo = null;
 				depth = 0;
 				return false;
 			}
@@ -70,10 +71,10 @@ namespace ClassDiagramGenerator.Models.Parser
 			var mod = ParseModifiers(match.Groups[1].Value);
 			var category = ParseClassCategory(match.Groups[2].Value);
 			var type = ParseType(match.Groups[3].Value);
-			var inheriteds = TextAnalyzer.Split(match.Groups[4].Value, ",", "<", ">", d => d == 0)
+			var inheriteds = match.Groups[4].Value.Split(",", "<", ">", d => d == 0)
 				.Where(s => !string.IsNullOrWhiteSpace(s))
 				.Select(s => ParseType(s));
-			info = new ClassInfo(mod, category, this.nameSpace, type, inheriteds);
+			classInfo = new ClassInfo(mod, category, this.nameSpace, type, inheriteds);
 
 			return true;
 		}
@@ -82,11 +83,12 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// Parse implementation lines.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
-		/// <param name="info"><see cref="ClassInfo"/> to hold implementation contents</param>
+		/// <param name="classInfo"><see cref="ClassInfo"/> to hold implementation contents</param>
 		/// <param name="definitionDepth">Depth of class definition line</param>
-		private void ParseImplementationLines(SourceCodeReader reader, ClassInfo info, int definitionDepth)
+		private void ParseImplementationLines(SourceCodeReader reader, ClassInfo classInfo, int definitionDepth)
 		{
 			var endOfClass = reader.Position + GetMoreDeepLineCount(reader, definitionDepth);
+			var enumParser = new EnumValuesParser(classInfo);
 
 			while(reader.Position < endOfClass)
 			{
@@ -96,18 +98,22 @@ namespace ClassDiagramGenerator.Models.Parser
 					continue;
 				}
 
-				if(this.TryParse(reader, out var innerInfo))
+				if((classInfo.Category == ClassCategory.Enum) && enumParser.TryParse(reader, out var values))
 				{
-					info.InnerClasses.Add(innerInfo);
+					classInfo.Fields.AddRange(values);
+				}
+				else if(this.TryParse(reader, out var innerInfo))
+				{
+					classInfo.InnerClasses.Add(innerInfo);
 				}
 				else if(this.methodParser.TryParse(reader, out var methodInfo))
 				{
-					info.Methods.Add(methodInfo);
+					classInfo.Methods.Add(methodInfo);
 				}
 				else if(this.fieldParser.TryParse(reader, out var fieldInfo))
 				{
 					// Parsing filed is executed after parsing method because field pattern also matches method
-					info.Fields.Add(fieldInfo);
+					classInfo.Fields.Add(fieldInfo);
 				}
 				else
 				{
@@ -116,7 +122,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				}
 			}
 		}
-
+		
 		/// <summary>
 		/// Check whether the depth of next line of <see cref="SourceCodeReader"/> is <paramref name="depth"/> or not.
 		/// <para>If failed to read, returns false.</para>
@@ -124,7 +130,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/> to be checked.</param>
 		/// <param name="depth">Expected depth</param>
-		/// <returns>whether the depth of next line is <paramref name="depth"/> or not</returns>
+		/// <returns>Whether the depth of next line is <paramref name="depth"/> or not</returns>
 		private static bool IsNextLineDepth(SourceCodeReader reader, int depth)
 		{
 			if(!reader.TryRead(out var text))
@@ -142,19 +148,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <returns><see cref="ClassCategory"/></returns>
 		private static ClassCategory ParseClassCategory(string text)
 		{
-			switch(text)
-			{
-				case "class":
-					return ClassCategory.Class;
-				case "interface":
-					return ClassCategory.Interface;
-				case "enum":
-					return ClassCategory.Enum;
-				case "struct":
-					return ClassCategory.Struct;
-				default:
-					throw new NotImplementedException();
-			}
+			return ClassCategories.Parse(text) ?? throw new NotImplementedException($"Unknown class category : {text}");
 		}
 	}
 }
