@@ -104,7 +104,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// </summary>
 		/// <param name="modifierText">String that indicates modifier</param>
 		/// <returns><see cref="Modifier"/> parsed from string</returns>
-		protected static Modifier ParseModifiers(string modifierText)
+		protected virtual Modifier ParseModifiers(string modifierText)
 		{
 			var words = Regex.Split(modifierText, "\\s+");
 			var mod = Modifier.None;

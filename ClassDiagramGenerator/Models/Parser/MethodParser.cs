@@ -19,8 +19,19 @@ namespace ClassDiagramGenerator.Models.Parser
 		private static readonly Regex MethodRegex = new Regex(
 			$"^\\s*{AttributePattern}?((?:{ModifierPattern}\\s+)*)(?:<{TypeArgPattern}>\\s*)?"	// Attributes + Modifier + TypeArgDeclaration
 			+ $"(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeArgPattern}>\\s*)?"         // ReturnType + Name + TypeArgDeclaration
-			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");		// Arguments
+			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");        // Arguments
+
+		private readonly ClassInfo classInfo;
 		
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="classInfo"><see cref="ClassInfo"/> containing methods</param>
+		public MethodParser(ClassInfo classInfo)
+		{
+			this.classInfo = classInfo;
+		}
+
 		public override bool TryParse(SourceCodeReader reader, out MethodInfo info)
 		{
 			if(!this.TryParseDefinitionLine(reader, out info, out var depth))
@@ -57,7 +68,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				return false;
 			}
 
-			var mod = ParseModifiers(match.Groups[1].Value);
+			var mod = this.ParseModifiers(match.Groups[1].Value);
 			var returnType = string.IsNullOrEmpty(match.Groups[2].Value) ? null : ParseType(match.Groups[2].Value);
 			var name = match.Groups[3].Value;
 			var args = ParseArguments(match.Groups[4].Value);
@@ -83,6 +94,17 @@ namespace ClassDiagramGenerator.Models.Parser
 				// Skip implementation lines
 				// TODO Gets used types in implementation lines
 			}
+		}
+
+		protected override Modifier ParseModifiers(string modifierText)
+		{
+			var mod = base.ParseModifiers(modifierText);
+
+			if((this.classInfo == null) || (this.classInfo.Category != ClassCategory.Interface))
+				return mod;
+
+			// Method in interface is always public 
+			return Modifier.Public | mod;
 		}
 	}
 }

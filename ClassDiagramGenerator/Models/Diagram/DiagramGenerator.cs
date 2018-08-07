@@ -191,7 +191,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 				case ClassCategory.Enum:
 					return "enum";
 				case ClassCategory.Struct:
-					return "struct";
+					return "class";	// "struct" is not supported in UML.
 				default:
 					throw new NotImplementedException();
 			}

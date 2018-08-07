@@ -18,9 +18,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		private static readonly Regex ClassRegex = new Regex(
 			$"^\\s*{AttributePattern}?((?:{ModifierPattern}\\s+)*)({ClassCategoryPattern})\\s+({TypePattern})\\s*"
 			+ $"(?::\\s*({TypePattern}(?:\\s*,\\s*(?:{TypePattern}))*))?");
-
-		private readonly MethodParser methodParser = new MethodParser();
-		private readonly FieldParser fieldParser = new FieldParser();
+		
 		private readonly string nameSpace;
 
 		/// <summary>
@@ -68,7 +66,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				return false;
 			}
 
-			var mod = ParseModifiers(match.Groups[1].Value);
+			var mod = this.ParseModifiers(match.Groups[1].Value);
 			var category = ParseClassCategory(match.Groups[2].Value);
 			var type = ParseType(match.Groups[3].Value);
 			var inheriteds = match.Groups[4].Value.Split(",", "<", ">", d => d == 0)
@@ -88,6 +86,8 @@ namespace ClassDiagramGenerator.Models.Parser
 		private void ParseImplementationLines(SourceCodeReader reader, ClassInfo classInfo, int definitionDepth)
 		{
 			var endOfClass = reader.Position + GetMoreDeepLineCount(reader, definitionDepth);
+			var methodParser = new MethodParser(classInfo);
+			var fieldParser = new FieldParser(classInfo);
 			var enumParser = new EnumValuesParser(classInfo);
 
 			while(reader.Position < endOfClass)
@@ -106,11 +106,11 @@ namespace ClassDiagramGenerator.Models.Parser
 				{
 					classInfo.InnerClasses.Add(innerInfo);
 				}
-				else if(this.methodParser.TryParse(reader, out var methodInfo))
+				else if(methodParser.TryParse(reader, out var methodInfo))
 				{
 					classInfo.Methods.Add(methodInfo);
 				}
-				else if(this.fieldParser.TryParse(reader, out var fieldInfo))
+				else if(fieldParser.TryParse(reader, out var fieldInfo))
 				{
 					// Parsing filed is executed after parsing method because field pattern also matches method
 					classInfo.Fields.Add(fieldInfo);
