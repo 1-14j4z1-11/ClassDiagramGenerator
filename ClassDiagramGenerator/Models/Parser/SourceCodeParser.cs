@@ -51,7 +51,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Try to parse a namespace.
+		/// Tries to parse a namespace.
 		/// <para>If failed to parse, the position of <paramref name="reader"/> after this processing is the same as that of before this processing.</para>
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>

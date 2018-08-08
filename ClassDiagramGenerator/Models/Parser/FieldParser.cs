@@ -9,12 +9,26 @@ using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
+	/// <summary>
+	/// Class parsing a field of C# and Java.
+	/// </summary>
 	public class FieldParser : ComponentParser<FieldInfo>
 	{
 		// Groups : [1] Modifier, [2] Return type, [3] Field name
 		private static readonly Regex FieldRegex = new Regex(
 			$"^\\s*{AttributePattern}?((?:{ModifierPattern}\\s+)*)({TypePattern})\\s+({NamePattern})\\s*"
 			+ $"(?:\\[\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\])?");
+
+		private readonly ClassInfo classInfo;
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="classInfo"><see cref="ClassInfo"/> containing fields</param>
+		public FieldParser(ClassInfo classInfo)
+		{
+			this.classInfo = classInfo;
+		}
 
 		public override bool TryParse(SourceCodeReader reader, out FieldInfo info)
 		{
@@ -26,7 +40,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Try to parse field definition line.
+		/// Tries to parse field definition line.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
 		/// <param name="info">[out] Parsed <see cref="FieldInfo"/> (only succeeded in parsing)</param>
@@ -51,7 +65,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				return false;
 			}
 
-			var mod = ParseModifiers(match.Groups[1].Value);
+			var mod = this.ParseModifiers(match.Groups[1].Value);
 			var type = string.IsNullOrWhiteSpace(match.Groups[2].Value) ? null : ParseType(match.Groups[2].Value);
 			var name = match.Groups[3].Value;
 			var args = ParseArguments(match.Groups[4].Value);
@@ -86,6 +100,17 @@ namespace ClassDiagramGenerator.Models.Parser
 				// Skip implementation lines
 				reader.TryRead(out var sub);
 			}
+		}
+
+		protected override Modifier ParseModifiers(string modifierText)
+		{
+			var mod = base.ParseModifiers(modifierText);
+
+			if((this.classInfo == null) || (this.classInfo.Category != ClassCategory.Interface))
+				return mod;
+
+			// Field in interface is always public 
+			return Modifier.Public | mod;
 		}
 	}
 }

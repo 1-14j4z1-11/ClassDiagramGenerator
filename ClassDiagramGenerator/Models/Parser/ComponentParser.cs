@@ -13,7 +13,7 @@ namespace ClassDiagramGenerator.Models.Parser
 	/// <summary>
 	/// Base class of parser to parse source code component.
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
+	/// <typeparam name="T">A type of parsed component</typeparam>
 	public abstract class ComponentParser<T>
 	{
 		/// <summary>A list containing strings to be used as modifier</summary>
@@ -47,7 +47,16 @@ namespace ClassDiagramGenerator.Models.Parser
 
 		/// <summary>Regex that matches <see cref="Attribute"/></summary>
 		protected static readonly string AttributePattern = "(?:\\[[^\\[\\]]*\\]\\s*)*";
-		
+
+		/// <summary>
+		/// Tries to parse component of source code.
+		/// <para>Tries read a line from <paramref name="reader"/>, and if succeeded in parsing, output parsed component.</para>
+		/// <para>If succeeded in parsing, the position of the <paramref name="reader"/> is seeked by the number of the read lines.
+		/// Otherwise, the position of <paramref name="reader"/> is not changed.</para>
+		/// </summary>
+		/// <param name="reader"><see cref="SourceCodeReader"/></param>
+		/// <param name="obj">[out] Parsed component (only succeeded in parsing)</param>
+		/// <returns>Whether succeeded in parsing or not</returns>
 		public abstract bool TryParse(SourceCodeReader reader, out T obj);
 
 		/// <summary>
@@ -60,7 +69,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			if(argText == null)
 				throw new ArgumentNullException();
 			
-			return TextAnalyzer.Split(argText, ",",  "<", ">", d => d == 0)
+			return argText.Split(",",  "<", ">", d => d == 0)
 				.Select(a => ArgumentRegex.Match(a))
 				.Where(m => m.Success)
 				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[4].Value), m.Groups[7].Value));
@@ -95,7 +104,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// </summary>
 		/// <param name="modifierText">String that indicates modifier</param>
 		/// <returns><see cref="Modifier"/> parsed from string</returns>
-		protected static Modifier ParseModifiers(string modifierText)
+		protected virtual Modifier ParseModifiers(string modifierText)
 		{
 			var words = Regex.Split(modifierText, "\\s+");
 			var mod = Modifier.None;
@@ -110,9 +119,10 @@ namespace ClassDiagramGenerator.Models.Parser
 
 		/// <summary>
 		/// Parse <see cref="TypeInfo"/> from string.
+		/// <para>If faield to parsing, returns null.</para>
 		/// </summary>
 		/// <param name="typeText">String that indicates type</param>
-		/// <returns><see cref="TypeInfo"/> parsed from string</returns>
+		/// <returns><see cref="TypeInfo"/> parsed from string, or null</returns>
 		protected static TypeInfo ParseType(string typeText)
 		{
 			var words = TextAnalyzer.SplitWithDepth(typeText, "<", ">")

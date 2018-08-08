@@ -45,6 +45,7 @@
     <Compile Include="Models\Diagram\DiagramGenerator.cs" />
     <Compile Include="Models\Diagram\RelationFactory.cs" />
     <Compile Include="Models\Parser\ClassParser.cs" />
+    <Compile Include="Models\Parser\EnumValuesParser.cs" />
     <Compile Include="Models\Parser\SourceCodeParser.cs" />
     <Compile Include="Models\Parser\ComponentParser.cs" />
     <Compile Include="Models\Parser\DepthText.cs" />

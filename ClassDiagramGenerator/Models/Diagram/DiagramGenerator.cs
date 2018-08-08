@@ -11,7 +11,6 @@ namespace ClassDiagramGenerator.Models.Diagram
 	public static class DiagramGenerator
 	{
 		private const string NewLine = "\r\n";
-		private const Modifier AllAccessModifier = Modifier.Public | Modifier.Protected | Modifier.Internal | Modifier.Private;
 		private static Dictionary<RelationType, string> Arrows = new Dictionary<RelationType, string>()
 		{
 			[RelationType.Dependency] = ".down.>",
@@ -23,9 +22,20 @@ namespace ClassDiagramGenerator.Models.Diagram
 			[RelationType.Nested] = "--+",
 		};
 
-		public static string Generate(string title, IEnumerable<ClassInfo> classInfoList, IEnumerable<Relation> relations, Modifier accessFilter = AllAccessModifier)
+		/// <summary>
+		/// Generates a class diagram.
+		/// <para>If <paramref name="accessFilter"/> is specified,
+		/// contents that do not correspond to the filter are not described.</para>
+		/// </summary>
+		/// <param name="title">Title of class diagram</param>
+		/// <param name="classInfoList">Classes to be included in a class diagram</param>
+		/// <param name="relations">Relations to be included in a class diagram</param>
+		/// <param name="accessFilter">Access level filter</param>
+		/// <returns>Class diagram text written in PlantUML</returns>
+		public static string Generate(string title, IEnumerable<ClassInfo> classInfoList, IEnumerable<Relation> relations, Modifier accessFilter = Modifier.AllAccessLevels)
 		{
-			var builder = new StringBuilder($"@startuml {{{title}}}").Append(NewLine).Append(NewLine);
+			var builder = new StringBuilder();
+			WriteHeader(builder, title);
 
 			foreach(var classInfo in classInfoList ?? Enumerable.Empty<ClassInfo>())
 			{
@@ -41,7 +51,30 @@ namespace ClassDiagramGenerator.Models.Diagram
 				WriteDiagramOfRelation(builder, relation);
 			}
 
-			return builder.Append(NewLine).Append("@enduml").ToString();
+			WriteFooter(builder);
+			return builder.ToString();
+		}
+
+		/// <summary>
+		/// Writes header texts to <paramref name="builder"/>.
+		/// </summary>
+		/// <param name="builder"><see cref="StringBuilder"/> possessing class diagram description</param>
+		/// <param name="title">Title of class diagram</param>
+		private static void WriteHeader(StringBuilder builder, string title)
+		{
+			builder.Append($"@startuml {{{title}}}").Append(NewLine)
+				.Append(NewLine)
+				.Append("skinparam classAttributeIconSize 0").Append(NewLine)
+				.Append(NewLine);
+		}
+
+		/// <summary>
+		/// Writes footer texts to <paramref name="builder"/>.
+		/// </summary>
+		/// <param name="builder"><see cref="StringBuilder"/> possessing class diagram description</param>
+		private static void WriteFooter(StringBuilder builder)
+		{
+			builder.Append(NewLine).Append("@enduml");
 		}
 
 		/// <summary>
@@ -52,7 +85,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <param name="builder"><see cref="StringBuilder"/> possessing class diagram description</param>
 		/// <param name="classInfo"><see cref="ClassInfo"/> to be written</param>
 		/// <param name="accessFilter">Access level filter</param>
-		private static void WriteDiagramOfClass(StringBuilder builder, ClassInfo classInfo, Modifier accessFilter = AllAccessModifier)
+		private static void WriteDiagramOfClass(StringBuilder builder, ClassInfo classInfo, Modifier accessFilter = Modifier.AllAccessLevels)
 		{
 			if(classInfo == null)
 				throw new ArgumentNullException();
@@ -67,7 +100,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 				if(!IsTargetAccessModifier(field.Modifier, accessFilter))
 					continue;
 
-				builder.Append($"\t\t{AccessSymbol(field.Modifier)} {ModifierText(field.Modifier, true)}{field.Type} {field.Name}")
+				builder.Append($"\t\t{AccessSymbol(field.Modifier)} {ModifierText(field.Modifier, true)}{field.Name} : {field.Type}")
 					.Append(NewLine);
 			}
 
@@ -76,15 +109,15 @@ namespace ClassDiagramGenerator.Models.Diagram
 				if(!IsTargetAccessModifier(method.Modifier, accessFilter))
 					continue;
 
+				var args = method.Arguments?.Select(a => $"{a.Name} : {a.Type}") ?? Enumerable.Empty<string>();
+
 				builder.Append($"\t\t{AccessSymbol(method.Modifier)} ")
 					.Append($"{ModifierText(method.Modifier, true)}")
-					.Append($"{method.ReturnType}{((method.ReturnType != null) ? " " : "")}")
-					.Append($"{method.Name}(");
-				
-				var args = method.Arguments.Select(a => $"{a.Type} {a.Name}") ?? Enumerable.Empty<string>();
-				builder.Append(string.Join(", ", args));
-
-				builder.Append(")").Append(NewLine);
+					.Append($"{method.Name}(")
+					.Append(string.Join(", ", args))
+					.Append(")")
+					.Append($"{((method.ReturnType != null) ? " : " : "")}{method.ReturnType}")
+					.Append(NewLine);
 			}
 
 			builder.Append("\t}").Append(NewLine)
@@ -112,7 +145,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		}
 
 		/// <summary>
-		/// Check whether access level of <paramref name="target"/> is included in <paramref name="filter"/>.
+		/// Checks whether access level of <paramref name="target"/> is included in <paramref name="filter"/>.
 		/// <para>Modifiers except for acccess level are ignored.</para>
 		/// </summary>
 		/// <param name="target">Target <see cref="Modifier"/></param>
@@ -120,7 +153,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <returns>whether access level of <paramref name="target"/> is included in <paramref name="filter"/></returns>
 		private static bool IsTargetAccessModifier(Modifier target, Modifier filter)
 		{
-			return (target & filter & AllAccessModifier) != Modifier.None;
+			return (target & filter & Modifier.AllAccessLevels) != Modifier.None;
 		}
 
 		/// <summary>
@@ -158,7 +191,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 				case ClassCategory.Enum:
 					return "enum";
 				case ClassCategory.Struct:
-					return "struct";
+					return "class";	// "struct" is not supported in UML.
 				default:
 					throw new NotImplementedException();
 			}

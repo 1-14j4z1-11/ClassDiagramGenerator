@@ -61,8 +61,8 @@ namespace ClassDiagramGenerator.Models.Parser
 		public IReadOnlyList<DepthText> Lines { get; }
 
 		/// <summary>
-		/// Try to read line with current position.
-		/// <para>Return false if this reader has finished all lines.</para>
+		/// Tries to read line with current position.
+		/// <para>If this reader has finished all lines, returns false.</para>
 		/// </summary>
 		/// <param name="line">[out] Line to be read</param>
 		/// <returns>Whether succeeded in reading</returns>

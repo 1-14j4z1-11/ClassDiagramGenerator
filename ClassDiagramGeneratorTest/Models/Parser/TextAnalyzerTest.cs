@@ -36,7 +36,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 
 		private static void TestcaseSplitWithDepthFilter(string target, string separator, string nest, string unnest, Func<int, bool> filter, IEnumerable<string> splittedWords)
 		{
-			TextAnalyzer.Split(target, separator, nest, unnest, filter).IsCollection(splittedWords);
+			target.Split(separator, nest, unnest, filter).IsCollection(splittedWords);
 		}
 
 		private static void TestcaseSplitAndMarge(IEnumerable<DepthText> splittedTexts, string margedText, string nest, string unnest)
