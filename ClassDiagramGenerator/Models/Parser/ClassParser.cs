@@ -17,17 +17,17 @@ namespace ClassDiagramGenerator.Models.Parser
 		// Groups : [1] Modifier, [2] Class category, [3] Class name, [4] Inherited classes
 		private static readonly Regex ClassRegex = new Regex(
 			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)({ClassCategoryPattern})\\s+({TypePattern})\\s*"
-			+ $"(?::\\s*({TypePattern}(?:\\s*,\\s*(?:{TypePattern}))*))?");
-		
-		private readonly string nameSpace;
+			+ $"((?:\\s*(?::|extends|implements)\\s*(?:{TypePattern}(?:\\s*,\\s*(?:{TypePattern}))*))*)");
+
+		private readonly string package;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="nameSpace">namespace of classes to be parsed</param>
-		public ClassParser(string nameSpace)
+		/// <param name="package">Package or namespace of classes to be parsed</param>
+		public ClassParser(string package)
 		{
-			this.nameSpace = nameSpace;
+			this.package = package;
 		}
 
 		public override bool TryParse(SourceCodeReader reader, out ClassInfo info)
@@ -69,16 +69,14 @@ namespace ClassDiagramGenerator.Models.Parser
 			var mod = this.ParseModifiers(match.Groups[1].Value);
 			var category = ParseClassCategory(match.Groups[2].Value);
 			var type = ParseType(match.Groups[3].Value);
-			var inheriteds = match.Groups[4].Value.Split(",", "<", ">", d => d == 0)
-				.Where(s => !string.IsNullOrWhiteSpace(s))
-				.Select(s => ParseType(s));
-			classInfo = new ClassInfo(mod, category, this.nameSpace, type, inheriteds);
+			var inheriteds = ParseInheritance(match.Groups[4].Value);
+			classInfo = new ClassInfo(mod, category, this.package, type, inheriteds);
 
 			return true;
 		}
 
 		/// <summary>
-		/// Parse implementation lines.
+		/// Parses implementation lines.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
 		/// <param name="classInfo"><see cref="ClassInfo"/> to hold implementation contents</param>
@@ -122,9 +120,24 @@ namespace ClassDiagramGenerator.Models.Parser
 				}
 			}
 		}
-		
+
 		/// <summary>
-		/// Check whether the depth of next line of <see cref="SourceCodeReader"/> is <paramref name="depth"/> or not.
+		/// Parses inheritance classes text into a collection of <see cref="TypeInfo"/>.
+		/// </summary>
+		/// <param name="text">Inheritance classes text</param>
+		/// <returns>A collection of <see cref="TypeInfo"/> parsed from <paramref name="text"/></returns>
+		private static IEnumerable<TypeInfo> ParseInheritance(string text)
+		{
+			// Inheritance text extracted by class definition regex contains inheritance keyword
+			text = text.Replace(":", ",").Replace("extends", ",").Replace("implements", ",");
+
+			return text.Split(",", "<", ">", d => d == 0)
+				.Where(s => !string.IsNullOrWhiteSpace(s))
+				.Select(s => ParseType(s));
+		}
+
+		/// <summary>
+		/// Checks whether the depth of next line of <see cref="SourceCodeReader"/> is <paramref name="depth"/> or not.
 		/// <para>If failed to read, returns false.</para>
 		/// <para>This processing does not change position of <see cref="SourceCodeReader"/>.</para>
 		/// </summary>
@@ -142,7 +155,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Parse <see cref="ClassCategory"/>.
+		/// Parses <see cref="ClassCategory"/>.
 		/// </summary>
 		/// <param name="text">string of class category</param>
 		/// <returns><see cref="ClassCategory"/></returns>

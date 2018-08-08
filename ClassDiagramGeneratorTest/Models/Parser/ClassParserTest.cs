@@ -28,8 +28,8 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Private, ClassCategory.Struct, Type("Derived1"), List(Type("IDisposable")));
 			TestcaseParseClassDefinition("protected internal interface Derived2 : IDisposable, IComparable<Derived2>", true,
 				Modifier.Protected | Modifier.Internal, ClassCategory.Interface, Type("Derived2"), List(Type("IDisposable"), Type("IComparable", Type("Derived2"))));
-			TestcaseParseClassDefinition("public class Derived3:IDictionary<string,int>,IDisposable,IComparable<Derived3>", true,
-				Modifier.Public, ClassCategory.Class, Type("Derived3"), List(Type("IDictionary", Type("string"), Type("int")), Type("IDisposable"), Type("IComparable", Type("Derived3"))));
+			TestcaseParseClassDefinition("public class Derived3:Dictionary<string,int>,IDisposable,IComparable<Derived3>", true,
+				Modifier.Public, ClassCategory.Class, Type("Derived3"), List(Type("Dictionary", Type("string"), Type("int")), Type("IDisposable"), Type("IComparable", Type("Derived3"))));
 			TestcaseParseClassDefinition("public static class StaticClass", true,
 				Modifier.Public | Modifier.Static, ClassCategory.Class, Type("StaticClass"));
 			TestcaseParseClassDefinition("private enum EnumValues", true,
@@ -39,7 +39,19 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseClassDefinition("private protected abstract class Where < T > : IDisposable where T : IDisposable", true,
 				Modifier.Private | Modifier.Protected | Modifier.Abstract, ClassCategory.Class, Type("Where", Type("T")), List(Type("IDisposable")));
 			TestcaseParseClassDefinition("interface IF : ", true,
-				Modifier.None, ClassCategory.Interface, Type("IF"));	// This test is OK because extra text after class definition is allowed.
+				Modifier.None, ClassCategory.Interface, Type("IF"));    // This test is OK because extra text after class definition is allowed.
+
+			// Inheritance of Java
+			TestcaseParseClassDefinition("private struct Derived1 implements IDisposable", true,
+				Modifier.Private, ClassCategory.Struct, Type("Derived1"), List(Type("IDisposable")));
+			TestcaseParseClassDefinition("protected internal interface Derived2 extends IDisposable, IComparable<Derived2>", true,
+				Modifier.Protected | Modifier.Internal, ClassCategory.Interface, Type("Derived2"), List(Type("IDisposable"), Type("IComparable", Type("Derived2"))));
+			TestcaseParseClassDefinition("public class Derived3 extends Dictionary<string,int> implements IDisposable,IComparable<Derived3>", true,
+				Modifier.Public, ClassCategory.Class, Type("Derived3"), List(Type("Dictionary", Type("string"), Type("int")), Type("IDisposable"), Type("IComparable", Type("Derived3"))));
+			TestcaseParseClassDefinition("class Derived4 implements Closable extends HashMap < String , Integer >", true,
+				Modifier.None, ClassCategory.Class, Type("Derived4"), List(Type("Closable"), Type("HashMap", Type("String"), Type("Integer"))));
+			TestcaseParseClassDefinition("class Derived5 extends HashMap< String , Integer> implements Closable", true,
+				Modifier.None, ClassCategory.Class, Type("Derived5"), List(Type("HashMap", Type("String"), Type("Integer")), Type("Closable")));
 
 			TestcaseParseClassDefinition("public static TestClass", false);
 			TestcaseParseClassDefinition("public TestClass", false);
