@@ -11,7 +11,7 @@ using ClassDiagramGenerator.Models.Structure;
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
 	[TestClass]
-	public class ClassParserTest : ComponentParserTestBase
+	public class ClassParserTest : ParserTestBase
 	{
 		[TestMethod]
 		public void TestParseClass()
@@ -24,8 +24,8 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.None, ClassCategory.Class, Type("Generic2", Type("List", Type("T1")), Type("T2")));
 			TestcaseParseClassDefinition("protected interface Generic3< T1, T2, T3 >", true,
 				Modifier.Protected, ClassCategory.Interface, Type("Generic3", Type("T1"), Type("T2"), Type("T3")));
-			TestcaseParseClassDefinition("private class Derived1 : IDisposable", true,
-				Modifier.Private, ClassCategory.Class, Type("Derived1"), List(Type("IDisposable")));
+			TestcaseParseClassDefinition("private struct Derived1 : IDisposable", true,
+				Modifier.Private, ClassCategory.Struct, Type("Derived1"), List(Type("IDisposable")));
 			TestcaseParseClassDefinition("protected internal interface Derived2 : IDisposable, IComparable<Derived2>", true,
 				Modifier.Protected | Modifier.Internal, ClassCategory.Interface, Type("Derived2"), List(Type("IDisposable"), Type("IComparable", Type("Derived2"))));
 			TestcaseParseClassDefinition("public class Derived3:IDictionary<string,int>,IDisposable,IComparable<Derived3>", true,

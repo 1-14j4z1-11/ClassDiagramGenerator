@@ -9,11 +9,11 @@ using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
-	public class SourceCodeParser
+	public class CSharpCodeParser : ISourceCodeParser
 	{
 		private static readonly Regex NameSpaceRegex = new Regex("^\\s*namespace\\s+([^\\s,:\\[\\]\\(\\)<>=]+)\\s*");
 
-		public List<ClassInfo> Parse(string code)
+		public IEnumerable<ClassInfo> Parse(string code)
 		{
 			if(code == null)
 				throw new ArgumentNullException();

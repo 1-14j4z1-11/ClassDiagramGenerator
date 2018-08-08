@@ -35,7 +35,7 @@ namespace UmlGenerator
 		/// <returns>Class diagram described in PlantUML</returns>
 		private static string GenerateClassDiagram(string title, IEnumerable<string> filePaths)
 		{
-			var parser = new SourceCodeParser();
+			var parser = new CSharpCodeParser();
 			var classes = new List<ClassInfo>();
 
 			foreach(var file in filePaths)

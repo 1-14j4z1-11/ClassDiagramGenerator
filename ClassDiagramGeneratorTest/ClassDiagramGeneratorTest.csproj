@@ -53,7 +53,7 @@
   <ItemGroup>
     <Compile Include="Models\Parser\ClassParserTest.cs" />
     <Compile Include="Models\Parser\ComponentParserTest.cs" />
-    <Compile Include="Models\Parser\ComponentParserTestBase.cs" />
+    <Compile Include="Models\Parser\ParserTestBase.cs" />
     <Compile Include="Models\Parser\FieldParserTest.cs" />
     <Compile Include="Models\Parser\MethodParserTest.cs" />
     <Compile Include="Models\Parser\TextAnalyzerTest.cs" />

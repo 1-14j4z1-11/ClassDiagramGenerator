@@ -36,6 +36,12 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <summary>Pattern string that matches single argument (no grouping)</summary>
 		protected static readonly string ArgumentPattern = $"(?:(?:(?:this|in|out|ref)\\s+)?(?:{TypePattern})\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
 
+		/// <summary>Pattern string that matches Attributes of C#</summary>
+		protected static readonly string AttributePattern = "(?:\\[[^\\[\\]]*\\]\\s*)*";
+
+		/// <summary>Pattern string that matches Annotations of Java</summary>
+		protected static readonly string AnnotationPattern = $"(?:@{NamePattern}\\s*(?:\\([^\\(\\)]*\\))?\\s*)*";
+
 		/// <summary>
 		/// Regex that matches single argument
 		/// <para>- [3] : this / in / out / ref</para>
@@ -44,9 +50,6 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <para>- [8] : Default argument</para>
 		/// </summary>
 		private static readonly Regex ArgumentRegex = new Regex(ArgumentPattern.Replace("(?:", "("));
-
-		/// <summary>Regex that matches <see cref="Attribute"/></summary>
-		protected static readonly string AttributePattern = "(?:\\[[^\\[\\]]*\\]\\s*)*";
 
 		/// <summary>
 		/// Tries to parse component of source code.

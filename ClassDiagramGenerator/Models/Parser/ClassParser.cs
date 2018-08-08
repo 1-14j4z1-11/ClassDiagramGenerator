@@ -16,7 +16,7 @@ namespace ClassDiagramGenerator.Models.Parser
 
 		// Groups : [1] Modifier, [2] Class category, [3] Class name, [4] Inherited classes
 		private static readonly Regex ClassRegex = new Regex(
-			$"^\\s*{AttributePattern}?((?:{ModifierPattern}\\s+)*)({ClassCategoryPattern})\\s+({TypePattern})\\s*"
+			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)({ClassCategoryPattern})\\s+({TypePattern})\\s*"
 			+ $"(?::\\s*({TypePattern}(?:\\s*,\\s*(?:{TypePattern}))*))?");
 		
 		private readonly string nameSpace;
