@@ -31,7 +31,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <param name="classInfoList">Classes to be included in a class diagram</param>
 		/// <param name="relations">Relations to be included in a class diagram</param>
 		/// <param name="accessFilter">Access level filter</param>
-		/// <returns></returns>
+		/// <returns>Class diagram text written in PlantUML</returns>
 		public static string Generate(string title, IEnumerable<ClassInfo> classInfoList, IEnumerable<Relation> relations, Modifier accessFilter = Modifier.AllAccessLevels)
 		{
 			var builder = new StringBuilder();
@@ -109,7 +109,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 				if(!IsTargetAccessModifier(method.Modifier, accessFilter))
 					continue;
 
-				var args = method.Arguments.Select(a => $"{a.Name} : {a.Type}") ?? Enumerable.Empty<string>();
+				var args = method.Arguments?.Select(a => $"{a.Name} : {a.Type}") ?? Enumerable.Empty<string>();
 
 				builder.Append($"\t\t{AccessSymbol(method.Modifier)} ")
 					.Append($"{ModifierText(method.Modifier, true)}")
