@@ -11,7 +11,7 @@ using ClassDiagramGenerator.Models.Structure;
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
 	[TestClass]
-	public class MethodParserTest : ComponentParserTestBase
+	public class MethodParserTest : ParserTestBase
 	{
 		[TestMethod]
 		public void TestParseMethodDefinition()
@@ -30,6 +30,23 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Private, Type("bool"), "Ref", List(Arg(Type("in"), "x"), Arg(Type("out"), "y")));
 			TestcaseParseMethodDefinition("static bool InOut(in object x, out string y)", true,
 				Modifier.Static, Type("bool"), "InOut", List(Arg(Type("object"), "x"), Arg(Type("string"), "y")));
+
+			// C# Generic
+			TestcaseParseMethodDefinition("public bool Generic<T>(T value)", true,
+				Modifier.Public, Type("bool"), "Generic", List(Arg(Type("T"), "value")));
+			TestcaseParseMethodDefinition("internal static int Where < T > ( T value ) where T : IDisposable", true,
+				Modifier.Internal | Modifier.Static, Type("int"), "Where", List(Arg(Type("T"), "value")));
+			
+			// Java Generic
+			TestcaseParseMethodDefinition("protected <T> bool Generic(T value)", true,
+				Modifier.Protected, Type("bool"), "Generic", List(Arg(Type("T"), "value")));
+			TestcaseParseMethodDefinition("static < T extends String > String Extends ( T value )", true,
+				Modifier.Static, Type("String"), "Extends", List(Arg(Type("T"), "value")));
+			TestcaseParseMethodDefinition("static <T> String Extends(List<? extends T> values)", true,
+				Modifier.Static, Type("String"), "Extends", List(Arg(Type("List", Type("? extends T")), "values")));
+			TestcaseParseMethodDefinition("static <T> String Super(List < ? super T > values)", true,
+				Modifier.Static, Type("String"), "Super", List(Arg(Type("List", Type("? super T")), "values")));
+
 			TestcaseParseMethodDefinition("internal static bool Where < T > ( T value ) where T : IDisposable", true,
 				Modifier.Internal | Modifier.Static, Type("bool"), "Where", List(Arg(Type("T"), "value")));
 
@@ -72,7 +89,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			var reader = ReaderFromCode(code);
 			Enumerable.Range(0, startPos).ToList().ForEach(_ => reader.TryRead(out var _));
 
-			new MethodParser().TryParse(reader, out var info).Is(isSuccess);
+			new MethodParser(null).TryParse(reader, out var info).Is(isSuccess);
 
 			if(isSuccess)
 			{

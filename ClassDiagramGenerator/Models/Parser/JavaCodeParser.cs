@@ -9,11 +9,11 @@ using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
-	public class SourceCodeParser
+	public class JavaCodeParser : ISourceCodeParser
 	{
-		private static readonly Regex NameSpaceRegex = new Regex("^\\s*namespace\\s+([^\\s,:\\[\\]\\(\\)<>=]+)\\s*");
+		private static readonly Regex PackageRegex = new Regex("^\\s*package\\s+([^\\s,:\\[\\]\\(\\)<>=]+)\\s*");
 
-		public List<ClassInfo> Parse(string code)
+		public IEnumerable<ClassInfo> Parse(string code)
 		{
 			if(code == null)
 				throw new ArgumentNullException();
@@ -21,19 +21,11 @@ namespace ClassDiagramGenerator.Models.Parser
 			var reader = new SourceCodeReader(code);
 			var classList = new List<ClassInfo>();
 			var classParser = new ClassParser(string.Empty);
-			var prevNS = new Dictionary<int, string>();
 
 			while(!reader.IsEndOfLines)
 			{
-				if(TryParseNameSpace(reader, out var nameSpace, out var depth))
+				if(TryParsePackage(reader, out var nameSpace))
 				{
-					// Already existed parent namespace, Add it before a nameSpace
-					if(prevNS.ContainsKey(depth - 1))
-					{
-						nameSpace = prevNS[depth - 1] + "." + nameSpace;
-					}
-
-					prevNS[depth] = nameSpace;
 					classParser = new ClassParser(nameSpace);
 					continue;
 				}
@@ -51,34 +43,30 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Tries to parse a namespace.
+		/// Tries to parse a package.
 		/// <para>If failed to parse, the position of <paramref name="reader"/> after this processing is the same as that of before this processing.</para>
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
-		/// <param name="nameSpace">[out] Namespace (only succeeded in parsing)</param>
-		/// <param name="depth">[out] Depth of namespace (only succeeded in parsing)</param>
+		/// <param name="package">[out] Package name (only succeeded in parsing)</param>
 		/// <returns>Whether succeeded in parsing or not</returns>
-		private static bool TryParseNameSpace(SourceCodeReader reader, out string nameSpace, out int depth)
+		private static bool TryParsePackage(SourceCodeReader reader, out string package)
 		{
 			if(!reader.TryRead(out var text))
 			{
-				nameSpace = null;
-				depth = 0;
+				package = null;
 				return false;
 			}
 
-			var match = NameSpaceRegex.Match(text.Text);
+			var match = PackageRegex.Match(text.Text);
 
 			if(!match.Success)
 			{
 				reader.Position--;
-				nameSpace = null;
-				depth = 0;
+				package = null;
 				return false;
 			}
 
-			nameSpace = match.Groups[1].Value;
-			depth = text.Depth;
+			package = match.Groups[1].Value;
 			return true;
 		}
 	}

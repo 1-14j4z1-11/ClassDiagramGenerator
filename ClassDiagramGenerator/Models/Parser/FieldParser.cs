@@ -16,7 +16,7 @@ namespace ClassDiagramGenerator.Models.Parser
 	{
 		// Groups : [1] Modifier, [2] Return type, [3] Field name
 		private static readonly Regex FieldRegex = new Regex(
-			$"^\\s*{AttributePattern}?((?:{ModifierPattern}\\s+)*)({TypePattern})\\s+({NamePattern})\\s*"
+			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)({TypePattern})\\s+({NamePattern})\\s*"
 			+ $"(?:\\[\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\])?");
 
 		private readonly ClassInfo classInfo;

@@ -12,7 +12,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 	/// <summary>
 	/// The support class to test a class inheriting <see cref="ComponentParser{T}"/>.
 	/// </summary>
-	public class ComponentParserTestBase
+	public class ParserTestBase
 	{
 		/// <summary>
 		/// Gets a sample source code 1.

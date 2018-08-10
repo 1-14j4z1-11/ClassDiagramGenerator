@@ -167,7 +167,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 				return "+";
 			else if(modifier.HasFlag(Modifier.Protected))
 				return "#";
-			else if(modifier.HasFlag(Modifier.Internal))
+			else if(modifier.HasFlag(Modifier.Internal) || modifier.HasFlag(Modifier.Package))
 				return "~";
 			else if(modifier.HasFlag(Modifier.Private))
 				return "-";

@@ -11,7 +11,7 @@ using ClassDiagramGenerator.Models.Structure;
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
 	[TestClass]
-	public class FieldParserTest : ComponentParserTestBase
+	public class FieldParserTest : ParserTestBase
 	{
 		[TestMethod]
 		public void TestParseFieldDefinition()
@@ -28,6 +28,14 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Private | Modifier.Protected | Modifier.Abstract, Type("IEnumerable", Type("string")), "this", List(Arg(Type("int"), "i"), Arg(Type("string"), "j")));
 			TestcaseParseFieldDefinition("protected internal event Action EventHandler", true,
 				Modifier.Protected | Modifier.Internal | Modifier.Event, Type("Action"), "EventHandler");
+			TestcaseParseFieldDefinition("[Attribute] public int X", true,
+				Modifier.Public, Type("int"), "X");
+			TestcaseParseFieldDefinition("[Attribute1][Attribute2] [Attribute3] public int X", true,
+				Modifier.Public, Type("int"), "X");
+			TestcaseParseFieldDefinition("@Annotation public int X", true,
+				Modifier.Public, Type("int"), "X");
+			TestcaseParseFieldDefinition("@Annotation @Annotation(0) @Annotation( 1, 2 ) public int X", true,
+				Modifier.Public, Type("int"), "X");
 
 			TestcaseParseFieldDefinition("public int", false);
 			TestcaseParseFieldDefinition("public static int", false);
@@ -56,7 +64,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		{
 			var reader = ReaderFromCode(code);
 			Enumerable.Range(0, startPos).ToList().ForEach(_ => reader.TryRead(out var _));
-			new FieldParser().TryParse(reader, out var info).Is(isSuccess);
+			new FieldParser(null).TryParse(reader, out var info).Is(isSuccess);
 
 			if(isSuccess)
 			{

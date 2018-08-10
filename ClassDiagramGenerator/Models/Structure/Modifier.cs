@@ -41,7 +41,11 @@ namespace ClassDiagramGenerator.Models.Structure
 
 		Async = 1 << 12,
 
-		AllAccessLevels = Public | Protected | Internal | Private,
+		Final = 1 << 13,
+
+		Package = 1 << 14,
+
+		AllAccessLevels = Public | Protected | Internal | Private | Package,
 	}
 
 	/// <summary>
@@ -65,6 +69,8 @@ namespace ClassDiagramGenerator.Models.Structure
 			[Modifier.Const] = "const",
 			[Modifier.Event] = "event",
 			[Modifier.Async] = "async",
+			[Modifier.Final] = "final",
+			[Modifier.Package] = "package",
 		};
 
 		/// <summary>

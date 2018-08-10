@@ -14,10 +14,10 @@ namespace ClassDiagramGenerator.Models.Parser
 	/// </summary>
 	public class MethodParser : ComponentParser<MethodInfo>
 	{
-		// In order to support Java and C# methods, Type argument declarations are included twice.
+		// In order to support both Java and C# methods, Type argument declarations are included twice.
 		// Groups : [1] Modifier, [2] Return type, [3] Method name, [4] Arguments
 		private static readonly Regex MethodRegex = new Regex(
-			$"^\\s*{AttributePattern}?((?:{ModifierPattern}\\s+)*)(?:<{TypeArgPattern}>\\s*)?"	// Attributes + Modifier + TypeArgDeclaration
+			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)(?:<{TypeArgPattern}>\\s*)?"	// Attributes + Modifier + TypeArgDeclaration
 			+ $"(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeArgPattern}>\\s*)?"         // ReturnType + Name + TypeArgDeclaration
 			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");        // Arguments
 
