@@ -42,9 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Console\CmdArgumentFlag.cs" />
+    <Compile Include="Console\CmdArgumentParser.cs" />
     <Compile Include="Models\Diagram\DiagramGenerator.cs" />
     <Compile Include="Models\Diagram\RelationFactory.cs" />
     <Compile Include="Models\Parser\ClassParser.cs" />
+    <Compile Include="Models\Parser\JavaCodeParser.cs" />
     <Compile Include="Models\Parser\EnumValuesParser.cs" />
     <Compile Include="Models\Parser\CSharpCodeParser.cs" />
     <Compile Include="Models\Parser\ComponentParser.cs" />

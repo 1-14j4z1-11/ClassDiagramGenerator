@@ -34,12 +34,12 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Public | Modifier.Static, ClassCategory.Class, Type("StaticClass"));
 			TestcaseParseClassDefinition("private enum EnumValues", true,
 				Modifier.Private, ClassCategory.Enum, Type("EnumValues"));
-			TestcaseParseClassDefinition("class class", true,
-				Modifier.None, ClassCategory.Class, Type("class"));
 			TestcaseParseClassDefinition("private protected abstract class Where < T > : IDisposable where T : IDisposable", true,
 				Modifier.Private | Modifier.Protected | Modifier.Abstract, ClassCategory.Class, Type("Where", Type("T")), List(Type("IDisposable")));
+			TestcaseParseClassDefinition("class class", true,
+				Modifier.None, ClassCategory.Class, Type("class"));     // OK, does not reject class name of reservation word.
 			TestcaseParseClassDefinition("interface IF : ", true,
-				Modifier.None, ClassCategory.Interface, Type("IF"));    // This test is OK because extra text after class definition is allowed.
+				Modifier.None, ClassCategory.Interface, Type("IF"));    // OK, extra text after class definition is allowed.
 
 			// Inheritance of Java
 			TestcaseParseClassDefinition("private struct Derived1 implements IDisposable", true,
