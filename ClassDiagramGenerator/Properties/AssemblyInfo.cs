@@ -1,4 +1,8 @@
-﻿using System.Reflection;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -10,7 +14,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("ClassDiagramGenerator")]
-[assembly: AssemblyCopyright("Copyright © y.hayashi 2018")]
+[assembly: AssemblyCopyright("Copyright © 2018 Yasuhiro Hayashi")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

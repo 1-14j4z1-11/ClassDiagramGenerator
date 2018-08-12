@@ -1,4 +1,8 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
