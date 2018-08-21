@@ -23,7 +23,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 			[RelationType.Composition] = "*-down->",
 			[RelationType.Generalization] = "-up-|>",
 			[RelationType.Realization] = ".up.|>",
-			[RelationType.Nested] = "--+",
+			[RelationType.Nested] = "-down-+",		// not 'up', to locate inner class under parent class
 		};
 
 		/// <summary>
@@ -126,6 +126,12 @@ namespace ClassDiagramGenerator.Models.Diagram
 
 			builder.Append("\t}").Append(NewLine)
 				.Append("}").Append(NewLine).Append(NewLine);
+
+			// Writes inner classes in this class
+			foreach(var innerClass in classInfo.InnerClasses)
+			{
+				WriteDiagramOfClass(builder, innerClass, accessFilter);
+			}
 		}
 
 		/// <summary>
