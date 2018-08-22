@@ -7,11 +7,12 @@ using UnitTestSupport.MSTest;
 
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
+using static ClassDiagramGeneratorTest.Models.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
 	[TestClass]
-	public class MethodParserTest : ParserTestBase
+	public class MethodParserTest
 	{
 		[TestMethod]
 		public void TestParseMethodDefinition()
@@ -66,14 +67,14 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		}
 
 		[TestMethod]
-		public void TestParseMethodWithCode1()
+		public void TestParseWithCSCode1()
 		{
-			TestcaseParseMethodAll(SampleCode1, 3, true, 5, Modifier.Public | Modifier.Static, Type("void"), "Main", List(Arg(Type("string"), "args")));
-			TestcaseParseMethodAll(SampleCode1, 10, true, 3, Modifier.Private | Modifier.Static, Type("int"), "Output", List(Arg(Type("int"), "x")));
+			TestcaseParseMethodAll(CSharpCode1, 4, true, 5, Modifier.Public | Modifier.Static, Type("void"), "Main", List(Arg(Type("string"), "args")));
+			TestcaseParseMethodAll(CSharpCode1, 11, true, 3, Modifier.Private | Modifier.Static, Type("int"), "Output", List(Arg(Type("int"), "x")));
 
-			foreach(var i in Enumerable.Range(0, 13).Except(new[] { 3, 10 }))
+			foreach(var i in Enumerable.Range(0, TotalLineCount(CSharpCode1)).Except(new[] { 4, 11 }))
 			{
-				TestcaseParseMethodAll(SampleCode1, i, false);
+				TestcaseParseMethodAll(CSharpCode1, i, false);
 			}
 		}
 
