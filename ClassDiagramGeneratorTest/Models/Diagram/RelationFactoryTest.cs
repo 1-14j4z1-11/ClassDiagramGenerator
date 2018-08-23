@@ -15,7 +15,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 	public class RelationFactoryTest
 	{
 		[TestMethod]
-		public void TestInheritance()
+		public void TestInheritances()
 		{
 			var relations = RelationFactory.CreateFromClasses(new[]
 			{
@@ -58,11 +58,71 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				Relation("In1-1-1", "In1-1", Nested));
 		}
 
+		[TestMethod]
+		public void TestFieldRelations()
+		{
+			var cls = Class(Type("MainClass"));
+			cls.Fields.AddRange(List(
+				new FieldInfo(Modifier.Public, "field1", Type("List", Type("FieldType1"))),
+				new FieldInfo(Modifier.Protected | Modifier.Readonly, "field2", Type("List", Type("Dictionary", Type("string"), Type("FieldType2")))),
+				new FieldInfo(Modifier.Private | Modifier.Const, "field3", Type("FieldType3"))
+				));
+
+			var relations = RelationFactory.CreateFromClasses(new[]
+			{
+				cls,
+				Class(Type("FieldType1")),
+				Class(Type("FieldType2")),
+			});
+			
+			relations.IsCollectionUnorderly(
+				Relation("MainClass", "FieldType1", Association),
+				Relation("MainClass", "FieldType2", Association));
+		}
+
+		[TestMethod]
+		public void TestMethodRelations()
+		{
+			var cls = Class(Type("MainClass"));
+			cls.Methods.AddRange(List(
+				new MethodInfo(Modifier.Public, "Method1", Type("void"), null),
+				new MethodInfo(Modifier.Protected | Modifier.Abstract, "Method2", Type("ReturnType2"), List(Arg(Type("List", Type("Dictionary", Type("string"), Type("ArgType2"))), "arg"))),
+				new MethodInfo(Modifier.Private | Modifier.Static, "Method3", Type("ReturnType3"), List(Arg(Type("ArgType3A"), "argA"), Arg(Type("ArgType3B"), "argB")))
+				));
+
+			var relations = RelationFactory.CreateFromClasses(new[]
+			{
+				cls,
+				Class(Type("ReturnType2")),
+				Class(Type("ArgType2")),
+				Class(Type("ReturnType3")),
+				Class(Type("ArgType3A")),
+			});
+
+			relations.IsCollectionUnorderly(
+				Relation("MainClass", "ReturnType2", Dependency),
+				Relation("MainClass", "ArgType2", Dependency),
+				Relation("MainClass", "ReturnType3", Dependency),
+				Relation("MainClass", "ArgType3A", Dependency));
+		}
+
+		/// <summary>
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
+		/// </summary>
+		/// <param name="type">Class type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
 		private static ClassInfo Class(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
 		{
 			return new ClassInfo(Modifier.Public, ClassCategory.Class, "TestNameSpace", type, inheritances);
 		}
 
+		/// <summary>
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
+		/// </summary>
+		/// <param name="type">Interface type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
 		private static ClassInfo IF(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
 		{
 			return new ClassInfo(Modifier.Public, ClassCategory.Interface, "TestNameSpace", type, inheritances);
