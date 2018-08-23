@@ -37,7 +37,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 	/// </summary>
 	public class Relation
 	{
-		// Dictionary contains weaker RelationType than key.
+		// Dictionary containing weaker RelationType than key.
 		private static readonly Dictionary<RelationType, List<RelationType>> RedundantMap = new Dictionary<RelationType, List<RelationType>>()
 		{
 			[Composition] = new List<RelationType>() { Aggregation, Association, Dependency },

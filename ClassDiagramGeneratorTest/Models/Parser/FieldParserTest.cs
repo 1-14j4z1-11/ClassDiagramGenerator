@@ -7,11 +7,12 @@ using UnitTestSupport.MSTest;
 
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
+using static ClassDiagramGeneratorTest.Models.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
 	[TestClass]
-	public class FieldParserTest : ParserTestBase
+	public class FieldParserTest
 	{
 		[TestMethod]
 		public void TestParseFieldDefinition()
@@ -42,14 +43,14 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		}
 
 		[TestMethod]
-		public void TestParseFieldWithCode1()
+		public void TestParseWithCSCode1()
 		{
-			TestcaseParseFieldAll(SampleCode1, 2, true, 1, Modifier.Private | Modifier.Static | Modifier.Readonly, Type("string"), "logText");
-			TestcaseParseFieldAll(SampleCode1, 8, true, 2, Modifier.Public | Modifier.Static, Type("string"), "LogText");
+			TestcaseParseFieldAll(CSharpCode1, 3, true, 1, Modifier.Private | Modifier.Static | Modifier.Readonly, Type("string"), "logText");
+			TestcaseParseFieldAll(CSharpCode1, 9, true, 2, Modifier.Public | Modifier.Static, Type("string"), "LogText");
 			
-			foreach(var i in new[] { 7, 11 })
+			foreach(var i in new[] { 8, 12 })
 			{
-				TestcaseParseFieldAll(SampleCode1, i, false);
+				TestcaseParseFieldAll(CSharpCode1, i, false);
 			}
 		}
 		

@@ -16,18 +16,19 @@ namespace ClassDiagramGenerator.Models.Diagram
 	{
 		/// <summary>
 		/// Creates a collection of relations from a collection of classes.
+		/// <para>A returned collection contains only relations between classes included in argument <paramref name="classes"/></para>
 		/// </summary>
 		/// <param name="classes">Collection of classes</param>
 		/// <returns>Collection of relations</returns>
 		public static IEnumerable<Relation> CreateFromClasses(IEnumerable<ClassInfo> classes)
 		{
 			var relations = new HashSet<Relation>();
-			var classNames = classes.Select(c => c.Name).ToList();
+			var allClassNames = classes.Select(c => c.Name).ToList();	// contains only top level classes (not contains inner classes)
 
 			foreach(var cls in classes)
 			{
 				// Inheritance
-				foreach(var inheritedName in cls.InheritedClasses.Select(c => c.Name).Where(classNames.Contains))
+				foreach(var inheritedName in cls.InheritedClasses.Select(c => c.Name).Where(allClassNames.Contains))
 				{
 					var inheritedClass = classes.First(c => c.Name == inheritedName);
 					var type = (inheritedClass.Category == ClassCategory.Interface) ? RelationType.Realization : RelationType.Generalization;
@@ -35,20 +36,16 @@ namespace ClassDiagramGenerator.Models.Diagram
 				}
 
 				// Inner classes
-				foreach(var innerClass in cls.InnerClasses.Select(c => c.Name).Where(classNames.Contains))
-				{
-					// TODO Add Nested relations 'recursively'
-					relations.Add(new Relation(cls.Name, innerClass, RelationType.Nested));
-				}
-
+				GetNestedRelationsRecursively(cls, relations);
+				
 				// Type used in fields -> Association
-				foreach(var type in cls.Fields.Select(f => f.GetRelatedTypeNames()).SelectMany(t => t).Where(classNames.Contains))
+				foreach(var type in cls.Fields.Select(f => f.GetRelatedTypeNames()).SelectMany(t => t).Where(allClassNames.Contains))
 				{
 					relations.Add(new Relation(cls.Name, type, RelationType.Association));
 				}
 
 				// Type used in methods -> Dependency
-				foreach(var type in cls.Methods.Select(m => m.GetRelatedTypeNames()).SelectMany(t => t).Where(classNames.Contains))
+				foreach(var type in cls.Methods.Select(m => m.GetRelatedTypeNames()).SelectMany(t => t).Where(allClassNames.Contains))
 				{
 					relations.Add(new Relation(cls.Name, type, RelationType.Dependency));
 				}
@@ -60,10 +57,27 @@ namespace ClassDiagramGenerator.Models.Diagram
 		}
 
 		/// <summary>
+		/// Gets nested relations recursively.
+		/// </summary>
+		/// <param name="parentClass">Parent class</param>
+		/// <param name="results">A collection to put result relations in</param>
+		private static void GetNestedRelationsRecursively(ClassInfo parentClass, ICollection<Relation> results)
+		{
+			if(!parentClass.InnerClasses.Any())
+				return;
+
+			foreach(var innerClass in parentClass.InnerClasses)
+			{
+				results.Add(new Relation(innerClass.Name, parentClass.Name, RelationType.Nested));
+				GetNestedRelationsRecursively(innerClass, results);
+			}
+		}
+
+		/// <summary>
 		/// Removes Redundant ralations.
 		/// </summary>
 		/// <param name="relations">List of <see cref="Relation"/></param>
-		private static void RemoveRedundantRelations(HashSet<Relation> relations)
+		private static void RemoveRedundantRelations(ICollection<Relation> relations)
 		{
 			var redundants = new HashSet<Relation>();
 
