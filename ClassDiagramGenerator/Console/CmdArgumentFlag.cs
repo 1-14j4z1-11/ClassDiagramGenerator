@@ -31,7 +31,7 @@ namespace ClassDiagramGenerator.Console
 		public IEnumerable<string> FlagWords { get; }
 
 		/// <summary>
-		/// Returns value whether <paramref name="arg"/> matches this flag or not.
+		/// Returns a value of whether <paramref name="arg"/> matches this flag or not.
 		/// </summary>
 		/// <param name="arg">One of command line arguments</param>
 		/// <returns>Whether <paramref name="arg"/> matches this flag or not</returns>

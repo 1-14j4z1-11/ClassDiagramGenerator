@@ -128,12 +128,13 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// Parse <see cref="TypeInfo"/> from string.
 		/// <para>If faield to parsing, returns null.</para>
 		/// </summary>
-		/// <param name="typeText">String that indicates type</param>
+		/// <param name="typeText">String that indicates type (that matches <see cref="TypePattern"/>)</param>
 		/// <returns><see cref="TypeInfo"/> parsed from string, or null</returns>
 		protected static TypeInfo ParseType(string typeText)
 		{
 			var words = TextAnalyzer.SplitWithDepth(typeText, "<", ">")
 				.Split(",")
+				.Split("[") // Use '[' as a separator, and ']' is treated as array descriptor.
 				.Where(w => !string.IsNullOrWhiteSpace(w.Text))
 				.Select(w => new DepthText(w.Text.Trim(), w.Depth))
 				.ToList();
@@ -141,6 +142,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			if(words.Count == 0)
 				return null;
 
+			var rightBracketRegex = new Regex("^\\s*\\]\\s*$");
 			var type = new TypeInfo.Mutable(words[0].Text);
 			var rootDepth = words[0].Depth;
 
@@ -150,20 +152,34 @@ namespace ClassDiagramGenerator.Models.Parser
 				var depth = words[i].Depth;
 
 				var parentType = type;
-				var lackDepth = 0;
 
-				for(var j = 0; j < depth - rootDepth - 1; j++)
+				if(rightBracketRegex.IsMatch(name))
 				{
-					if(parentType.TypeArgs.LastOrDefault() == null)
+					for(var j = 0; j < depth - rootDepth; j++)
 					{
-						lackDepth = depth - rootDepth - j - 1;
-						break;
+						// If an input arg is correct format, this statement is not passed.
+						if(parentType.TypeArgs.LastOrDefault() == null)
+							break;
+
+						parentType = parentType.TypeArgs.Last();
 					}
 
-					parentType = parentType.TypeArgs.Last();
+					parentType.IsArray = true;
 				}
+				else
+				{
+					// Gets a parent type of current 'name'
+					for(var j = 0; j < depth - rootDepth - 1; j++)
+					{
+						// If an input arg is correct format, this statement is not passed.
+						if(parentType.TypeArgs.LastOrDefault() == null)
+							break;
 
-				parentType.TypeArgs.Add(new TypeInfo.Mutable(name));
+						parentType = parentType.TypeArgs.Last();
+					}
+
+					parentType.TypeArgs.Add(new TypeInfo.Mutable(name));
+				}
 			}
 
 			return type.ToImmutable();

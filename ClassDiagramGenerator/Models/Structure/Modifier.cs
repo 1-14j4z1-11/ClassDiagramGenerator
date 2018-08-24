@@ -79,7 +79,7 @@ namespace ClassDiagramGenerator.Models.Structure
 
 		/// <summary>
 		/// Parse <see cref="Modifier"/> from string.
-		/// <para>If argument string contains no modifiers, returns <see cref="Modifier.None"/>.</para>
+		/// <para>If argument string contains no modifiers or contains only texts that are not modifier, returns <see cref="Modifier.None"/>.</para>
 		/// </summary>
 		/// <param name="str">String to be parsed</param>
 		/// <returns><see cref="Modifier"/> parsed from string</returns>

@@ -136,7 +136,7 @@ namespace UmlGenerator
 			public IEnumerable<string> CmdValues { get; }
 
 			/// <summary>
-			/// Returns a value whether <paramref name="cmdValue"/> matches this language or not.
+			/// Returns a value of whether <paramref name="cmdValue"/> matches this language or not.
 			/// </summary>
 			/// <param name="cmdValue">dependent argument of a language flag</param>
 			/// <returns></returns>

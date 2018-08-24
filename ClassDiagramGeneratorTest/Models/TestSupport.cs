@@ -71,7 +71,7 @@ namespace Sample1
 		}
 
 		/// <summary>
-		/// Creates <see cref="TypeInfo"/>.
+		/// Creates a <see cref="TypeInfo"/>.
 		/// </summary>
 		/// <param name="type">Type name</param>
 		/// <param name="typeArgs">Type arguments</param>
@@ -82,7 +82,18 @@ namespace Sample1
 		}
 
 		/// <summary>
-		/// Creates <see cref="ArgumentInfo"/>.
+		/// Creates a Array <see cref="TypeInfo"/>.
+		/// </summary>
+		/// <param name="type">Type name</param>
+		/// <param name="typeArgs">Type arguments</param>
+		/// <returns><see cref="TypeInfo"/></returns>
+		public static TypeInfo TypeArray(string type, params TypeInfo[] typeArgs)
+		{
+			return new TypeInfo(true, type, typeArgs);
+		}
+
+		/// <summary>
+		/// Creates a <see cref="ArgumentInfo"/>.
 		/// </summary>
 		/// <param name="type"><see cref="TypeInfo"/></param>
 		/// <param name="name">Argument name</param>
@@ -93,7 +104,7 @@ namespace Sample1
 		}
 
 		/// <summary>
-		/// Creates <see cref="ClassDiagramGenerator.Models.Diagram.Relation"/>.
+		/// Creates a <see cref="ClassDiagramGenerator.Models.Diagram.Relation"/>.
 		/// </summary>
 		/// <param name="class1">Class name 1</param>
 		/// <param name="class2">Class name 2</param>
@@ -105,7 +116,7 @@ namespace Sample1
 		}
 
 		/// <summary>
-		/// Creates <see cref="List{T}"/>.
+		/// Creates a <see cref="List{T}"/>.
 		/// </summary>
 		/// <typeparam name="T">Contents type in List</typeparam>
 		/// <param name="values">Contents in List</param>

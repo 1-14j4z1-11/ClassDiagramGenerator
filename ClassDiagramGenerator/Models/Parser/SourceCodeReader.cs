@@ -52,7 +52,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 		
 		/// <summary>
-		/// Gets the value whether the current position is end of reader.
+		/// Gets a value of whether the current position is end of reader.
 		/// </summary>
 		public bool IsEndOfLines
 		{
