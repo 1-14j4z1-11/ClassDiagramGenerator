@@ -135,7 +135,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			// Inheritance text extracted by class definition regex contains inheritance keyword
 			text = text.Replace(":", ",").Replace("extends", ",").Replace("implements", ",");
 
-			return text.Split(",", "<", ">", d => d == 0)
+			return text.SplitEach(",", "<", ">", d => d == 0)
 				.Where(s => !string.IsNullOrWhiteSpace(s))
 				.Select(s => ParseType(s));
 		}

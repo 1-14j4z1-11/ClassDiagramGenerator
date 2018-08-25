@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UnitTestSupport.MSTest;
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
+using static ClassDiagramGeneratorTest.Models.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
@@ -21,8 +22,17 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Type("List", Type("List", Type("int"))));
 			TestcaseParseTypes("Dictionary<string,int>",
 				Type("Dictionary", Type("string"), Type("int")));
-			TestcaseParseTypes("Dictionary<string, Dictionary<int, int>>",
-				Type("Dictionary", Type("string"), Type("Dictionary", Type("int"), Type("int"))));
+			TestcaseParseTypes("Dictionary<List<Dictionary<List<string>, int>>, Dictionary<int, List<int>>>",
+				Type("Dictionary", Type("List", Type("Dictionary", Type("List", Type("string")), Type("int"))), Type("Dictionary", Type("int"), Type("List", Type("int")))));
+
+			TestcaseParseTypes("string[]", TypeArray("string"));
+			TestcaseParseTypes("List<string>[]", TypeArray("List", Type("string")));
+			TestcaseParseTypes("List < List < int [ ] > > [ ]",
+				TypeArray("List", Type("List", TypeArray("int"))));
+			TestcaseParseTypes("Dictionary<string[],int[]>[]",
+				TypeArray("Dictionary", TypeArray("string"), TypeArray("int")));
+			TestcaseParseTypes("Dictionary < List<Dictionary<List<string>, int>> [] , Dictionary<int[], List<int>[]> > [ ]",
+				TypeArray("Dictionary", TypeArray("List", Type("Dictionary", Type("List", Type("string")), Type("int"))), Type("Dictionary", TypeArray("int"), TypeArray("List", Type("int")))));
 		}
 
 		private void TestcaseParseTypes(string targetText, TypeInfo expextedType)
@@ -49,11 +59,6 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			var actualType = ParseType(targetText);
 			actualType.Name.Is(expextedType.Name);
 			recursiveCheck(expextedType.TypeArgs, actualType.TypeArgs);
-		}
-
-		private static TypeInfo Type(string type, params TypeInfo[] typeArgs)
-		{
-			return new TypeInfo(type, typeArgs);
 		}
 		
 		public override bool TryParse(SourceCodeReader reader, out object obj)

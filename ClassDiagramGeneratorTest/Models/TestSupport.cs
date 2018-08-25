@@ -71,7 +71,29 @@ namespace Sample1
 		}
 
 		/// <summary>
-		/// Creates <see cref="TypeInfo"/>.
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
+		/// </summary>
+		/// <param name="type">Class type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
+		public static ClassInfo Class(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
+		{
+			return new ClassInfo(Modifier.Public, ClassCategory.Class, "TestNameSpace", type, inheritances);
+		}
+
+		/// <summary>
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
+		/// </summary>
+		/// <param name="type">Interface type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
+		public static ClassInfo Interface(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
+		{
+			return new ClassInfo(Modifier.Public, ClassCategory.Interface, "TestNameSpace", type, inheritances);
+		}
+
+		/// <summary>
+		/// Creates a <see cref="TypeInfo"/>.
 		/// </summary>
 		/// <param name="type">Type name</param>
 		/// <param name="typeArgs">Type arguments</param>
@@ -79,6 +101,17 @@ namespace Sample1
 		public static TypeInfo Type(string type, params TypeInfo[] typeArgs)
 		{
 			return new TypeInfo(type, typeArgs);
+		}
+
+		/// <summary>
+		/// Creates a Array <see cref="TypeInfo"/>.
+		/// </summary>
+		/// <param name="type">Type name</param>
+		/// <param name="typeArgs">Type arguments</param>
+		/// <returns><see cref="TypeInfo"/></returns>
+		public static TypeInfo TypeArray(string type, params TypeInfo[] typeArgs)
+		{
+			return new TypeInfo(true, type, typeArgs);
 		}
 
 		/// <summary>

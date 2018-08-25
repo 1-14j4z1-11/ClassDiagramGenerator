@@ -32,6 +32,10 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("static bool InOut(in object x, out string y)", true,
 				Modifier.Static, Type("bool"), "InOut", List(Arg(Type("object"), "x"), Arg(Type("string"), "y")));
 
+			// Lambda format
+			TestcaseParseMethodDefinition("public int Max(int x, int y) => (x > y) ? x : y", true,
+				Modifier.Public, Type("int"), "Max", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+
 			// C# Generic
 			TestcaseParseMethodDefinition("public bool Generic<T>(T value)", true,
 				Modifier.Public, Type("bool"), "Generic", List(Arg(Type("T"), "value")));
@@ -78,6 +82,26 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			}
 		}
 
+		[TestMethod]
+		public void TestParseFailure()
+		{
+			var reader = ReaderFromCode(string.Empty);
+			var parser = new MethodParser(null);
+
+			parser.TryParse(reader, out var _).IsFalse();
+		}
+
+		[TestMethod]
+		public void TestParseMethodInInterface()
+		{
+			var ifClass = Interface(Type("Interface"));
+
+			TestcaseParseMethodDefinition("void Func()", true,
+				Modifier.Public | Modifier.Abstract, Type("void"), "Func", null, ifClass);
+			TestcaseParseMethodDefinition("R Func<T, R>(T x)", true,
+				Modifier.Public | Modifier.Abstract, Type("R"), "Func", List(Arg(Type("T"), "x")), ifClass);
+		}
+
 		private static void TestcaseParseMethodAll(string code,
 			int startPos,
 			bool isSuccess,
@@ -85,12 +109,13 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			Modifier? mod = null,
 			TypeInfo returnType = null,
 			string methodName = null,
-			IEnumerable<ArgumentInfo> argTypes = null)
+			IEnumerable<ArgumentInfo> argTypes = null,
+			ClassInfo parserClassInfo = null)
 		{
 			var reader = ReaderFromCode(code);
 			Enumerable.Range(0, startPos).ToList().ForEach(_ => reader.TryRead(out var _));
 
-			new MethodParser(null).TryParse(reader, out var info).Is(isSuccess);
+			new MethodParser(parserClassInfo).TryParse(reader, out var info).Is(isSuccess);
 
 			if(isSuccess)
 			{
@@ -112,9 +137,10 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			Modifier? mod = null,
 			TypeInfo returnType = null,
 			string methodName = null,
-			IEnumerable<ArgumentInfo> argTypes = null)
+			IEnumerable<ArgumentInfo> argTypes = null,
+			ClassInfo parserClassInfo = null)
 		{
-			TestcaseParseMethodAll(code, 0, isSuccess, 1, mod, returnType, methodName, argTypes);
+			TestcaseParseMethodAll(code, 0, isSuccess, 1, mod, returnType, methodName, argTypes, parserClassInfo);
 		}
 	}
 }

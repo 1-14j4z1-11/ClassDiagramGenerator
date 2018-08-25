@@ -52,7 +52,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 		
 		/// <summary>
-		/// Gets the value whether the current position is end of reader.
+		/// Gets a value of whether the current position is end of reader.
 		/// </summary>
 		public bool IsEndOfLines
 		{
@@ -118,8 +118,9 @@ namespace ClassDiagramGenerator.Models.Parser
 			code = Regex.Replace(code, "[\\r\\n\\s]+", " ");
 			
 			return TextAnalyzer.SplitWithDepth(code, "{", "}")
-				.Split(";")
+				.SplitEach(";")
 				.Where(w => !string.IsNullOrWhiteSpace(w.Text))
+				.Select(w => new DepthText(w.Text.Trim(), w.Depth))
 				.ToList();
 		}
 

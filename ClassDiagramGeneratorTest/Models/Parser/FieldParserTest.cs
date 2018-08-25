@@ -53,7 +53,16 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				TestcaseParseFieldAll(CSharpCode1, i, false);
 			}
 		}
-		
+
+		[TestMethod]
+		public void TestParseFailure()
+		{
+			var reader = ReaderFromCode(string.Empty);
+			var parser = new FieldParser(null);
+
+			parser.TryParse(reader, out var _).IsFalse();
+		}
+
 		private static void TestcaseParseFieldAll(string code,
 			int startPos,
 			bool isSuccess,

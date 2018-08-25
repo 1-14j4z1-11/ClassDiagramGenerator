@@ -22,8 +22,24 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// <param name="name">Type name</param>
 		/// <param name="typeArgs">Collection of type arguments</param>
 		public TypeInfo(string name, IEnumerable<TypeInfo> typeArgs = null)
+			: this(false, name, typeArgs)
+		{ }
+
+		/// <summary>
+		/// Constructor.
+		/// <para>If <paramref name="isArray"/> is true, this instance indicates an Array type.</para>
+		/// <para>For example</para>
+		/// <para>- isArray=false, name="string" -> string</para>
+		/// <para>- isArray=true, name="string" -> string[]</para>
+		/// <para>- isArray=true, name="List", typeArgs=[string] -> List&lt;string&gt;[]</para>
+		/// </summary>
+		/// <param name="isArray">Value of whether this type indicates an Array type or not.</param>
+		/// <param name="name">Type name</param>
+		/// <param name="typeArgs">Collection of type arguments</param>
+		public TypeInfo(bool isArray, string name, IEnumerable<TypeInfo> typeArgs = null)
 		{
 			this.Name = name;
+			this.IsArray = IsArray;
 			this.TypeArgs = new ReadOnlyCollection<TypeInfo>(
 				new List<TypeInfo>(typeArgs ?? Enumerable.Empty<TypeInfo>()));
 		}
@@ -32,6 +48,11 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// Gets a type name.
 		/// </summary>
 		public string Name { get; }
+
+		/// <summary>
+		/// Gets a value of whether this type indicates an Array type or not.
+		/// </summary>
+		public bool IsArray { get; }
 
 		/// <summary>
 		/// Gets a list of type arguments.
@@ -56,30 +77,25 @@ namespace ClassDiagramGenerator.Models.Structure
 				return false;
 
 			return (this.Name == other.Name)
+				&& (this.IsArray == other.IsArray)
 				&& (this.TypeArgs.SequenceEqual(other.TypeArgs));
 		}
 
 		public override int GetHashCode()
 		{
 			var argsHash = (this.TypeArgs.Count > 0) ? this.TypeArgs.Select(t => t?.GetHashCode() ?? 0).Aggregate((h1, h2) => h1 ^ h2) : 0;
-			return this.Name.GetHashCode() ^ argsHash;
+			return this.Name.GetHashCode() ^ this.IsArray.GetHashCode() ^ argsHash;
 		}
 
 		public override string ToString()
 		{
-			if(this.TypeArgs.Count == 0)
-			{
-				return this.Name;
-			}
-			else
-			{
-				return this.Name + "<" + string.Join(",", this.TypeArgs) + ">";
-			}
+			var typeArgs = (this.TypeArgs.Count > 0) ? $"<{string.Join(",", this.TypeArgs)}>" : string.Empty;
+			return this.Name + typeArgs + (this.IsArray ? "[]" : string.Empty);
 		}
 
 		/// <summary>
 		/// Mutable <see cref="TypeInfo"/> Class.
-		/// <para>This class is only used intermediate processing</para>
+		/// <para>This class is only used intermediate processing.</para>
 		/// </summary>
 		internal class Mutable
 		{
@@ -87,17 +103,21 @@ namespace ClassDiagramGenerator.Models.Structure
 			/// Constructor.
 			/// </summary>
 			/// <param name="name">Type name</param>
-			/// <param name="typeArgs">Collection of type arguments</param>
-			public Mutable(string name, IEnumerable<Mutable> typeArgs = null)
+			public Mutable(string name)
 			{
 				this.Name = name;
-				this.TypeArgs = (typeArgs != null) ? new List<Mutable>(typeArgs) : new List<Mutable>();
+				this.TypeArgs = new List<Mutable>();
 			}
 
 			/// <summary>
 			/// Gets or sets a type name.
 			/// </summary>
 			public string Name { get; set; }
+
+			/// <summary>
+			/// Gets or sets a value of whether this type indicates an Array type or not.
+			/// </summary>
+			public bool IsArray { get; set; }
 
 			/// <summary>
 			/// Gets a mutable list of type arguments.
@@ -110,7 +130,7 @@ namespace ClassDiagramGenerator.Models.Structure
 			/// <returns><see cref="TypeInfo"/></returns>
 			public TypeInfo ToImmutable()
 			{
-				return new TypeInfo(this.Name, this.TypeArgs.Select(m => m.ToImmutable()));
+				return new TypeInfo(this.IsArray, this.Name, this.TypeArgs.Select(m => m.ToImmutable()));
 			}
 		}
 	}

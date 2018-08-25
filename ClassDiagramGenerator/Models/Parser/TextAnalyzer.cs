@@ -71,7 +71,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <returns>Collection of splitted text</returns>
 		/// <exception cref="ArgumentNullException">If at least one argument of <paramref name="text"/>, 
 		/// <paramref name="separator"/>, <paramref name="nest"/>, <paramref name="unnest"/> is null</exception>
-		public static List<string> Split(this string text, string separator, string nest, string unnest, Func<int, bool> depthFilter = null)
+		public static List<string> SplitEach(this string text, string separator, string nest, string unnest, Func<int, bool> depthFilter = null)
 		{
 			if((text == null) || (separator == null) || (nest == null) || (unnest == null))
 				throw new ArgumentNullException();
@@ -125,7 +125,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <param name="texts">Collection of <see cref="DepthText"/></param>
 		/// <param name="separator">Separator</param>
 		/// <returns>List of splitted <see cref="DepthText"/></returns>
-		public static List<DepthText> Split(this IEnumerable<DepthText> texts, string separator)
+		public static List<DepthText> SplitEach(this IEnumerable<DepthText> texts, string separator)
 		{
 			if(texts == null)
 				throw new ArgumentNullException();

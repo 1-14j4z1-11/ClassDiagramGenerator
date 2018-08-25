@@ -76,7 +76,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			if(argText == null)
 				throw new ArgumentNullException();
 			
-			return argText.Split(",",  "<", ">", d => d == 0)
+			return argText.SplitEach(",",  "<", ">", d => d == 0)
 				.Select(a => ArgumentRegex.Match(a))
 				.Where(m => m.Success)
 				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[4].Value), m.Groups[7].Value));
@@ -128,12 +128,13 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// Parse <see cref="TypeInfo"/> from string.
 		/// <para>If faield to parsing, returns null.</para>
 		/// </summary>
-		/// <param name="typeText">String that indicates type</param>
+		/// <param name="typeText">String that indicates type (that matches <see cref="TypePattern"/>)</param>
 		/// <returns><see cref="TypeInfo"/> parsed from string, or null</returns>
 		protected static TypeInfo ParseType(string typeText)
 		{
 			var words = TextAnalyzer.SplitWithDepth(typeText, "<", ">")
-				.Split(",")
+				.SplitEach(",")
+				.SplitEach("[") // Use '[' as a separator, and ']' is treated as an array descriptor.
 				.Where(w => !string.IsNullOrWhiteSpace(w.Text))
 				.Select(w => new DepthText(w.Text.Trim(), w.Depth))
 				.ToList();
@@ -141,32 +142,53 @@ namespace ClassDiagramGenerator.Models.Parser
 			if(words.Count == 0)
 				return null;
 
-			var type = new TypeInfo.Mutable(words[0].Text);
+			var rightBracketRegex = new Regex("^\\s*\\]\\s*$");
+			var rootType = new TypeInfo.Mutable(words[0].Text);
 			var rootDepth = words[0].Depth;
 
 			for(var i = 1; i < words.Count; i++)
 			{
 				var name = words[i].Text;
 				var depth = words[i].Depth;
-
-				var parentType = type;
-				var lackDepth = 0;
-
-				for(var j = 0; j < depth - rootDepth - 1; j++)
+				
+				if(rightBracketRegex.IsMatch(name))
 				{
-					if(parentType.TypeArgs.LastOrDefault() == null)
-					{
-						lackDepth = depth - rootDepth - j - 1;
-						break;
-					}
-
-					parentType = parentType.TypeArgs.Last();
+					// Gets a type whose depth is the same as an array descriptor
+					var arrayType = GetLastTypeWithDepth(rootType, depth - rootDepth);
+					arrayType.IsArray = true;
 				}
-
-				parentType.TypeArgs.Add(new TypeInfo.Mutable(name));
+				else
+				{
+					// Gets a parent type, whose depth is the same as this depth-1
+					var parentType = GetLastTypeWithDepth(rootType, depth - rootDepth - 1);
+					parentType.TypeArgs.Add(new TypeInfo.Mutable(name));
+				}
 			}
 
-			return type.ToImmutable();
+			return rootType.ToImmutable();
+		}
+
+		/// <summary>
+		/// Gets a <see cref="TypeInfo.Mutable"/> with the same depth as argument.
+		/// If more than one type argument with the same depth is included, returns a last type argument.
+		/// </summary>
+		/// <param name="rootType"><see cref="TypeInfo.Mutable"/></param>
+		/// <param name="depth">Target depth</param>
+		/// <returns><see cref="TypeInfo"/> with the same depth as argument</returns>
+		private static TypeInfo.Mutable GetLastTypeWithDepth(TypeInfo.Mutable rootType, int depth)
+		{
+			var type = rootType;
+
+			for(var j = 0; j < depth; j++)
+			{
+				// If an input arg is correct format, this statement is not passed.
+				if(rootType.TypeArgs.LastOrDefault() == null)
+					break;
+
+				type = type.TypeArgs.Last();
+			}
+
+			return type;
 		}
 	}
 }

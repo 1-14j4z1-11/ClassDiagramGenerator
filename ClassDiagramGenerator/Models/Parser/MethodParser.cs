@@ -107,8 +107,8 @@ namespace ClassDiagramGenerator.Models.Parser
 			if((this.classInfo == null) || (this.classInfo.Category != ClassCategory.Interface))
 				return mod;
 
-			// Method in interface is always public 
-			return Modifier.Public | mod;
+			// Method in interface is always Public and Abstract
+			return Modifier.Public | Modifier.Abstract | mod;
 		}
 	}
 }

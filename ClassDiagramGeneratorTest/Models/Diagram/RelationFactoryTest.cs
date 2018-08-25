@@ -21,8 +21,8 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			{
 				Class(Type("ClassA"), List(Type("Base1"), Type("IF1"), Type("IF2"), Type("IF3"))),
 				Class(Type("Base1")),
-				IF(Type("IF1")),
-				IF(Type("IF2")),
+				Interface(Type("IF1")),
+				Interface(Type("IF2")),
 			});
 
 			// Note that relation of 'IF3' is not contained
@@ -104,28 +104,6 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				Relation("MainClass", "ArgType2", Dependency),
 				Relation("MainClass", "ReturnType3", Dependency),
 				Relation("MainClass", "ArgType3A", Dependency));
-		}
-
-		/// <summary>
-		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
-		/// </summary>
-		/// <param name="type">Class type</param>
-		/// <param name="inheritances">Inherited classes</param>
-		/// <returns><see cref="ClassInfo"/></returns>
-		private static ClassInfo Class(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
-		{
-			return new ClassInfo(Modifier.Public, ClassCategory.Class, "TestNameSpace", type, inheritances);
-		}
-
-		/// <summary>
-		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
-		/// </summary>
-		/// <param name="type">Interface type</param>
-		/// <param name="inheritances">Inherited classes</param>
-		/// <returns><see cref="ClassInfo"/></returns>
-		private static ClassInfo IF(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
-		{
-			return new ClassInfo(Modifier.Public, ClassCategory.Interface, "TestNameSpace", type, inheritances);
 		}
 	}
 }
