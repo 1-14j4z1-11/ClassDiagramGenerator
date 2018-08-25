@@ -71,6 +71,28 @@ namespace Sample1
 		}
 
 		/// <summary>
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
+		/// </summary>
+		/// <param name="type">Class type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
+		public static ClassInfo Class(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
+		{
+			return new ClassInfo(Modifier.Public, ClassCategory.Class, "TestNameSpace", type, inheritances);
+		}
+
+		/// <summary>
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
+		/// </summary>
+		/// <param name="type">Interface type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
+		public static ClassInfo Interface(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
+		{
+			return new ClassInfo(Modifier.Public, ClassCategory.Interface, "TestNameSpace", type, inheritances);
+		}
+
+		/// <summary>
 		/// Creates a <see cref="TypeInfo"/>.
 		/// </summary>
 		/// <param name="type">Type name</param>
@@ -93,7 +115,7 @@ namespace Sample1
 		}
 
 		/// <summary>
-		/// Creates a <see cref="ArgumentInfo"/>.
+		/// Creates <see cref="ArgumentInfo"/>.
 		/// </summary>
 		/// <param name="type"><see cref="TypeInfo"/></param>
 		/// <param name="name">Argument name</param>
@@ -104,7 +126,7 @@ namespace Sample1
 		}
 
 		/// <summary>
-		/// Creates a <see cref="ClassDiagramGenerator.Models.Diagram.Relation"/>.
+		/// Creates <see cref="ClassDiagramGenerator.Models.Diagram.Relation"/>.
 		/// </summary>
 		/// <param name="class1">Class name 1</param>
 		/// <param name="class2">Class name 2</param>
@@ -116,7 +138,7 @@ namespace Sample1
 		}
 
 		/// <summary>
-		/// Creates a <see cref="List{T}"/>.
+		/// Creates <see cref="List{T}"/>.
 		/// </summary>
 		/// <typeparam name="T">Contents type in List</typeparam>
 		/// <param name="values">Contents in List</param>

@@ -109,12 +109,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected override Modifier ParseModifiers(string modifierText)
 		{
 			var mod = base.ParseModifiers(modifierText);
-
-			if((this.classInfo == null) || (this.classInfo.Category != ClassCategory.Interface))
-				return mod;
-
-			// Field in interface is always public 
-			return Modifier.Public | mod;
+			return mod;
 		}
 	}
 }

@@ -19,14 +19,13 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 		{
 			var relations = RelationFactory.CreateFromClasses(new[]
 			{
-				Class(Type("ClassA"), List(Type("Base1"), Type("IF1"), Type("IF2", Type("TypeArg")), Type("IF3"))),
+				Class(Type("ClassA"), List(Type("Base1"), Type("IF1"), Type("IF2"), Type("IF3"))),
 				Class(Type("Base1")),
-				IF(Type("IF1")),
-				IF(Type("IF2")),
-				IF(Type("TypeArg")),
+				Interface(Type("IF1")),
+				Interface(Type("IF2")),
 			});
 
-			// Note that relation of 'IF3' and 'TypeArg' are not contained
+			// Note that relation of 'IF3' is not contained
 			relations.IsCollectionUnorderly(
 				Relation("ClassA", "Base1", Generalization),
 				Relation("ClassA", "IF1", Realization),
@@ -64,29 +63,21 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 		{
 			var cls = Class(Type("MainClass"));
 			cls.Fields.AddRange(List(
-				new FieldInfo(Modifier.Public, "field1", Type("List", Type("T1"))),
-				new FieldInfo(Modifier.Protected | Modifier.Readonly, "field2", Type("List", Type("Dictionary", Type("string"), Type("T2")))),
-				new FieldInfo(Modifier.Private | Modifier.Const, "field3", Type("T3")),
-				new FieldInfo(Modifier.Internal | Modifier.Static, "field4", TypeArray("T4")),
-				new FieldInfo(Modifier.Protected | Modifier.Internal, "field5", Type("Dictionary", Type("List", Type("T5a")), Type("T5b")))
+				new FieldInfo(Modifier.Public, "field1", Type("List", Type("FieldType1"))),
+				new FieldInfo(Modifier.Protected | Modifier.Readonly, "field2", Type("List", Type("Dictionary", Type("string"), Type("FieldType2")))),
+				new FieldInfo(Modifier.Private | Modifier.Const, "field3", Type("FieldType3"))
 				));
 
 			var relations = RelationFactory.CreateFromClasses(new[]
 			{
 				cls,
-				Class(Type("T1")),
-				Class(Type("T2")),
-				Class(Type("T4")),
-				Class(Type("T5a")),
-				Class(Type("T5b")),
+				Class(Type("FieldType1")),
+				Class(Type("FieldType2")),
 			});
 			
 			relations.IsCollectionUnorderly(
-				Relation("MainClass", "T1", Association),
-				Relation("MainClass", "T2", Association),
-				Relation("MainClass", "T4", Association),
-				Relation("MainClass", "T5a", Association),
-				Relation("MainClass", "T5b", Association));
+				Relation("MainClass", "FieldType1", Association),
+				Relation("MainClass", "FieldType2", Association));
 		}
 
 		[TestMethod]
@@ -95,49 +86,24 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			var cls = Class(Type("MainClass"));
 			cls.Methods.AddRange(List(
 				new MethodInfo(Modifier.Public, "Method1", Type("void"), null),
-				new MethodInfo(Modifier.Protected | Modifier.Abstract, "Method2", Type("R2"), List(Arg(Type("List", Type("Dictionary", Type("List", Type("A2a")), Type("A2b"))), "arg"))),
-				new MethodInfo(Modifier.Private | Modifier.Static, "Method3", Type("R3"), List(Arg(Type("A3a"), "argA"), Arg(Type("A3b"), "argB"))),
-				new MethodInfo(Modifier.Internal | Modifier.Virtual, "Method4", Type("R4"), List(Arg(TypeArray("A4a"), "argA"), Arg(TypeArray("List", Type("A4b")), "argB")))
+				new MethodInfo(Modifier.Protected | Modifier.Abstract, "Method2", Type("ReturnType2"), List(Arg(Type("List", Type("Dictionary", Type("string"), Type("ArgType2"))), "arg"))),
+				new MethodInfo(Modifier.Private | Modifier.Static, "Method3", Type("ReturnType3"), List(Arg(Type("ArgType3A"), "argA"), Arg(Type("ArgType3B"), "argB")))
 				));
 
 			var relations = RelationFactory.CreateFromClasses(new[]
 			{
 				cls,
-				Class(Type("R2")),
-				Class(Type("A2a")),
-				Class(Type("A2b")),
-				Class(Type("R3")),
-				Class(Type("A3a")),
+				Class(Type("ReturnType2")),
+				Class(Type("ArgType2")),
+				Class(Type("ReturnType3")),
+				Class(Type("ArgType3A")),
 			});
 
 			relations.IsCollectionUnorderly(
-				Relation("MainClass", "R2", Dependency),
-				Relation("MainClass", "A2a", Dependency),
-				Relation("MainClass", "A2b", Dependency),
-				Relation("MainClass", "R3", Dependency),
-				Relation("MainClass", "A3a", Dependency));
-		}
-
-		/// <summary>
-		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
-		/// </summary>
-		/// <param name="type">Class type</param>
-		/// <param name="inheritances">Inherited classes</param>
-		/// <returns><see cref="ClassInfo"/></returns>
-		private static ClassInfo Class(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
-		{
-			return new ClassInfo(Modifier.Public, ClassCategory.Class, "TestNameSpace", type, inheritances);
-		}
-
-		/// <summary>
-		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
-		/// </summary>
-		/// <param name="type">Interface type</param>
-		/// <param name="inheritances">Inherited classes</param>
-		/// <returns><see cref="ClassInfo"/></returns>
-		private static ClassInfo IF(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
-		{
-			return new ClassInfo(Modifier.Public, ClassCategory.Interface, "TestNameSpace", type, inheritances);
+				Relation("MainClass", "ReturnType2", Dependency),
+				Relation("MainClass", "ArgType2", Dependency),
+				Relation("MainClass", "ReturnType3", Dependency),
+				Relation("MainClass", "ArgType3A", Dependency));
 		}
 	}
 }
