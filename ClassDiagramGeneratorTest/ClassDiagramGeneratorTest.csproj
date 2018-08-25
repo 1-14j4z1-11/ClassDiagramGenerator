@@ -54,6 +54,7 @@
     <Compile Include="Models\Diagram\RelationFactoryTest.cs" />
     <Compile Include="Models\Parser\ClassParserTest.cs" />
     <Compile Include="Models\Parser\ComponentParserTest.cs" />
+    <Compile Include="Models\Parser\SourceCodeReaderTest.cs" />
     <Compile Include="Models\TestSupport.cs" />
     <Compile Include="Models\Parser\FieldParserTest.cs" />
     <Compile Include="Models\Parser\MethodParserTest.cs" />

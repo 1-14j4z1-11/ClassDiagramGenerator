@@ -32,6 +32,10 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("static bool InOut(in object x, out string y)", true,
 				Modifier.Static, Type("bool"), "InOut", List(Arg(Type("object"), "x"), Arg(Type("string"), "y")));
 
+			// Lambda format
+			TestcaseParseMethodDefinition("public int Max(int x, int y) => (x > y) ? x : y", true,
+				Modifier.Public, Type("int"), "Max", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+
 			// C# Generic
 			TestcaseParseMethodDefinition("public bool Generic<T>(T value)", true,
 				Modifier.Public, Type("bool"), "Generic", List(Arg(Type("T"), "value")));

@@ -118,8 +118,9 @@ namespace ClassDiagramGenerator.Models.Parser
 			code = Regex.Replace(code, "[\\r\\n\\s]+", " ");
 			
 			return TextAnalyzer.SplitWithDepth(code, "{", "}")
-				.Split(";")
+				.SplitEach(";")
 				.Where(w => !string.IsNullOrWhiteSpace(w.Text))
+				.Select(w => new DepthText(w.Text.Trim(), w.Depth))
 				.ToList();
 		}
 
