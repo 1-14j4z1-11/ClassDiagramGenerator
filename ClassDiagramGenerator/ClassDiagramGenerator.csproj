@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Console\CmdArgumentFlag.cs" />
     <Compile Include="Console\CmdArgumentParser.cs" />
+    <Compile Include="Models\Diagram\CodeWriter.cs" />
     <Compile Include="Models\Diagram\DiagramGenerator.cs" />
     <Compile Include="Models\Diagram\RelationFactory.cs" />
     <Compile Include="Models\Parser\ClassParser.cs" />

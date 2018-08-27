@@ -38,12 +38,24 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <returns>Class diagram text written in PlantUML</returns>
 		public static string Generate(string title, IEnumerable<ClassInfo> classInfoList, IEnumerable<Relation> relations, Modifier accessFilter = Modifier.AllAccessLevels)
 		{
-			var builder = new StringBuilder();
-			WriteHeader(builder, title);
+			var writer = new CodeWriter(NewLine);
+			WriteHeader(writer, title);
 
-			foreach(var classInfo in classInfoList ?? Enumerable.Empty<ClassInfo>())
+			var groups = classInfoList?.GroupBy(cls => cls.NameSpace)
+				?? Enumerable.Empty<IGrouping<string, ClassInfo>>();
+
+			foreach(var group in groups)
 			{
-				WriteDiagramOfClass(builder, classInfo, accessFilter);
+				writer.Write($"package {group.Key} {{").NewLine().NewLine();
+				writer.IncreaseIndent();
+
+				foreach(var cls in group)
+				{
+					WriteClass(writer, cls, accessFilter);
+				}
+
+				writer.DecreaseIndent();
+				writer.Write("}").NewLine().NewLine();
 			}
 
 			foreach(var relation in relations ?? Enumerable.Empty<Relation>())
@@ -52,60 +64,59 @@ namespace ClassDiagramGenerator.Models.Diagram
 				if(relation.Class1 == relation.Class2)
 					continue;
 
-				WriteDiagramOfRelation(builder, relation);
+				WriteRelation(writer, relation);
 			}
 
-			WriteFooter(builder);
-			return builder.ToString();
+			WriteFooter(writer);
+			return writer.ToString();
 		}
 
 		/// <summary>
-		/// Writes header texts to <paramref name="builder"/>.
+		/// Writes header texts into <paramref name="writer"/>.
 		/// </summary>
-		/// <param name="builder"><see cref="StringBuilder"/> possessing class diagram description</param>
+		/// <param name="writer"><see cref="CodeWriter"/> into which a class diagram is written</param>
 		/// <param name="title">Title of class diagram</param>
-		private static void WriteHeader(StringBuilder builder, string title)
+		private static void WriteHeader(CodeWriter writer, string title)
 		{
-			builder.Append($"@startuml {title}").Append(NewLine)
-				.Append(NewLine)
-				.Append("skinparam classAttributeIconSize 0").Append(NewLine)
-				.Append(NewLine);
+			writer.Write($"@startuml {title}").NewLine()
+				.NewLine()
+				.Write("skinparam classAttributeIconSize 0").NewLine()
+				.NewLine();
 		}
 
 		/// <summary>
-		/// Writes footer texts to <paramref name="builder"/>.
+		/// Writes footer texts into <paramref name="writer"/>.
 		/// </summary>
-		/// <param name="builder"><see cref="StringBuilder"/> possessing class diagram description</param>
-		private static void WriteFooter(StringBuilder builder)
+		/// <param name="writer"><see cref="CodeWriter"/> into which a class diagram is written</param>
+		private static void WriteFooter(CodeWriter writer)
 		{
-			builder.Append(NewLine).Append("@enduml");
+			writer.NewLine().Write("@enduml").NewLine();
 		}
 
 		/// <summary>
-		/// Writes a class which structs class diagram to <paramref name="builder"/>.
+		/// Writes a class which structs class diagram into <paramref name="writer"/>.
 		/// <para>If <paramref name="accessFilter"/> is specified,
 		/// contents that do not correspond to the filter are not described.</para>
 		/// </summary>
-		/// <param name="builder"><see cref="StringBuilder"/> possessing class diagram description</param>
+		/// <param name="writer"><see cref="CodeWriter"/> into which a class diagram is written</param>
 		/// <param name="classInfo"><see cref="ClassInfo"/> to be written</param>
 		/// <param name="accessFilter">Access level filter</param>
-		private static void WriteDiagramOfClass(StringBuilder builder, ClassInfo classInfo, Modifier accessFilter = Modifier.AllAccessLevels)
+		private static void WriteClass(CodeWriter writer, ClassInfo classInfo, Modifier accessFilter = Modifier.AllAccessLevels)
 		{
 			if(classInfo == null)
 				throw new ArgumentNullException();
 
-			builder.Append($"package {classInfo.NameSpace} {{").Append(NewLine);
-
-			var classModifier = (classInfo.Modifier.HasFlag(Modifier.Abstract)) ? "abstract " : string.Empty;
-			builder.Append($"\t{classModifier}{ClassCategoryText(classInfo.Category)} {classInfo.Type} {{").Append(NewLine);
+			var stereoType = (classInfo.Category == ClassCategory.Struct) ? "<<struct>> " : string.Empty;
+			var modifier = (classInfo.Modifier.HasFlag(Modifier.Abstract)) ? "abstract " : string.Empty;
+			writer.Write($"{modifier}{ClassCategoryText(classInfo.Category)} {classInfo.Type} {stereoType}{{").NewLine();
+			writer.IncreaseIndent();
 
 			foreach(var field in classInfo.Fields ?? Enumerable.Empty<FieldInfo>())
 			{
 				if(!IsTargetAccessModifier(field.Modifier, accessFilter))
 					continue;
 
-				builder.Append($"\t\t{AccessSymbol(field.Modifier)} {ModifierText(field.Modifier, true)}{field.Name} : {field.Type}")
-					.Append(NewLine);
+				WriteField(writer, field);
 			}
 
 			foreach(var method in classInfo.Methods ?? Enumerable.Empty<MethodInfo>())
@@ -113,45 +124,82 @@ namespace ClassDiagramGenerator.Models.Diagram
 				if(!IsTargetAccessModifier(method.Modifier, accessFilter))
 					continue;
 
-				var args = method.Arguments?.Select(a => $"{a.Name} : {a.Type}") ?? Enumerable.Empty<string>();
-
-				builder.Append($"\t\t{AccessSymbol(method.Modifier)} ")
-					.Append($"{ModifierText(method.Modifier, true)}")
-					.Append($"{method.Name}(")
-					.Append(string.Join(", ", args))
-					.Append(")")
-					.Append($"{((method.ReturnType != null) ? " : " : "")}{method.ReturnType}")
-					.Append(NewLine);
+				WriteMethod(writer, method);
 			}
 
-			builder.Append("\t}").Append(NewLine)
-				.Append("}").Append(NewLine).Append(NewLine);
+			writer.DecreaseIndent();
+			writer.Write("}").NewLine().NewLine();
 
 			// Writes inner classes in this class
 			foreach(var innerClass in classInfo.InnerClasses)
 			{
-				WriteDiagramOfClass(builder, innerClass, accessFilter);
+				WriteClass(writer, innerClass, accessFilter);
 			}
 		}
 
 		/// <summary>
-		/// Writes a relation which structs class diagram to <paramref name="builder"/>.
+		/// Writes a field which structs class diagram into <paramref name="writer"/>.
 		/// </summary>
-		/// <param name="builder"><see cref="StringBuilder"/> possessing class diagram description</param>
+		/// <param name="writer"><see cref="CodeWriter"/> into which a class diagram is written</param>
+		/// <param name="field"><see cref="FieldInfo"/> to be written</param>
+		private static void WriteField(CodeWriter writer, FieldInfo field)
+		{
+			var stereoTypes = new List<string>();
+			Action<bool, string> addStereoTypeIf = (condition, stereoTypeString) =>
+			{
+				if(condition)
+					stereoTypes.Add(stereoTypeString);
+			};
+
+			addStereoTypeIf(field.Modifier.HasFlag(Modifier.Event), "event");
+			addStereoTypeIf(field.PropertyType.HasFlag(PropertyType.Get), "get");
+			addStereoTypeIf(field.PropertyType.HasFlag(PropertyType.Set), "set");
+			var stereoTypeText = stereoTypes.Any() ? "<<" + string.Join(",", stereoTypes) + ">> " : string.Empty;
+
+			var indexerArgs = field.IndexerArguments.Any() ? "[" + ArgumentsText(field.IndexerArguments) + "]" : string.Empty;
+
+			writer.Write($"{AccessSymbol(field.Modifier)} ")
+				.Write($"{stereoTypeText}")
+				.Write($"{ModifierText(field.Modifier, true)}")
+				.Write($"{field.Name}{indexerArgs}")
+				.Write($" : {field.Type}")
+				.NewLine();
+		}
+
+		/// <summary>
+		/// Writes a method which structs class diagram into <paramref name="writer"/>.
+		/// </summary>
+		/// <param name="writer"><see cref="CodeWriter"/> into which a class diagram is written</param>
+		/// <param name="method"><see cref="MethodInfo"/> to be written</param>
+		private static void WriteMethod(CodeWriter writer, MethodInfo method)
+		{
+			writer.Write($"{AccessSymbol(method.Modifier)} ")
+				.Write($"{ModifierText(method.Modifier, true)}")
+				.Write($"{method.Name}(")
+				.Write(ArgumentsText(method.Arguments))
+				.Write(")")
+				.Write($"{((method.ReturnType != null) ? " : " : "")}{method.ReturnType}")
+				.NewLine();
+		}
+
+		/// <summary>
+		/// Writes a relation which structs class diagram into <paramref name="writer"/>.
+		/// </summary>
+		/// <param name="writer"><see cref="CodeWriter"/> into which a class diagram is written</param>
 		/// <param name="relation"><see cref="Relation"/> to be written</param>
-		private static void WriteDiagramOfRelation(StringBuilder builder, Relation relation)
+		private static void WriteRelation(CodeWriter writer, Relation relation)
 		{
 			if(relation == null)
 				throw new ArgumentNullException();
 			
 			var arrow = Arrows[relation.Type];
 
-			builder.Append(relation.Class1)
-				.Append(" ")
-				.Append(arrow)
-				.Append(" ")
-				.Append(relation.Class2)
-				.Append(NewLine);
+			writer.Write(relation.Class1)
+				.Write(" ")
+				.Write(arrow)
+				.Write(" ")
+				.Write(relation.Class2)
+				.NewLine();
 		}
 
 		/// <summary>
@@ -164,6 +212,17 @@ namespace ClassDiagramGenerator.Models.Diagram
 		private static bool IsTargetAccessModifier(Modifier target, Modifier filter)
 		{
 			return (target & filter & Modifier.AllAccessLevels) != Modifier.None;
+		}
+
+		/// <summary>
+		/// Gets a text describing arguments.
+		/// </summary>
+		/// <param name="args">Arguments to be converted into a text</param>
+		/// <returns>Text describing arguments</returns>
+		private static string ArgumentsText(IEnumerable<ArgumentInfo> args)
+		{
+			var argsText = args?.Select(a => $"{a.Name} : {a.Type}") ?? Enumerable.Empty<string>();
+			return string.Join(", ", argsText);
 		}
 
 		/// <summary>
@@ -188,7 +247,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <summary>
 		/// Gets a text describing class category from <see cref="ClassCategory"/>.
 		/// </summary>
-		/// <param name="category">Class category</param>
+		/// <param name="category">Class category to be converted into a text</param>
 		/// <returns>Text describing class category</returns>
 		private static string ClassCategoryText(ClassCategory category)
 		{
@@ -210,7 +269,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <summary>
 		/// Gets a text describing modifier except for access level from <see cref="ClassCategory"/>.
 		/// </summary>
-		/// <param name="modifier"><see cref="Modifier"/></param>
+		/// <param name="modifier"><see cref="Modifier"/> to be converted into a text</param>
 		/// <param name="enclose">Whether enclose text with { }</param>
 		/// <returns>Text describing modifier</returns>
 		private static string ModifierText(Modifier modifier, bool enclose)
