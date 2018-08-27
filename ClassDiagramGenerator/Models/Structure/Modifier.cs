@@ -25,31 +25,33 @@ namespace ClassDiagramGenerator.Models.Structure
 
 		Internal = 1 << 2,
 
-		Private = 1 << 3,
+		Package = 1 << 3,
 
-		Static = 1 << 4,
+		Private = 1 << 4,
 
-		Abstract = 1 << 5,
+		Static = 1 << 5,
 
-		Virtual = 1 << 6,
+		Sealed = 1 << 6,
 
-		Override = 1 << 7,
+		Final = 1 << 7,
 
-		New = 1 << 8,
+		Abstract = 1 << 8,
 
-		Readonly = 1 << 9,
+		Virtual = 1 << 9,
 
-		Const = 1 << 10,
+		Override = 1 << 10,
 
-		Event = 1 << 11,
+		New = 1 << 11,
 
-		Async = 1 << 12,
+		Readonly = 1 << 12,
 
-		Final = 1 << 13,
+		Const = 1 << 13,
 
-		Package = 1 << 14,
+		Event = 1 << 14,
 
-		AllAccessLevels = Public | Protected | Internal | Private | Package,
+		Async = 1 << 15,
+
+		AllAccessLevels = Public | Protected | Internal | Package | Private,
 	}
 
 	/// <summary>
@@ -59,12 +61,14 @@ namespace ClassDiagramGenerator.Models.Structure
 	{
 		private static readonly OrderedDictionary StringMap = new OrderedDictionary()
 		{
-			[Modifier.None] = string.Empty,
 			[Modifier.Public] = "public",
 			[Modifier.Protected] = "protected",
 			[Modifier.Internal] = "internal",
+			[Modifier.Package] = "package",
 			[Modifier.Private] = "private",
 			[Modifier.Static] = "static",
+			[Modifier.Sealed] = "sealed",
+			[Modifier.Final] = "final",
 			[Modifier.Abstract] = "abstract",
 			[Modifier.Virtual] = "virtual",
 			[Modifier.Override] = "override",
@@ -73,8 +77,6 @@ namespace ClassDiagramGenerator.Models.Structure
 			[Modifier.Const] = "const",
 			[Modifier.Event] = "event",
 			[Modifier.Async] = "async",
-			[Modifier.Final] = "final",
-			[Modifier.Package] = "package",
 		};
 
 		/// <summary>
@@ -107,17 +109,20 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// <returns>String of <see cref="Modifier"/></returns>
 		public static string ToModifierString(this Modifier modifier)
 		{
+			if(modifier == Modifier.None)
+				return string.Empty;
+
 			var containedValues = new List<Modifier>();
 
-			foreach(var enumValue in Enum.GetValues(typeof(Modifier)).Cast<Modifier>())
+			foreach(var enumValue in StringMap.Keys.Cast<Modifier>())
 			{
-				if(!modifier.HasFlag(enumValue) || string.IsNullOrEmpty((string)StringMap[enumValue]))
+				if(!modifier.HasFlag(enumValue))
 					continue;
 
 				containedValues.Add(enumValue);
 			}
 
-			return string.Join(" ", containedValues.Select(m => StringMap[m]));
+			return string.Join(" ", containedValues.Select(v => StringMap[v]));
 		}
 	}
 }

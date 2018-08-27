@@ -66,7 +66,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <param name="title">Title of class diagram</param>
 		private static void WriteHeader(StringBuilder builder, string title)
 		{
-			builder.Append($"@startuml {{{title}}}").Append(NewLine)
+			builder.Append($"@startuml {title}").Append(NewLine)
 				.Append(NewLine)
 				.Append("skinparam classAttributeIconSize 0").Append(NewLine)
 				.Append(NewLine);

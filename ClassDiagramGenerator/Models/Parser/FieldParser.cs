@@ -18,10 +18,31 @@ namespace ClassDiagramGenerator.Models.Parser
 	/// </summary>
 	public class FieldParser : ComponentParser<FieldInfo>
 	{
-		// Groups : [1] Modifier, [2] Return type, [3] Field name
+		// Groups : [1] Modifier, [2] Return type, [3] Field name,
+		//          [4] Indexer's arguments includeing "[ ]", [5] Lambda arrow, [6] Default value assign
 		private static readonly Regex FieldRegex = new Regex(
 			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)({TypePattern})\\s+({NamePattern})\\s*"
-			+ $"(?:\\[\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\])?");
+			+ $"(\\[\\s*(?:{ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\])?[^=]*(=)?[^=]*(=>)?");
+
+		private static readonly Regex GetterRegex = new Regex($"^\\s*(?:{ModifierPattern}\\s+)*\\s*(get|get\\s*=>)");
+		private static readonly Regex SetterRegex = new Regex($"^\\s*(?:{ModifierPattern}\\s+)*\\s*(set|set\\s*=>)");
+
+		// -------------------
+		Func<int, string>[] field = new Func<int, string>[]
+		{
+			get => null
+		};
+
+		Func<int, string>[] Prop
+		{
+			get => null;
+		}
+
+		Action<int>[] Action1
+		{
+			get { return null; }
+		}
+		// -------------------
 
 		private readonly ClassInfo classInfo;
 
@@ -36,30 +57,13 @@ namespace ClassDiagramGenerator.Models.Parser
 
 		public override bool TryParse(SourceCodeReader reader, out FieldInfo info)
 		{
-			if(!this.TryParseDefinitionLine(reader, out info, out var depth))
-				return false;
-
-			this.ParseImplementationLines(reader, info, depth);
-			return true;
-		}
-
-		/// <summary>
-		/// Tries to parse field definition line.
-		/// </summary>
-		/// <param name="reader"><see cref="SourceCodeReader"/></param>
-		/// <param name="info">[out] Parsed <see cref="FieldInfo"/> (only succeeded in parsing)</param>
-		/// <param name="depth">[out] Depth of field definition line (only succeeded in parsing)</param>
-		/// <returns>Whether succeeded in parsing or not</returns>
-		private bool TryParseDefinitionLine(SourceCodeReader reader, out FieldInfo info, out int depth)
-		{
 			if(!reader.TryRead(out var text))
 			{
 				info = null;
-				depth = 0;
 				return false;
 			}
 
-			depth = text.Depth;
+			var depth = text.Depth;
 			var match = FieldRegex.Match(text.Text);
 
 			if(!match.Success)
@@ -69,13 +73,14 @@ namespace ClassDiagramGenerator.Models.Parser
 				return false;
 			}
 
+			var idxrArgs = match.Groups[4].Value;
 			var mod = this.ParseModifiers(match.Groups[1].Value);
 			var type = string.IsNullOrWhiteSpace(match.Groups[2].Value) ? null : ParseType(match.Groups[2].Value);
 			var name = match.Groups[3].Value;
-			var args = ParseArguments(match.Groups[4].Value);
+			var args = ParseArguments(Regex.Replace(idxrArgs, "(\\s*\\[\\s*|\\s*\\]\\s*)", string.Empty));
 
-			// Parsing is failed when parsed type name matches modifier
-			// Field regex pattern matches invalid pattern below
+			// Parsing must be treated as failure if parsed type name matches modifier,
+			// because field regex pattern matches invalid pattern below.
 			// ex) "public int" -> Type : public, FiledName : int
 			if(Modifiers.Contains(type.Name))
 			{
@@ -84,32 +89,58 @@ namespace ClassDiagramGenerator.Models.Parser
 				return false;
 			}
 
-			info = new FieldInfo(mod, name, type, args);
+			this.ParseImplementationLines(reader, depth, out var propTypeFromImpl);
+			var propType = PropertyType.None;
+			var isIndexer = !string.IsNullOrEmpty(idxrArgs);
+			var hasDefault = !string.IsNullOrEmpty(match.Groups[5].Value);
+			var hasGetter = !string.IsNullOrEmpty(match.Groups[6].Value);
 
+			if(isIndexer)
+			{
+				propType |= PropertyType.Indexer;
+			}
+			if(hasGetter)
+			{
+				propType |= PropertyType.Get;
+			}
+			if(!hasDefault)
+			{
+				// If definition line contains a default value assignment expression, this field is not a property.
+				// If this field is a property, adds a flag parsed from implementation lines.
+				propType |= propTypeFromImpl;
+			}
+
+			info = new FieldInfo(mod, name, type, propType, args);
 			return true;
 		}
-
+		
 		/// <summary>
-		/// Parse implementation lines.
+		/// Parses implementation lines.
+		/// <para>If declarations of getter or setter appears, adds <see cref="PropertyType"/> to <paramref name="propType"/>.</para>
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
-		/// <param name="info"><see cref="FieldInfo"/> to hold implementation contents</param>
 		/// <param name="definitionDepth">Depth of field definition line</param>
-		private void ParseImplementationLines(SourceCodeReader reader, FieldInfo info, int definitionDepth)
+		/// <param name="propType"><see cref="PropertyType"/> to be added getter or setter flags</param>
+		private void ParseImplementationLines(SourceCodeReader reader, int definitionDepth, out PropertyType propType)
 		{
 			var subLines = GetMoreDeepLineCount(reader, definitionDepth);
+			propType = PropertyType.None;
 
+			// Skips all implementation lines, and checks getter or setter declarations.
 			for(var i = 0; i < subLines; i++)
 			{
-				// Skip implementation lines
-				reader.TryRead(out var sub);
+				if(!reader.TryRead(out var sub) || sub.Depth != definitionDepth + 1)
+					continue;
+				
+				if(GetterRegex.IsMatch(sub.Text))
+				{
+					propType |= PropertyType.Get;
+				}
+				if(SetterRegex.IsMatch(sub.Text))
+				{
+					propType |= PropertyType.Set;
+				}
 			}
-		}
-
-		protected override Modifier ParseModifiers(string modifierText)
-		{
-			var mod = base.ParseModifiers(modifierText);
-			return mod;
 		}
 	}
 }

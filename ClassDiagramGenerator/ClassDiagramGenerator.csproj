@@ -64,6 +64,7 @@
     <Compile Include="Models\Structure\MethodInfo.cs" />
     <Compile Include="Models\Structure\Modifier.cs" />
     <Compile Include="Models\Diagram\Relation.cs" />
+    <Compile Include="Models\Structure\PropertyType.cs" />
     <Compile Include="Models\Structure\TypeInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
