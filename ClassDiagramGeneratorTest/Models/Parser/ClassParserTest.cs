@@ -64,18 +64,41 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		[TestMethod]
 		public void TestParseWithCSCode1()
 		{
-			TestcaseParseClassAll(CSharpCode1, 2, true, 12, Modifier.Public | Modifier.Static, ClassCategory.Class, Type("MainClass"),
+			var code = @"
+using System;
+
+namespace Sample1
+{
+	public static class MainClass
+	{
+		private static readonly string logText = ""Output"";
+	
+		public static void Main(string args)
+		{
+			for(var i = 0; i < 10; i++)
+			{
+				Output(i);
+			}
+		}
+	
+		public static string LogText { get => logText; } 
+	
+		private static int Output ( int x )
+		{
+			Console.WriteLine(LogText + x);
+			return x;
+		}
+	}
+}
+";
+
+			TestcaseParseClassAll(code, 2, true, 12, Modifier.Public | Modifier.Static, ClassCategory.Class, Type("MainClass"),
 				Enumerable.Empty<TypeInfo>(),
 				List(new FieldInfo(Modifier.Private | Modifier.Static | Modifier.Readonly, "logText", Type("string")),
 					new FieldInfo(Modifier.Public | Modifier.Static, "LogText", Type("string"))),
 				List(new MethodInfo(Modifier.Public | Modifier.Static, "Main", Type("void"), List(Arg(Type("string"), "args"))),
 					new MethodInfo(Modifier.Private | Modifier.Static, "Output", Type("int"), List(Arg(Type("int"), "x")))
 				));
-
-			foreach(var i in Enumerable.Range(0, TotalLineCount(CSharpCode1)).Except(new[] { 2 }))
-			{
-				TestcaseParseClassAll(CSharpCode1, i, false);
-			}
 		}
 		
 		private static void TestcaseParseClassAll(string code,

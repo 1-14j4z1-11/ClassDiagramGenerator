@@ -46,49 +46,49 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		public void TestParseFieldAll()
 		{
 			// Field
-			TestcaseParseFieldAll("int field;", 0, true, 1,
+			TestcaseParseFieldAll("int field;", true, 1,
 				Modifier.None, Type("int"), "field", PropertyType.None);
-			TestcaseParseFieldAll("int field = 0;", 0, true, 1,
+			TestcaseParseFieldAll("int field = 0;", true, 1,
 				Modifier.None, Type("int"), "field", PropertyType.None);
-			TestcaseParseFieldAll("int[] field = new [] { 1, 2 };", 0, true, 2,
+			TestcaseParseFieldAll("int[] field = new [] { 1, 2 };", true, 2,
 				Modifier.None, TypeArray("int"), "field", PropertyType.None);
 
 			// Auto property
-			TestcaseParseFieldAll("int Property{get;}", 0, true, 2,
+			TestcaseParseFieldAll("int Property{get;}", true, 2,
 				Modifier.None, Type("int"), "Property", PropertyType.Get);
-			TestcaseParseFieldAll("int Property { set; }", 0, true, 2,
+			TestcaseParseFieldAll("int Property { set; }", true, 2,
 				Modifier.None, Type("int"), "Property", PropertyType.Set);
-			TestcaseParseFieldAll("int Property { get; set; }", 0, true, 3,
+			TestcaseParseFieldAll("int Property { get; set; }", true, 3,
 				Modifier.None, Type("int"), "Property", PropertyType.Get | PropertyType.Set);
-			TestcaseParseFieldAll("int Property{set;private get;}", 0, true, 3,
+			TestcaseParseFieldAll("int Property{set;private get;}", true, 3,
 				Modifier.None, Type("int"), "Property", PropertyType.Get | PropertyType.Set);
-			TestcaseParseFieldAll("int Property { get; protected internal set; }", 0, true, 3,
+			TestcaseParseFieldAll("int Property { get; protected internal set; }", true, 3,
 				Modifier.None, Type("int"), "Property", PropertyType.Get | PropertyType.Set);
 
 			// Implemented property
-			TestcaseParseFieldAll("int Property{get => 0;}", 0, true, 2,
+			TestcaseParseFieldAll("int Property{get => 0;}", true, 2,
 				Modifier.None, Type("int"), "Property", PropertyType.Get);
-			TestcaseParseFieldAll("int Property { get => x; public set => x = value; }", 0, true, 3,
+			TestcaseParseFieldAll("int Property { get => x; public set => x = value; }", true, 3,
 				Modifier.None, Type("int"), "Property", PropertyType.Get | PropertyType.Set);
-			TestcaseParseFieldAll("int Property { get { return 0; } }", 0, true, 3,
+			TestcaseParseFieldAll("int Property { get { return 0; } }", true, 3,
 				Modifier.None, Type("int"), "Property", PropertyType.Get);
-			TestcaseParseFieldAll("int Property { get { return x; } internal set { x = value; } }", 0, true, 5,
+			TestcaseParseFieldAll("int Property { get { return x; } internal set { x = value; } }", true, 5,
 				Modifier.None, Type("int"), "Property", PropertyType.Get | PropertyType.Set);
 
 			// Indexer
-			TestcaseParseFieldAll("int this[string x]{get => values[x];}", 0, true, 2,
+			TestcaseParseFieldAll("int this[string x]{get => values[x];}", true, 2,
 				Modifier.None, Type("int"), "this", PropertyType.Get | PropertyType.Indexer, List(Arg(Type("string"), "x")));
-			TestcaseParseFieldAll("int this [ string x ] { get => values[x]; public set => values[x] = value; }", 0, true, 3,
+			TestcaseParseFieldAll("int this [ string x ] { get => values[x]; public set => values[x] = value; }", true, 3,
 				Modifier.None, Type("int"), "this", PropertyType.Get | PropertyType.Set | PropertyType.Indexer, List(Arg(Type("string"), "x")));
-			TestcaseParseFieldAll("string this[int x,int y]{get{return values[x][y];}}", 0, true, 3,
+			TestcaseParseFieldAll("string this[int x,int y]{get{return values[x][y];}}", true, 3,
 				Modifier.None, Type("string"), "this", PropertyType.Get | PropertyType.Indexer, List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
-			TestcaseParseFieldAll("string this [ int x, int y ] { get { return values[x][y]; } internal set { values[x][y] = value; } }", 0, true, 5,
+			TestcaseParseFieldAll("string this [ int x, int y ] { get { return values[x][y]; } internal set { values[x][y] = value; } }", true, 5,
 				Modifier.None, Type("string"), "this", PropertyType.Get | PropertyType.Set | PropertyType.Indexer, List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
-			
-			// Complicated cases
-			TestcaseParseFieldAll("Func<int, string>[] field = new Func<int, string>[] { get => null };", 0, true, 2,
+
+			// 'get =>' text is contained, but it is a field, not a property
+			TestcaseParseFieldAll("Func<int, string>[] field = new Func<int, string>[] { get => null };", true, 2,
 				Modifier.None, TypeArray("Func", Type("int"), Type("string")), "field", PropertyType.None);
-			TestcaseParseFieldAll("Func<int, string>[] Property { get => null; }", 0, true, 2,
+			TestcaseParseFieldAll("Func<int, string>[] Property { get => null; }", true, 2,
 				Modifier.None, TypeArray("Func", Type("int"), Type("string")), "Property", PropertyType.Get);
 		}
 
@@ -102,7 +102,6 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		}
 
 		private static void TestcaseParseFieldAll(string code,
-			int startPos,
 			bool isSuccess,
 			int? expectedReadLines = null,
 			Modifier? mod = null,
@@ -112,7 +111,6 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			IEnumerable<ArgumentInfo> indexerArgTypes = null)
 		{
 			var reader = ReaderFromCode(code);
-			Enumerable.Range(0, startPos).ToList().ForEach(_ => reader.TryRead(out var _));
 			new FieldParser(null).TryParse(reader, out var info).Is(isSuccess);
 
 			if(isSuccess)
@@ -123,11 +121,11 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				info.PropertyType.Is(propertyType);
 				info.IndexerArguments.IsCollection(indexerArgTypes ?? Enumerable.Empty<ArgumentInfo>());
 
-				reader.Position.Is(startPos + expectedReadLines.Value);
+				reader.Position.Is(expectedReadLines.Value);
 			}
 			else
 			{
-				reader.Position.Is(startPos);
+				reader.Position.Is(0);
 			}
 		}
 
@@ -139,7 +137,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			PropertyType propertyType = default(PropertyType),
 			IEnumerable<ArgumentInfo> indexerArgTypes = null)
 		{
-			TestcaseParseFieldAll(code, 0, isSuccess, 1, mod, type, fieldName, propertyType, indexerArgTypes);
+			TestcaseParseFieldAll(code, isSuccess, 1, mod, type, fieldName, propertyType, indexerArgTypes);
 		}
 	}
 }

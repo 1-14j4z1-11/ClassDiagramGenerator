@@ -15,41 +15,6 @@ namespace ClassDiagramGeneratorTest.Models
 	/// </summary>
 	public static class TestSupport
 	{
-		#region Sample codes
-
-		/// <summary>
-		/// Gets a C# sample source code 1.
-		/// </summary>
-		public static string CSharpCode1 { get; } = @"
-using System;
-
-namespace Sample1
-{
-	public static class MainClass
-	{
-		private static readonly string logText = ""Output"";
-	
-		public static void Main(string args)
-		{
-			for(var i = 0; i < 10; i++)
-			{
-				Output(i);
-			}
-		}
-	
-		public static string LogText { get => logText; } 
-	
-		private static int Output ( int x )
-		{
-			Console.WriteLine(LogText + x);
-			return x;
-		}
-	}
-}
-";
-		
-		#endregion
-
 		/// <summary>
 		/// Generates <see cref="SourceCodeReader"/> from a source code text.
 		/// </summary>
