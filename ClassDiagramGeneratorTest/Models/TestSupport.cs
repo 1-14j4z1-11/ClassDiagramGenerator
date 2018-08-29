@@ -99,7 +99,7 @@ namespace ClassDiagramGeneratorTest.Models
 		/// <returns><see cref="ClassDiagramGenerator.Models.Diagram.Relation"/></returns>
 		public static Relation Relation(string class1, string class2, RelationType type)
 		{
-			return new ClassDiagramGenerator.Models.Diagram.Relation(class1, class2, type);
+			return new Relation(class1, class2, type);
 		}
 
 		/// <summary>
@@ -111,6 +111,17 @@ namespace ClassDiagramGeneratorTest.Models
 		public static List<T> List<T>(params T[] values)
 		{
 			return values.ToList();
+		}
+
+		/// <summary>
+		/// Creates a <see cref="DepthText"/>.
+		/// </summary>
+		/// <param name="depth">Depth</param>
+		/// <param name="text">Text</param>
+		/// <returns><see cref="DepthText"/></returns>
+		public static DepthText Text(int depth, string text)
+		{
+			return new DepthText(text, depth);
 		}
 	}
 }

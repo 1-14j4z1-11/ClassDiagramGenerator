@@ -65,9 +65,13 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("internal static Func ( int  x ) ", true,
 				Modifier.Internal | Modifier.Static, null, "Func", List(Arg(Type("int"), "x")));
 
+			// Not method
 			TestcaseParseMethodDefinition("public void", false);
-			TestcaseParseMethodDefinition("public void ", false);
 			TestcaseParseMethodDefinition("public void Func", false);
+			TestcaseParseMethodDefinition("public object obj = new object()", false);
+			TestcaseParseMethodDefinition("private List<int> list = new List<int>()", false);
+			TestcaseParseMethodDefinition("private List<Srting> list = new ArrayList<>()", false);
+			TestcaseParseMethodDefinition("private List<Srting> list = new ArrayList()", false);
 		}
 
 		[TestMethod]

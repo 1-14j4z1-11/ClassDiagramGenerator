@@ -14,7 +14,7 @@ using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
 using ClassDiagramGenerator.Console;
 
-namespace UmlGenerator
+namespace ClassDiagramGenerator
 {
 	public class Program
 	{
@@ -36,7 +36,7 @@ namespace UmlGenerator
 		{
 			if(!CmdParser.TryParse(args, out var argMap))
 			{
-				Console.WriteLine(CmdParser.Usage());
+				System.Console.WriteLine(CmdParser.Usage());
 				return;
 			}
 
@@ -48,7 +48,7 @@ namespace UmlGenerator
 
 			if(lang == null)
 			{
-				Console.WriteLine(CmdParser.Usage());
+				System.Console.WriteLine(CmdParser.Usage());
 				return;
 			}
 
@@ -60,7 +60,7 @@ namespace UmlGenerator
 			}
 			catch
 			{
-				Console.WriteLine($"Could not get file list : {inputDir}");
+				System.Console.WriteLine($"Could not get file list : {inputDir}");
 				return;
 			}
 
@@ -72,7 +72,7 @@ namespace UmlGenerator
 			}
 			catch
 			{
-				Console.WriteLine($"Could not open output file : {outputFile}");
+				System.Console.WriteLine($"Could not open output file : {outputFile}");
 				return;
 			}
 		}
@@ -97,12 +97,12 @@ namespace UmlGenerator
 				}
 				catch
 				{
-					Console.WriteLine($"Skipped (could not open file) : {file}");
+					System.Console.WriteLine($"Skipped (could not open file) : {file}");
 				}
 			}
 
 			var relations = RelationFactory.CreateFromClasses(classes);
-			return DiagramGenerator.Generate(title ?? string.Empty, classes, relations, Modifier.Public);
+			return DiagramGenerator.Generate(title ?? string.Empty, classes, relations);
 		}
 
 		private class Language

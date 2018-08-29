@@ -39,9 +39,16 @@ namespace ClassDiagramGenerator.Models.Parser
 			return this.TryParseInternal(reader, string.Empty, out info);
 		}
 
-		public bool TryParseInternal(SourceCodeReader reader, string parentName, out ClassInfo info)
+		/// <summary>
+		/// Tries to parsing a class.
+		/// </summary>
+		/// <param name="reader"><see cref="SourceCodeReader"/></param>
+		/// <param name="parentClassName">Parent class name added to a parsed class</param>
+		/// <param name="info">[out] Parsed class (only succeeded in parsing)</param>
+		/// <returns>Whether succeeded in parsing or not</returns>
+		public bool TryParseInternal(SourceCodeReader reader, string parentClassName, out ClassInfo info)
 		{
-			if(!this.TryParseDefinitionLine(reader, parentName, out info, out var depth))
+			if(!this.TryParseDefinitionLine(reader, parentClassName, out info, out var depth))
 				return false;
 
 			this.ParseImplementationLines(reader, info, info.Name, depth);

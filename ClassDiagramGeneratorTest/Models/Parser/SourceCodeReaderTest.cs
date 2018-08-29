@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UnitTestSupport.MSTest;
 
 using ClassDiagramGenerator.Models.Parser;
+using static ClassDiagramGeneratorTest.Models.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
@@ -98,17 +99,6 @@ public class SampleClass
 			}
 
 			reader.TryRead(out var text).IsFalse($"Expected reader reached end of code, but read a text '{text}'");
-		}
-
-		/// <summary>
-		/// Creates a <see cref="DepthText"/>.
-		/// </summary>
-		/// <param name="depth">Depth</param>
-		/// <param name="text">Text</param>
-		/// <returns><see cref="DepthText"/></returns>
-		private static DepthText Text(int depth, string text)
-		{
-			return new DepthText(text, depth);
 		}
 	}
 }

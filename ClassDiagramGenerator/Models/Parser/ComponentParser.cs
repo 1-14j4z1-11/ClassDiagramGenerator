@@ -32,7 +32,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected static readonly string NamePattern = "[^\\s,:\\[\\]\\(\\)<>=]+";
 
 		/// <summary>Pattern string that matches type argument enclosed in &lt;&gt; (no grouping)</summary>
-		protected static readonly string TypeArgPattern = "[^:\\[\\]\\(\\)]+";
+		protected static readonly string TypeArgPattern = "[^:\\[\\]\\(\\)=]+";
 
 		/// <summary>Pattern string that matches type (no grouping)</summary>
 		protected static readonly string TypePattern = $"{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?(?:\\s*\\[\\s*\\]\\s*)?";
