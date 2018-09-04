@@ -41,7 +41,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 			var writer = new CodeWriter(NewLine);
 			WriteHeader(writer, title);
 
-			var groups = classInfoList?.GroupBy(cls => cls.NameSpace)
+			var groups = classInfoList?.GroupBy(cls => cls.Package)
 				?? Enumerable.Empty<IGrouping<string, ClassInfo>>();
 
 			foreach(var group in groups)

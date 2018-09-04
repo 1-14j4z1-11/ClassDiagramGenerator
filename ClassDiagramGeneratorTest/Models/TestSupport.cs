@@ -47,6 +47,18 @@ namespace ClassDiagramGeneratorTest.Models
 		}
 
 		/// <summary>
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
+		/// </summary>
+		/// <param name="nameSpace">Namespace of class</param>
+		/// <param name="type">Class type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
+		public static ClassInfo ClassFully(string nameSpace, TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
+		{
+			return new ClassInfo(Modifier.Public, ClassCategory.Class, nameSpace, type, inheritances);
+		}
+
+		/// <summary>
 		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
 		/// </summary>
 		/// <param name="type">Interface type</param>
@@ -55,6 +67,18 @@ namespace ClassDiagramGeneratorTest.Models
 		public static ClassInfo Interface(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
 		{
 			return new ClassInfo(Modifier.Public, ClassCategory.Interface, "TestNameSpace", type, inheritances);
+		}
+
+		/// <summary>
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
+		/// </summary>
+		/// <param name="nameSpace">Namespace of interface</param>
+		/// <param name="type">Interface type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
+		public static ClassInfo InterfaceFully(string nameSpace, TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
+		{
+			return new ClassInfo(Modifier.Public, ClassCategory.Interface, nameSpace, type, inheritances);
 		}
 
 		/// <summary>

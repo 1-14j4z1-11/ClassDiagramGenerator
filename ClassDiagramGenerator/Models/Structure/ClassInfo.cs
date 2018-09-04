@@ -21,15 +21,15 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// </summary>
 		/// <param name="modifier">Modifier</param>
 		/// <param name="category">Class category</param>
-		/// <param name="nameSpace">Namespace</param>
+		/// <param name="package">Package name or namespace</param>
 		/// <param name="type">Class type</param>
 		/// <param name="inheritedClasses">Inherited classes and interfaces</param>
 		/// <exception cref="ArgumentNullException">If <paramref name="type"/> is null.</exception>
-		public ClassInfo(Modifier modifier, ClassCategory category, string nameSpace, TypeInfo type, IEnumerable<TypeInfo> inheritedClasses)
+		public ClassInfo(Modifier modifier, ClassCategory category, string package, TypeInfo type, IEnumerable<TypeInfo> inheritedClasses)
 		{
 			this.Modifier = modifier;
 			this.Category = category;
-			this.NameSpace = nameSpace;
+			this.Package = package;
 			this.Type = type ?? throw new ArgumentNullException();
 			this.InheritedClasses = new ReadOnlyCollection<TypeInfo>(
 				new List<TypeInfo>(inheritedClasses ?? Enumerable.Empty<TypeInfo>()));
@@ -49,9 +49,9 @@ namespace ClassDiagramGenerator.Models.Structure
 		public ClassCategory Category { get; }
 
 		/// <summary>
-		/// Gets a namespace of class.
+		/// Gets a package (or namespace) of class.
 		/// </summary>
-		public string NameSpace { get; }
+		public string Package { get; }
 
 		/// <summary>
 		/// Gets a class type. (Always not null)
@@ -62,6 +62,18 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// Gets a class name.
 		/// </summary>
 		public string Name { get => this.Type?.Name; }
+
+		/// <summary>
+		/// Gets a full name consisting of package name and type name.
+		/// </summary>
+		public string FullName
+		{
+			get
+			{
+				var package = (this.Package != null) ? this.Package + "." : string.Empty;
+				return package + (this.Name ?? string.Empty);
+			}
+		}
 
 		/// <summary>
 		/// Gets inherited classes and interfaces.
@@ -86,5 +98,21 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// <para>If this have no fields, return empty list.</para>
 		/// </summary>
 		public List<FieldInfo> Fields { get; }
+
+		/// <summary>
+		/// Gets a collection of classes contained in this class (including this class itself).
+		/// </summary>
+		/// <returns>A collection of classes</returns>
+		public List<ClassInfo> GetAllClasses()
+		{
+			var classes = new List<ClassInfo>() { this };
+
+			foreach(var inner in this.InnerClasses)
+			{
+				classes.AddRange(inner.GetAllClasses());
+			}
+
+			return classes;
+		}
 	}
 }

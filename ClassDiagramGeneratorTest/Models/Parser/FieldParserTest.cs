@@ -37,6 +37,16 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Public, Type("int"), "X", PropertyType.None);
 			TestcaseParseFieldDefinition("@Annotation @Annotation(0) @Annotation( 1, 2 ) public int X", true,
 				Modifier.Public, Type("int"), "X", PropertyType.None);
+			TestcaseParseFieldDefinition("private List<int> list = new List<int>()", true,
+				Modifier.Private, Type("List", Type("int")), "list");
+			TestcaseParseFieldDefinition("private List<String> list = new ArrayList<>()", true,
+				Modifier.Private, Type("List", Type("String")), "list");
+			TestcaseParseFieldDefinition("private List<String> list = new ArrayList()", true,
+				Modifier.Private, Type("List", Type("String")), "list");
+			TestcaseParseFieldDefinition("private string[] array = new [] ", true,
+				Modifier.Private, TypeArray("string"), "array");
+			TestcaseParseFieldDefinition("private String[] array = new String[] ", true,
+				Modifier.Private, TypeArray("String"), "array");
 
 			TestcaseParseFieldDefinition("public int", false);
 			TestcaseParseFieldDefinition("public static int", false);

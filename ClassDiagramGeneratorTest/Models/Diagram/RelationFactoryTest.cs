@@ -33,6 +33,25 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 		}
 
 		[TestMethod]
+		public void TestInheritances2()
+		{
+			var relations = RelationFactory.CreateFromClasses(new[]
+			{
+				Class(Type("Outer.Inner.ClassA"), List(Type("Base1"), Type("IF1"), Type("Inner2.IF2"), Type("IF3"))),
+				ClassFully("External", Type("Base1")),
+				Interface(Type("Outer.Inner.IF1")),
+				Interface(Type("Outer.Inner2.IF2")),
+				InterfaceFully("Internal", Type("Outer.Inner.IF3"))
+			});
+			
+			relations.IsCollectionUnorderly(
+				Relation("Outer.Inner.ClassA", "Base1", Generalization),
+				Relation("Outer.Inner.ClassA", "Outer.Inner.IF1", Realization),
+				Relation("Outer.Inner.ClassA", "Outer.Inner2.IF2", Realization),
+				Relation("Outer.Inner.ClassA", "Outer.Inner.IF3", Realization));
+		}
+
+		[TestMethod]
 		public void TestNestedClasses()
 		{
 			var root = Class(Type("Root"));
@@ -47,8 +66,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			root.InnerClasses.Add(Class(Type("In2")));
 
 			var relations = RelationFactory.CreateFromClasses(new[] { root });
-
-			// All Nested relations are included regardless of whether the classes are included in RelationFactory's argument or not.
+			
 			relations.IsCollectionUnorderly(
 				Relation("In1", "Root", Nested),
 				Relation("In2", "Root", Nested),
@@ -63,21 +81,51 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 		{
 			var cls = Class(Type("MainClass"));
 			cls.Fields.AddRange(List(
-				new FieldInfo(Modifier.Public, "field1", Type("List", Type("FieldType1"))),
-				new FieldInfo(Modifier.Protected | Modifier.Readonly, "field2", Type("List", Type("Dictionary", Type("string"), Type("FieldType2")))),
-				new FieldInfo(Modifier.Private | Modifier.Const, "field3", Type("FieldType3"))
+				new FieldInfo(Modifier.Public, "field1", Type("List", Type("F1"))),
+				new FieldInfo(Modifier.Protected | Modifier.Readonly, "field2", Type("List", Type("Dictionary", Type("string"), Type("F2")))),
+				new FieldInfo(Modifier.Private | Modifier.Const, "field3", Type("F3")),
+				new FieldInfo(Modifier.Internal, "field4", Type("F4"))
 				));
 
 			var relations = RelationFactory.CreateFromClasses(new[]
 			{
 				cls,
-				Class(Type("FieldType1")),
-				Class(Type("FieldType2")),
+				Class(Type("F1")),
+				Class(Type("F2")),
+				Class(Type("F3"))
 			});
 			
 			relations.IsCollectionUnorderly(
-				Relation("MainClass", "FieldType1", Association),
-				Relation("MainClass", "FieldType2", Association));
+				Relation("MainClass", "F1", Association),
+				Relation("MainClass", "F2", Association),
+				Relation("MainClass", "F3", Association));
+		}
+
+		[TestMethod]
+		public void TestFieldRelations2()
+		{
+			var cls = Class(Type("Outer.Inner.MainClass"));
+			cls.Fields.AddRange(List(
+				new FieldInfo(Modifier.Public, "field1", Type("List", Type("External.F1"))),
+				new FieldInfo(Modifier.Protected | Modifier.Readonly, "field2", Type("List", Type("Dictionary", Type("string"), Type("Inner2.F2")))),
+				new FieldInfo(Modifier.Private | Modifier.Const, "field3", Type("External.Outer.Inner.F3")),
+				new FieldInfo(Modifier.Internal, "field4", Type("F4"))
+				));
+
+			var relations = RelationFactory.CreateFromClasses(new[]
+			{
+				cls,
+				ClassFully("External", Type("F1")),
+				Class(Type("Inner2.F2")),
+				ClassFully("External", Type("Outer.Inner.F3")),
+				ClassFully("Internal", Type("Outer.Inner.F4"))
+			});
+
+			relations.IsCollectionUnorderly(
+				Relation("Outer.Inner.MainClass", "F1", Association),
+				Relation("Outer.Inner.MainClass", "Inner2.F2", Association),
+				Relation("Outer.Inner.MainClass", "Outer.Inner.F3", Association),
+				Relation("Outer.Inner.MainClass", "Outer.Inner.F4", Association));
 		}
 
 		[TestMethod]
@@ -86,24 +134,54 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			var cls = Class(Type("MainClass"));
 			cls.Methods.AddRange(List(
 				new MethodInfo(Modifier.Public, "Method1", Type("void"), null),
-				new MethodInfo(Modifier.Protected | Modifier.Abstract, "Method2", Type("ReturnType2"), List(Arg(Type("List", Type("Dictionary", Type("string"), Type("ArgType2"))), "arg"))),
-				new MethodInfo(Modifier.Private | Modifier.Static, "Method3", Type("ReturnType3"), List(Arg(Type("ArgType3A"), "argA"), Arg(Type("ArgType3B"), "argB")))
+				new MethodInfo(Modifier.Protected | Modifier.Abstract, "Method2", Type("R2"), List(Arg(Type("List", Type("Dictionary", Type("string"), Type("A2"))), "arg"))),
+				new MethodInfo(Modifier.Private | Modifier.Static, "Method3", Type("R3"), List(Arg(Type("A3a"), "argA"), Arg(Type("A3b"), "argB")))
 				));
 
 			var relations = RelationFactory.CreateFromClasses(new[]
 			{
 				cls,
-				Class(Type("ReturnType2")),
-				Class(Type("ArgType2")),
-				Class(Type("ReturnType3")),
-				Class(Type("ArgType3A")),
+				Class(Type("R2")),
+				Class(Type("A2")),
+				Class(Type("R3")),
+				Class(Type("A3a")),
 			});
 
 			relations.IsCollectionUnorderly(
-				Relation("MainClass", "ReturnType2", Dependency),
-				Relation("MainClass", "ArgType2", Dependency),
-				Relation("MainClass", "ReturnType3", Dependency),
-				Relation("MainClass", "ArgType3A", Dependency));
+				Relation("MainClass", "R2", Dependency),
+				Relation("MainClass", "A2", Dependency),
+				Relation("MainClass", "R3", Dependency),
+				Relation("MainClass", "A3a", Dependency));
+		}
+
+		[TestMethod]
+		public void TestMethodRelations2()
+		{
+			var cls = Class(Type("Outer.Inner.MainClass"));
+			cls.Methods.AddRange(List(
+				new MethodInfo(Modifier.Public, "Method1", Type("External.R1"), null),
+				new MethodInfo(Modifier.Protected | Modifier.Abstract, "Method2", Type("Inner2.R2"), List(Arg(Type("List", Type("Dictionary", Type("string"), Type("Outer2.Inner.A2"))), "arg"))),
+				new MethodInfo(Modifier.Private | Modifier.Static, "Method3", Type("R3"), List(Arg(Type("External.Outer.Inner.A3a"), "argA"), Arg(Type("External2.Outer.Inner.A3b"), "argB")))
+				));
+
+			var relations = RelationFactory.CreateFromClasses(new[]
+			{
+				cls,
+				ClassFully("External", Type("R1")),
+				Class(Type("Inner2.R2")),
+				Class(Type("Outer2.Inner.A2")),
+				ClassFully("Internal", Type("Outer.Inner.R3")),
+				ClassFully("External", Type("Outer.Inner.A3a")),
+				ClassFully("External", Type("Outer.Inner.A3b")),
+			});
+
+			// Note that relation of A3b does not contain
+			relations.IsCollectionUnorderly(
+				Relation("Outer.Inner.MainClass", "R1", Dependency),
+				Relation("Outer.Inner.MainClass", "Inner2.R2", Dependency),
+				Relation("Outer.Inner.MainClass", "Outer2.Inner.A2", Dependency),
+				Relation("Outer.Inner.MainClass", "Outer.Inner.R3", Dependency),
+				Relation("Outer.Inner.MainClass", "Outer.Inner.A3a", Dependency));
 		}
 	}
 }

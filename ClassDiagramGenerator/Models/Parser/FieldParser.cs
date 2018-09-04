@@ -26,24 +26,6 @@ namespace ClassDiagramGenerator.Models.Parser
 
 		private static readonly Regex GetterRegex = new Regex($"^\\s*(?:{ModifierPattern}\\s+)*\\s*(get|get\\s*=>)");
 		private static readonly Regex SetterRegex = new Regex($"^\\s*(?:{ModifierPattern}\\s+)*\\s*(set|set\\s*=>)");
-
-		// -------------------
-		Func<int, string>[] field = new Func<int, string>[]
-		{
-			get => null
-		};
-
-		Func<int, string>[] Prop
-		{
-			get => null;
-		}
-
-		Action<int>[] Action1
-		{
-			get { return null; }
-		}
-		// -------------------
-
 		private readonly ClassInfo classInfo;
 
 		/// <summary>

@@ -69,9 +69,10 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("public void", false);
 			TestcaseParseMethodDefinition("public void Func", false);
 			TestcaseParseMethodDefinition("public object obj = new object()", false);
+
 			TestcaseParseMethodDefinition("private List<int> list = new List<int>()", false);
-			TestcaseParseMethodDefinition("private List<Srting> list = new ArrayList<>()", false);
-			TestcaseParseMethodDefinition("private List<Srting> list = new ArrayList()", false);
+			TestcaseParseMethodDefinition("private List<String> list = new ArrayList<>()", false);
+			TestcaseParseMethodDefinition("private List<String> list = new ArrayList()", false);
 		}
 
 		[TestMethod]
