@@ -32,7 +32,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected static readonly string NamePattern = "[^\\s,:\\[\\]\\(\\)<>=]+";
 
 		/// <summary>Pattern string that matches type argument enclosed in &lt;&gt; (no grouping)</summary>
-		protected static readonly string TypeArgPattern = "[^:\\[\\]\\(\\)]+";
+		protected static readonly string TypeArgPattern = "[^:\\[\\]\\(\\)=]+";
 
 		/// <summary>Pattern string that matches type (no grouping)</summary>
 		protected static readonly string TypePattern = $"{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?(?:\\s*\\[\\s*\\]\\s*)?";
@@ -68,15 +68,16 @@ namespace ClassDiagramGenerator.Models.Parser
 
 		/// <summary>
 		/// Parse a collection of <see cref="ArgumentInfo"/> from string.
+		/// <para>If argument is null or empty, returns a empty collection.</para>
 		/// </summary>
 		/// <param name="argText">String that indicates arguments</param>
 		/// <returns>A collection of <see cref="ArgumentInfo"/></returns>
 		protected static IEnumerable<ArgumentInfo> ParseArguments(string argText)
 		{
-			if(argText == null)
-				throw new ArgumentNullException();
+			if(string.IsNullOrEmpty(argText))
+				return Enumerable.Empty<ArgumentInfo>();
 			
-			return argText.SplitEach(",",  "<", ">", d => d == 0)
+			return argText.Split(",",  "<", ">", d => d == 0)
 				.Select(a => ArgumentRegex.Match(a))
 				.Where(m => m.Success)
 				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[4].Value), m.Groups[7].Value));
@@ -89,6 +90,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <param name="reader">Reader</param>
 		/// <param name="depth">Depth threshold (excluding self)</param>
 		/// <returns>A line count coutinuous more deep lines</returns>
+		/// <exception cref="ArgumentNullException">If <paramref name="reader"/> is null</exception>
 		protected static int GetMoreDeepLineCount(SourceCodeReader reader, int depth)
 		{
 			if(reader == null)

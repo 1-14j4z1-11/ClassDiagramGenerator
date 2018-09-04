@@ -65,23 +65,40 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("internal static Func ( int  x ) ", true,
 				Modifier.Internal | Modifier.Static, null, "Func", List(Arg(Type("int"), "x")));
 
+			// Not method
 			TestcaseParseMethodDefinition("public void", false);
-			TestcaseParseMethodDefinition("public void ", false);
 			TestcaseParseMethodDefinition("public void Func", false);
+			TestcaseParseMethodDefinition("public object obj = new object()", false);
+
+			TestcaseParseMethodDefinition("private List<int> list = new List<int>()", false);
+			TestcaseParseMethodDefinition("private List<String> list = new ArrayList<>()", false);
+			TestcaseParseMethodDefinition("private List<String> list = new ArrayList()", false);
 		}
 
 		[TestMethod]
-		public void TestParseWithCSCode1()
+		public void TestParseMethodAll()
 		{
-			TestcaseParseMethodAll(CSharpCode1, 4, true, 5, Modifier.Public | Modifier.Static, Type("void"), "Main", List(Arg(Type("string"), "args")));
-			TestcaseParseMethodAll(CSharpCode1, 11, true, 3, Modifier.Private | Modifier.Static, Type("int"), "Output", List(Arg(Type("int"), "x")));
+			TestcaseParseMethodAll(@"public static void Main(string[] args) { Console.WriteLine(""Hello world.""); }", true, 2,
+				Modifier.Public | Modifier.Static, Type("void"), "Main", List(Arg(TypeArray("string"), "args")));
 
-			foreach(var i in Enumerable.Range(0, TotalLineCount(CSharpCode1)).Except(new[] { 4, 11 }))
-			{
-				TestcaseParseMethodAll(CSharpCode1, i, false);
-			}
+			TestcaseParseMethodAll(@"
+protected virtual T SetValue<T>(string x, T value)
+{
+	for(var i = 0; i < keys.Length; i++)
+	{
+		if(keys[i] == x)
+		{
+			values[i] = value;
+			return value;
 		}
+	}
 
+	throw new ArgumentException($""Invalid Key: {x}"");
+}
+", 
+				true, 8, Modifier.Protected | Modifier.Virtual, Type("T"), "SetValue", List(Arg(Type("string"), "x"), Arg(Type("T"), "value")));
+		}
+		
 		[TestMethod]
 		public void TestParseFailure()
 		{
@@ -103,7 +120,6 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		}
 
 		private static void TestcaseParseMethodAll(string code,
-			int startPos,
 			bool isSuccess,
 			int? expectedReadLines = null,
 			Modifier? mod = null,
@@ -113,7 +129,6 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			ClassInfo parserClassInfo = null)
 		{
 			var reader = ReaderFromCode(code);
-			Enumerable.Range(0, startPos).ToList().ForEach(_ => reader.TryRead(out var _));
 
 			new MethodParser(parserClassInfo).TryParse(reader, out var info).Is(isSuccess);
 
@@ -124,11 +139,11 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				info.ReturnType.Is(returnType);
 				info.Arguments.IsCollection(argTypes ?? Enumerable.Empty<ArgumentInfo>());
 
-				reader.Position.Is(startPos + expectedReadLines.Value);
+				reader.Position.Is(expectedReadLines.Value);
 			}
 			else
 			{
-				reader.Position.Is(startPos);
+				reader.Position.Is(0);
 			}
 		}
 
@@ -140,7 +155,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			IEnumerable<ArgumentInfo> argTypes = null,
 			ClassInfo parserClassInfo = null)
 		{
-			TestcaseParseMethodAll(code, 0, isSuccess, 1, mod, returnType, methodName, argTypes, parserClassInfo);
+			TestcaseParseMethodAll(code, isSuccess, 1, mod, returnType, methodName, argTypes, parserClassInfo);
 		}
 	}
 }

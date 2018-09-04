@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UnitTestSupport.MSTest;
 
 using ClassDiagramGenerator.Models.Parser;
+using static ClassDiagramGeneratorTest.Models.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
@@ -13,15 +14,17 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		[TestMethod]
 		public void TestReader1()
 		{
-			// [Note]
-			// - Comment is removed.
-			// - String enclosed in '"' is removed.
-			TestcaseReader(@"
+			var code = @"
 // Main Funtion.
 public static void main(string[] arg)
 {
 	Console.WriteLine(""Hello world."");
-}",
+}";
+
+			// [Note]
+			// - Comment is removed.
+			// - String enclosed in '"' is removed.
+			TestcaseReader(code,
 				Text(0, "public static void main(string[] arg)"),
 				Text(1, "Console.WriteLine()"));
 		}
@@ -29,11 +32,7 @@ public static void main(string[] arg)
 		[TestMethod]
 		public void TestReader2()
 		{
-			// [Note]
-			// - Doc comments are removed.
-			// - All Single character is removed.
-			// - String enclosed in '"' is removed.
-			TestcaseReader(@"
+			var code = @"
 using System.Collections.Generic;
 
 /// SampleClass
@@ -65,7 +64,13 @@ public class SampleClass
 		// [3]
 		return sum;
 	}
-}",
+}";
+
+			// [Note]
+			// - Doc comments are removed.
+			// - All Single character is removed.
+			// - String enclosed in '"' is removed.
+			TestcaseReader(code,
 				Text(0, "using System.Collections.Generic"),
 				Text(0, "public class SampleClass"),
 				Text(1, "private const string Text1 ="),
@@ -94,17 +99,6 @@ public class SampleClass
 			}
 
 			reader.TryRead(out var text).IsFalse($"Expected reader reached end of code, but read a text '{text}'");
-		}
-
-		/// <summary>
-		/// Creates a <see cref="DepthText"/>.
-		/// </summary>
-		/// <param name="depth">Depth</param>
-		/// <param name="text">Text</param>
-		/// <returns><see cref="DepthText"/></returns>
-		private static DepthText Text(int depth, string text)
-		{
-			return new DepthText(text, depth);
 		}
 	}
 }

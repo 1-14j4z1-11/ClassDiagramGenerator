@@ -22,12 +22,14 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// <param name="modifier">Modifier</param>
 		/// <param name="name">Field name</param>
 		/// <param name="type">Filed type</param>
+		/// <param name="propertyType">Property type</param>
 		/// <param name="indexerArgs">Collection containing indexer's arguments (Indexer only)</param>
-		public FieldInfo(Modifier modifier, string name, TypeInfo type, IEnumerable<ArgumentInfo> indexerArgs = null)
+		public FieldInfo(Modifier modifier, string name, TypeInfo type, PropertyType propertyType = PropertyType.None, IEnumerable<ArgumentInfo> indexerArgs = null)
 		{
 			this.Modifier = modifier;
 			this.Name = name;
 			this.Type = type;
+			this.PropertyType = propertyType;
 			this.IndexerArguments = new ReadOnlyCollection<ArgumentInfo>(
 				new List<ArgumentInfo>(indexerArgs ?? Enumerable.Empty<ArgumentInfo>()));
 		}
@@ -46,6 +48,11 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// Gets a field type.
 		/// </summary>
 		public TypeInfo Type { get; }
+
+		/// <summary>
+		/// Gets a <see cref="PropertyType"/>.
+		/// </summary>
+		public PropertyType PropertyType { get; }
 
 		/// <summary>
 		/// Gets a list of indexer's arguments.

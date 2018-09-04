@@ -36,10 +36,22 @@ namespace ClassDiagramGenerator.Models.Parser
 
 		public override bool TryParse(SourceCodeReader reader, out ClassInfo info)
 		{
-			if(!this.TryParseDefinitionLine(reader, out info, out var depth))
+			return this.TryParseInternal(reader, string.Empty, out info);
+		}
+
+		/// <summary>
+		/// Tries to parsing a class.
+		/// </summary>
+		/// <param name="reader"><see cref="SourceCodeReader"/></param>
+		/// <param name="parentClassName">Parent class name added to a parsed class</param>
+		/// <param name="info">[out] Parsed class (only succeeded in parsing)</param>
+		/// <returns>Whether succeeded in parsing or not</returns>
+		public bool TryParseInternal(SourceCodeReader reader, string parentClassName, out ClassInfo info)
+		{
+			if(!this.TryParseDefinitionLine(reader, parentClassName, out info, out var depth))
 				return false;
 
-			this.ParseImplementationLines(reader, info, depth);
+			this.ParseImplementationLines(reader, info, info.Name, depth);
 			return true;
 		}
 
@@ -47,10 +59,11 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// Tries to parse class definition line.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
+		/// <param name="parentClassName">Parent class name added to a parsed class</param>
 		/// <param name="classInfo">[out] Parsed <see cref="ClassInfo"/> (only succeeded in parsing)</param>
 		/// <param name="depth">[out] Depth of class definition line (only succeeded in parsing)</param>
 		/// <returns>Whether succeeded in parsing or not</returns>
-		private bool TryParseDefinitionLine(SourceCodeReader reader, out ClassInfo classInfo, out int depth)
+		private bool TryParseDefinitionLine(SourceCodeReader reader, string parentClassName, out ClassInfo classInfo, out int depth)
 		{
 			if(!reader.TryRead(out var text))
 			{
@@ -70,9 +83,10 @@ namespace ClassDiagramGenerator.Models.Parser
 				return false;
 			}
 
+			var parentName = string.IsNullOrEmpty(parentClassName) ? string.Empty : parentClassName + ".";
 			var mod = this.ParseModifiers(match.Groups[1].Value);
 			var category = ParseClassCategory(match.Groups[2].Value);
-			var type = ParseType(match.Groups[3].Value);
+			var type = ParseType(parentName + match.Groups[3].Value);
 			var inheriteds = ParseInheritance(match.Groups[4].Value);
 			classInfo = new ClassInfo(mod, category, this.package, type, inheriteds);
 
@@ -84,8 +98,9 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
 		/// <param name="classInfo"><see cref="ClassInfo"/> to hold implementation contents</param>
+		/// <param name="parentClassName">Parent class name added to a parsed class</param>
 		/// <param name="definitionDepth">Depth of class definition line</param>
-		private void ParseImplementationLines(SourceCodeReader reader, ClassInfo classInfo, int definitionDepth)
+		private void ParseImplementationLines(SourceCodeReader reader, ClassInfo classInfo, string parentClassName, int definitionDepth)
 		{
 			var endOfClass = reader.Position + GetMoreDeepLineCount(reader, definitionDepth);
 			var methodParser = new MethodParser(classInfo);
@@ -104,7 +119,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				{
 					classInfo.Fields.AddRange(values);
 				}
-				else if(this.TryParse(reader, out var innerInfo))
+				else if(this.TryParseInternal(reader, parentClassName, out var innerInfo))
 				{
 					classInfo.InnerClasses.Add(innerInfo);
 				}
@@ -135,7 +150,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			// Inheritance text extracted by class definition regex contains inheritance keyword
 			text = text.Replace(":", ",").Replace("extends", ",").Replace("implements", ",");
 
-			return text.SplitEach(",", "<", ">", d => d == 0)
+			return text.Split(",", "<", ">", d => d == 0)
 				.Where(s => !string.IsNullOrWhiteSpace(s))
 				.Select(s => ParseType(s));
 		}

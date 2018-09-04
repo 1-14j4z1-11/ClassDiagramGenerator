@@ -15,41 +15,6 @@ namespace ClassDiagramGeneratorTest.Models
 	/// </summary>
 	public static class TestSupport
 	{
-		#region Sample codes
-
-		/// <summary>
-		/// Gets a C# sample source code 1.
-		/// </summary>
-		public static string CSharpCode1 { get; } = @"
-using System;
-
-namespace Sample1
-{
-	public static class MainClass
-	{
-		private static readonly string logText = ""Output"";
-	
-		public static void Main(string args)
-		{
-			for(var i = 0; i < 10; i++)
-			{
-				Output(i);
-			}
-		}
-	
-		public static string LogText { get => logText; } 
-	
-		private static int Output ( int x )
-		{
-			Console.WriteLine(LogText + x);
-			return x;
-		}
-	}
-}
-";
-		
-		#endregion
-
 		/// <summary>
 		/// Generates <see cref="SourceCodeReader"/> from a source code text.
 		/// </summary>
@@ -82,6 +47,18 @@ namespace Sample1
 		}
 
 		/// <summary>
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
+		/// </summary>
+		/// <param name="nameSpace">Namespace of class</param>
+		/// <param name="type">Class type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
+		public static ClassInfo ClassFully(string nameSpace, TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
+		{
+			return new ClassInfo(Modifier.Public, ClassCategory.Class, nameSpace, type, inheritances);
+		}
+
+		/// <summary>
 		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
 		/// </summary>
 		/// <param name="type">Interface type</param>
@@ -90,6 +67,18 @@ namespace Sample1
 		public static ClassInfo Interface(TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
 		{
 			return new ClassInfo(Modifier.Public, ClassCategory.Interface, "TestNameSpace", type, inheritances);
+		}
+
+		/// <summary>
+		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
+		/// </summary>
+		/// <param name="nameSpace">Namespace of interface</param>
+		/// <param name="type">Interface type</param>
+		/// <param name="inheritances">Inherited classes</param>
+		/// <returns><see cref="ClassInfo"/></returns>
+		public static ClassInfo InterfaceFully(string nameSpace, TypeInfo type, IEnumerable<TypeInfo> inheritances = null)
+		{
+			return new ClassInfo(Modifier.Public, ClassCategory.Interface, nameSpace, type, inheritances);
 		}
 
 		/// <summary>
@@ -134,7 +123,7 @@ namespace Sample1
 		/// <returns><see cref="ClassDiagramGenerator.Models.Diagram.Relation"/></returns>
 		public static Relation Relation(string class1, string class2, RelationType type)
 		{
-			return new ClassDiagramGenerator.Models.Diagram.Relation(class1, class2, type);
+			return new Relation(class1, class2, type);
 		}
 
 		/// <summary>
@@ -146,6 +135,17 @@ namespace Sample1
 		public static List<T> List<T>(params T[] values)
 		{
 			return values.ToList();
+		}
+
+		/// <summary>
+		/// Creates a <see cref="DepthText"/>.
+		/// </summary>
+		/// <param name="depth">Depth</param>
+		/// <param name="text">Text</param>
+		/// <returns><see cref="DepthText"/></returns>
+		public static DepthText Text(int depth, string text)
+		{
+			return new DepthText(text, depth);
 		}
 	}
 }

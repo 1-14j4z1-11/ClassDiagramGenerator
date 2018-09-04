@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Console\CmdArgumentFlag.cs" />
     <Compile Include="Console\CmdArgumentParser.cs" />
+    <Compile Include="Models\Diagram\CodeWriter.cs" />
     <Compile Include="Models\Diagram\DiagramGenerator.cs" />
     <Compile Include="Models\Diagram\RelationFactory.cs" />
     <Compile Include="Models\Parser\ClassParser.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Models\Structure\MethodInfo.cs" />
     <Compile Include="Models\Structure\Modifier.cs" />
     <Compile Include="Models\Diagram\Relation.cs" />
+    <Compile Include="Models\Structure\PropertyType.cs" />
     <Compile Include="Models\Structure\TypeInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
