@@ -12,19 +12,23 @@ using System.Threading.Tasks;
 using ClassDiagramGenerator.Models.Diagram;
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
-using ClassDiagramGenerator.Console;
+using ClassDiagramGenerator.Cui;
 
 namespace ClassDiagramGenerator
 {
 	public class Program
 	{
-		private static readonly CmdArgumentFlag InputFlag = new CmdArgumentFlag("-i");
-		private static readonly CmdArgumentFlag OutputFlag = new CmdArgumentFlag("-o");
-		private static readonly CmdArgumentFlag LangFlag = new CmdArgumentFlag("-l", "-lang");
-		private static readonly CmdArgumentParser CmdParser = new CmdArgumentParser()
-			.AddArgumentFlag(true, InputFlag, 1, "Input directory path")
-			.AddArgumentFlag(true, OutputFlag, 1, "Output file path")
-			.AddArgumentFlag(true, LangFlag, 1, "Programming language ( C# : 'cs' or 'csharp', Java : 'java' )");
+		private static readonly CmdFlag InputFlag = new CmdFlag(true, 1, "-i");
+		private static readonly CmdFlag OutputFlag = new CmdFlag(true, 1, "-o");
+		private static readonly CmdFlag LangFlag = new CmdFlag(true, 1, "-l", "-lang");
+		private static readonly CmdFlag AccessLevelFlag = new CmdFlag(false, 1, "-al", "-accesslevel");
+		private static readonly CmdFlag ExcludedClassFlag = new CmdFlag(false, 1, "-ec", "-excludedclass");
+		private static readonly CmdParser CmdParser = new CmdParser()
+			.AddFlag(InputFlag, "Input directory path")
+			.AddFlag(OutputFlag, "Output file path")
+			.AddFlag(LangFlag, "Programming language", " - C#   : 'cs' or 'csharp'", " - Java : 'java'")
+			.AddFlag(AccessLevelFlag, "Access level(s) of members written to an UML", "Default value is all access levels", "Use ',' as separator to specify multiple access levels")
+			.AddFlag(ExcludedClassFlag, "Excluded class names, which is not written to an UML", "Use ',' as separator to specify multiple classes");
 
 		private static readonly Language[] Languages = new Language[]
 		{
@@ -36,19 +40,22 @@ namespace ClassDiagramGenerator
 		{
 			if(!CmdParser.TryParse(args, out var argMap))
 			{
-				System.Console.WriteLine(CmdParser.Usage());
+				Console.WriteLine(CmdParser.Usage());
 				return;
 			}
 
 			var inputDir = argMap[InputFlag].First();
 			var outputFile = argMap[OutputFlag].First();
 			var langValue = argMap[LangFlag].First();
-
 			var lang = Languages.FirstOrDefault(l => l.MatchesCmdValue(langValue));
+			var alStr = argMap.TryGetValue(AccessLevelFlag, out var al) ? al.First() : string.Empty;
+			var accessLevel = ParseAccessLevel(alStr);
+			var ecStr = argMap.TryGetValue(ExcludedClassFlag, out var ec) ? ec.First() : string.Empty;
+			var excludedClasses = ParseClasses(ecStr);
 
 			if(lang == null)
 			{
-				System.Console.WriteLine(CmdParser.Usage());
+				Console.WriteLine(CmdParser.Usage());
 				return;
 			}
 
@@ -60,11 +67,11 @@ namespace ClassDiagramGenerator
 			}
 			catch
 			{
-				System.Console.WriteLine($"Could not get file list : {inputDir}");
+				Console.WriteLine($"Could not get file list : {inputDir}");
 				return;
 			}
 
-			var diagram = GenerateClassDiagram("class-diagram", sourceFiles, lang.Parser);
+			var diagram = GenerateClassDiagram("class-diagram", sourceFiles, lang.Parser, accessLevel, excludedClasses);
 
 			try
 			{
@@ -72,7 +79,7 @@ namespace ClassDiagramGenerator
 			}
 			catch
 			{
-				System.Console.WriteLine($"Could not open output file : {outputFile}");
+				Console.WriteLine($"Could not open output file : {outputFile}");
 				return;
 			}
 		}
@@ -83,8 +90,10 @@ namespace ClassDiagramGenerator
 		/// <param name="title">Title of class diagram</param>
 		/// <param name="filePaths">Source code paths</param>
 		/// <param name="parser">Parser to parse source codes</param>
+		/// <param name="accessLevel">Access level of members written to a class diagram</param>
+		/// <param name="excludedClasses">A collection of class names not to be written to a class diagram</param>
 		/// <returns>Class diagram described in PlantUML</returns>
-		private static string GenerateClassDiagram(string title, IEnumerable<string> filePaths, ISourceCodeParser parser)
+		private static string GenerateClassDiagram(string title, IEnumerable<string> filePaths, ISourceCodeParser parser, Modifier accessLevel, IEnumerable<string> excludedClasses)
 		{
 			var classes = new List<ClassInfo>();
 
@@ -97,12 +106,48 @@ namespace ClassDiagramGenerator
 				}
 				catch
 				{
-					System.Console.WriteLine($"Skipped (could not open file) : {file}");
+					Console.WriteLine($"Skipped (could not open file) : {file}");
 				}
 			}
 
 			var relations = RelationFactory.CreateFromClasses(classes);
-			return DiagramGenerator.Generate(title ?? string.Empty, classes, relations);
+			return PumlClassDiagramGenerator.Generate(title ?? string.Empty, classes, relations, accessLevel, excludedClasses);
+		}
+
+		/// <summary>
+		/// Parses a string describing access levels.
+		/// <para>If no access modifier is contained, return all access levels</para>
+		/// </summary>
+		/// <param name="str">A string describing access levels</param>
+		/// <returns><see cref="Modifier"/> indicating access level parsed from an argument</returns>
+		private static Modifier ParseAccessLevel(string str)
+		{
+			if(string.IsNullOrEmpty(str))
+				return Modifier.AllAccessLevels;
+
+			var words = str.Split(',', ' ', '|');
+			var modifier = Modifier.None;
+
+			foreach(var word in words)
+			{
+				modifier |= Modifiers.Parse(word);
+			}
+
+			return (modifier == Modifier.None) ? Modifier.AllAccessLevels : modifier & Modifier.AllAccessLevels;
+		}
+
+		/// <summary>
+		/// Parses a string describing class names.
+		/// <para>Returns a collection of class names, or null if argument string is null or empty.</para>
+		/// </summary>
+		/// <param name="str">A string describing class names</param>
+		/// <returns>A collection of class names parsed from an argument</returns>
+		private static IEnumerable<string> ParseClasses(string str)
+		{
+			if(string.IsNullOrEmpty(str))
+				return Enumerable.Empty<string>();
+
+			return str.Split(',', ' ', '|');
 		}
 
 		private class Language

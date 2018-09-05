@@ -13,14 +13,23 @@ using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
+	/// <summary>
+	/// The class to parse classes of C# and Java.
+	/// </summary>
 	public class ClassParser : ComponentParser<ClassInfo>
 	{
 		private static readonly IEnumerable<string> Categories = Enum.GetValues(typeof(ClassCategory)).Cast<ClassCategory>().Select(c => c.ToCategoryString());
 		private static readonly string ClassCategoryPattern = "(?:" + string.Join("|", Categories) + ")";
 
+		// Pattern string that matches type parameter enclosed in &lt;&gt; (no grouping)</summary>
+		private static readonly string TypeParamPattern = "[^:\\[\\]\\(\\)=<>]+";
+
+		// Pattern string that matches class type (Note that it differs from TypePattern, no grouping)</summary>
+		private static readonly string ClassTypePattern = $"{NamePattern}(?:\\s*<{TypeParamPattern}>\\s*)?";
+
 		// Groups : [1] Modifier, [2] Class category, [3] Class name, [4] Inherited classes
 		private static readonly Regex ClassRegex = new Regex(
-			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)({ClassCategoryPattern})\\s+({TypePattern})\\s*"
+			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)({ClassCategoryPattern})\\s+({ClassTypePattern})\\s*"
 			+ $"((?:\\s*(?::|extends|implements)\\s*(?:{TypePattern}(?:\\s*,\\s*(?:{TypePattern}))*))*)");
 
 		private readonly string package;

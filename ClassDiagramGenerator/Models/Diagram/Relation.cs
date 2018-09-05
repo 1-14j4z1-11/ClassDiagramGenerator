@@ -33,7 +33,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 	}
 
 	/// <summary>
-	/// Class that indicates relation between two classes.
+	/// The class that indicates relation between two classes.
 	/// </summary>
 	public class Relation
 	{

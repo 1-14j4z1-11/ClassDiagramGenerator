@@ -21,7 +21,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// </summary>
 		/// <param name="modifier">Modifier</param>
 		/// <param name="name">Method name</param>
-		/// <param name="returnType">Return value type</param>
+		/// <param name="returnType">Return value type, or null to indicate a constructor</param>
 		/// <param name="arguments">Collection containing arguments</param>
 		public MethodInfo(Modifier modifier, string name, TypeInfo returnType, IEnumerable<ArgumentInfo> arguments)
 		{

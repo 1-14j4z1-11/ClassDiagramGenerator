@@ -171,7 +171,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 			public ClassInfo ClassInfo { get; }
 
 			/// <summary>
-			/// Returns a value of whether this class name matches a argument <paramref name="name"/> or not.
+			/// Returns a value of whether this class name matches an argument <paramref name="name"/> or not.
 			/// </summary>
 			/// <param name="name">A class name confirmed to match this class name</param>
 			/// <returns>Whether this class name matches a argument <paramref name="name"/> or not</returns>

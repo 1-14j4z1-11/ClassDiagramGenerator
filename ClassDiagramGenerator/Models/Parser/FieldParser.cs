@@ -14,7 +14,7 @@ using ClassDiagramGenerator.Models.Structure;
 namespace ClassDiagramGenerator.Models.Parser
 {
 	/// <summary>
-	/// Class parsing a field of C# and Java.
+	/// The class to parse a field of C# and Java.
 	/// </summary>
 	public class FieldParser : ComponentParser<FieldInfo>
 	{

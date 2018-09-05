@@ -21,8 +21,8 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Public, ClassCategory.Class, Type("TestClass"));
 			TestcaseParseClassDefinition("internal class Generic1<T>", true,
 				Modifier.Internal, ClassCategory.Class, Type("Generic1", Type("T")));
-			TestcaseParseClassDefinition("class Generic2<List<T1>,T2>", true,
-				Modifier.None, ClassCategory.Class, Type("Generic2", Type("List", Type("T1")), Type("T2")));
+			TestcaseParseClassDefinition("class Generic2<T1,T2>", true,
+				Modifier.None, ClassCategory.Class, Type("Generic2", Type("T1"), Type("T2")));
 			TestcaseParseClassDefinition("protected interface Generic3< T1, T2, T3 >", true,
 				Modifier.Protected, ClassCategory.Interface, Type("Generic3", Type("T1"), Type("T2"), Type("T3")));
 			TestcaseParseClassDefinition("private struct Derived1 : IDisposable", true,
@@ -53,6 +53,14 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.None, ClassCategory.Class, Type("Derived4"), List(Type("Closable"), Type("HashMap", Type("String"), Type("Integer"))));
 			TestcaseParseClassDefinition("class Derived5 extends HashMap< String , Integer> implements Closable", true,
 				Modifier.None, ClassCategory.Class, Type("Derived5"), List(Type("HashMap", Type("String"), Type("Integer")), Type("Closable")));
+
+			// Type argument appears twice
+			TestcaseParseClassDefinition("class MyList<T> : List<T>", true,
+				Modifier.None, ClassCategory.Class, Type("MyList", Type("T")), List(Type("List", Type("T"))));
+			TestcaseParseClassDefinition("class MyList<T> extends List<T>", true,
+				Modifier.None, ClassCategory.Class, Type("MyList", Type("T")), List(Type("List", Type("T"))));
+			TestcaseParseClassDefinition("class MyList<T> implements List<T>", true,
+				Modifier.None, ClassCategory.Class, Type("MyList", Type("T")), List(Type("List", Type("T"))));
 
 			TestcaseParseClassDefinition("public static TestClass", false);
 			TestcaseParseClassDefinition("public TestClass", false);

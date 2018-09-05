@@ -12,7 +12,10 @@ using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Diagram
 {
-	public static class DiagramGenerator
+	/// <summary>
+	/// The class to generate a class diagram written in PlantUML.
+	/// </summary>
+	public static class PumlClassDiagramGenerator
 	{
 		private const string NewLine = "\r\n";
 		private static Dictionary<RelationType, string> Arrows = new Dictionary<RelationType, string>()
@@ -35,8 +38,9 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <param name="classInfoList">Classes to be included in a class diagram</param>
 		/// <param name="relations">Relations to be included in a class diagram</param>
 		/// <param name="accessFilter">Access level filter</param>
+		/// <param name="excludedClasses">A collection of class names not to be written to a class diagram</param>
 		/// <returns>Class diagram text written in PlantUML</returns>
-		public static string Generate(string title, IEnumerable<ClassInfo> classInfoList, IEnumerable<Relation> relations, Modifier accessFilter = Modifier.AllAccessLevels)
+		public static string Generate(string title, IEnumerable<ClassInfo> classInfoList, IEnumerable<Relation> relations, Modifier accessFilter = Modifier.AllAccessLevels, IEnumerable<string> excludedClasses = null)
 		{
 			var writer = new CodeWriter(NewLine);
 			WriteHeader(writer, title);
@@ -51,7 +55,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 
 				foreach(var cls in group)
 				{
-					WriteClass(writer, cls, accessFilter);
+					WriteClass(writer, cls, accessFilter, excludedClasses);
 				}
 
 				writer.DecreaseIndent();
@@ -64,7 +68,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 				if(relation.Class1 == relation.Class2)
 					continue;
 
-				WriteRelation(writer, relation);
+				WriteRelation(writer, relation, excludedClasses);
 			}
 
 			WriteFooter(writer);
@@ -101,10 +105,14 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <param name="writer"><see cref="CodeWriter"/> into which a class diagram is written</param>
 		/// <param name="classInfo"><see cref="ClassInfo"/> to be written</param>
 		/// <param name="accessFilter">Access level filter</param>
-		private static void WriteClass(CodeWriter writer, ClassInfo classInfo, Modifier accessFilter = Modifier.AllAccessLevels)
+		/// <param name="excludedClasses">A collection of class names not to be written to a class diagram</param>
+		private static void WriteClass(CodeWriter writer, ClassInfo classInfo, Modifier accessFilter, IEnumerable<string> excludedClasses)
 		{
 			if(classInfo == null)
 				throw new ArgumentNullException();
+
+			if(excludedClasses?.Contains(classInfo.Name) ?? false)
+				return;
 
 			var stereoType = (classInfo.Category == ClassCategory.Struct) ? "<<struct>> " : string.Empty;
 			var modifier = (classInfo.Modifier.HasFlag(Modifier.Abstract)) ? "abstract " : string.Empty;
@@ -133,7 +141,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 			// Writes inner classes in this class
 			foreach(var innerClass in classInfo.InnerClasses)
 			{
-				WriteClass(writer, innerClass, accessFilter);
+				WriteClass(writer, innerClass, accessFilter, excludedClasses);
 			}
 		}
 
@@ -187,11 +195,15 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// </summary>
 		/// <param name="writer"><see cref="CodeWriter"/> into which a class diagram is written</param>
 		/// <param name="relation"><see cref="Relation"/> to be written</param>
-		private static void WriteRelation(CodeWriter writer, Relation relation)
+		/// <param name="excludedClasses">A collection of class names not to be written to a class diagram</param>
+		private static void WriteRelation(CodeWriter writer, Relation relation, IEnumerable<string> excludedClasses)
 		{
 			if(relation == null)
 				throw new ArgumentNullException();
-			
+
+			if(excludedClasses?.Any(c => (c == relation.Class1) || (c == relation.Class2)) ?? false)
+				return;
+
 			var arrow = Arrows[relation.Type];
 
 			writer.Write(relation.Class1)
