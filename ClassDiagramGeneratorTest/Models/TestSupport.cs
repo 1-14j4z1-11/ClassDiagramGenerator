@@ -16,7 +16,7 @@ namespace ClassDiagramGeneratorTest.Models
 	public static class TestSupport
 	{
 		/// <summary>
-		/// Generates <see cref="SourceCodeReader"/> from a source code text.
+		/// Generates a <see cref="SourceCodeReader"/> from a source code text.
 		/// </summary>
 		/// <param name="code">Source code text</param>
 		/// <returns><see cref="SourceCodeReader"/></returns>
@@ -36,7 +36,7 @@ namespace ClassDiagramGeneratorTest.Models
 		}
 
 		/// <summary>
-		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
+		/// Creates a <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
 		/// </summary>
 		/// <param name="type">Class type</param>
 		/// <param name="inheritances">Inherited classes</param>
@@ -47,7 +47,7 @@ namespace ClassDiagramGeneratorTest.Models
 		}
 
 		/// <summary>
-		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
+		/// Creates a <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Class"/>.
 		/// </summary>
 		/// <param name="nameSpace">Namespace of class</param>
 		/// <param name="type">Class type</param>
@@ -59,7 +59,7 @@ namespace ClassDiagramGeneratorTest.Models
 		}
 
 		/// <summary>
-		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
+		/// Creates a <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
 		/// </summary>
 		/// <param name="type">Interface type</param>
 		/// <param name="inheritances">Inherited classes</param>
@@ -70,7 +70,7 @@ namespace ClassDiagramGeneratorTest.Models
 		}
 
 		/// <summary>
-		/// Creates <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
+		/// Creates a <see cref="ClassInfo"/> whose category is <see cref="ClassCategory.Interface"/>.
 		/// </summary>
 		/// <param name="nameSpace">Namespace of interface</param>
 		/// <param name="type">Interface type</param>
@@ -104,7 +104,7 @@ namespace ClassDiagramGeneratorTest.Models
 		}
 
 		/// <summary>
-		/// Creates <see cref="ArgumentInfo"/>.
+		/// Creates an <see cref="ArgumentInfo"/>.
 		/// </summary>
 		/// <param name="type"><see cref="TypeInfo"/></param>
 		/// <param name="name">Argument name</param>
@@ -115,19 +115,19 @@ namespace ClassDiagramGeneratorTest.Models
 		}
 
 		/// <summary>
-		/// Creates <see cref="ClassDiagramGenerator.Models.Diagram.Relation"/>.
+		/// Creates a <see cref="PlainRelation"/>.
 		/// </summary>
 		/// <param name="class1">Class name 1</param>
 		/// <param name="class2">Class name 2</param>
 		/// <param name="type">Relation type</param>
-		/// <returns><see cref="ClassDiagramGenerator.Models.Diagram.Relation"/></returns>
-		public static Relation Relation(string class1, string class2, RelationType type)
+		/// <returns><see cref="PlainRelation"/></returns>
+		public static PlainRelation Relation(string class1, string class2, RelationType type)
 		{
-			return new Relation(class1, class2, type);
+			return new PlainRelation(class1, class2, type);
 		}
 
 		/// <summary>
-		/// Creates <see cref="List{T}"/>.
+		/// Creates a <see cref="List{T}"/>.
 		/// </summary>
 		/// <typeparam name="T">Contents type in List</typeparam>
 		/// <param name="values">Contents in List</param>

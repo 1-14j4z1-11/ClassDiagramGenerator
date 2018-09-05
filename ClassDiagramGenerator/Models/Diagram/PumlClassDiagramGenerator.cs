@@ -201,16 +201,16 @@ namespace ClassDiagramGenerator.Models.Diagram
 			if(relation == null)
 				throw new ArgumentNullException();
 
-			if(excludedClasses?.Any(c => (c == relation.Class1) || (c == relation.Class2)) ?? false)
+			if(excludedClasses?.Any(c => (c == relation.Class1.Name) || (c == relation.Class2.Name)) ?? false)
 				return;
 
 			var arrow = Arrows[relation.Type];
 
-			writer.Write(relation.Class1)
+			writer.Write(relation.Class1.Name)
 				.Write(" ")
 				.Write(arrow)
 				.Write(" ")
-				.Write(relation.Class2)
+				.Write(relation.Class2.Name)
 				.NewLine();
 		}
 
@@ -236,7 +236,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 			var argsText = args?.Select(a => $"{a.Name} : {a.Type}") ?? Enumerable.Empty<string>();
 			return string.Join(", ", argsText);
 		}
-
+		
 		/// <summary>
 		/// Gets a symbol describing access level from <see cref="Modifier"/>.
 		/// </summary>

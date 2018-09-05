@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassDiagramGenerator.Models.Structure;
 using static ClassDiagramGenerator.Models.Diagram.RelationType;
 
 namespace ClassDiagramGenerator.Models.Diagram
@@ -52,10 +53,10 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="class1">Class name 1</param>
-		/// <param name="class2">Class name 2</param>
+		/// <param name="class1"><see cref="ClassInfo"/> 1</param>
+		/// <param name="class2"><see cref="ClassInfo"/> 2</param>
 		/// <param name="type"><see cref="RelationType"/> from <see cref="class1"/> to <see cref="class2"/></param>
-		public Relation(string class1, string class2, RelationType type)
+		public Relation(ClassInfo class1, ClassInfo class2, RelationType type)
 		{
 			this.Class1 = class1 ?? throw new ArgumentNullException();
 			this.Class2 = class2 ?? throw new ArgumentNullException();
@@ -63,14 +64,14 @@ namespace ClassDiagramGenerator.Models.Diagram
 		}
 
 		/// <summary>
-		/// Gets a Class name 1.
+		/// Gets a <see cref="ClassInfo"/>1, which is a relation source.
 		/// </summary>
-		public string Class1 { get; }
+		public ClassInfo Class1 { get; }
 
 		/// <summary>
-		/// Gets a Class name 2.
+		/// Gets a <see cref="ClassInfo"/>2, which is a relation destination.
 		/// </summary>
-		public string Class2 { get; }
+		public ClassInfo Class2 { get; }
 
 		/// <summary>
 		/// Gets a <see cref="RelationType"/> from <see cref="class1"/> to <see cref="class2"/>.
@@ -89,7 +90,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 			if(relations == null)
 				throw new ArgumentNullException();
 			
-			return relations.Where(r => (r.Class1 == this.Class1) && (r.Class2 == this.Class2))
+			return relations.Where(r => r.Class1.Equals(this.Class1) && r.Class2.Equals(this.Class2))
 				.Where(r => RedundantMap[this.Type].Contains(r.Type));
 		}
 
@@ -98,8 +99,8 @@ namespace ClassDiagramGenerator.Models.Diagram
 			if(!(obj is Relation other))
 				return false;
 
-			return (this.Class1 == other.Class1)
-				&& (this.Class2 == other.Class2)
+			return this.Class1.Equals(other.Class1)
+				&& this.Class2.Equals(other.Class2)
 				&& (this.Type == other.Type);
 		}
 

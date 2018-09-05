@@ -23,46 +23,46 @@ namespace ClassDiagramGenerator.Models.Diagram
 		public static IEnumerable<Relation> CreateFromClasses(IEnumerable<ClassInfo> classes)
 		{
 			var relations = new HashSet<Relation>();
-			var allClassNames = classes.SelectMany(c => c.GetAllClasses().Select(c0 => new NameInfo(c0))).ToList();
+			var classSearcher = new ClassSearcher(classes.SelectMany(c => c.GetAllClasses()));
 
 			foreach(var cls in classes)
 			{
 				// Inheritance
-				foreach(var inheritedName in cls.InheritedClasses.Select(c => c.Name))
+				foreach(var inheritedType in cls.InheritedClasses)
 				{
-					var inheritedInfo = SearchClassName(inheritedName, allClassNames);
+					var inheritedClass = classSearcher.Search(inheritedType);
 
-					if(inheritedInfo == null)
+					if(inheritedClass == null)
 						continue;
 
-					var type = (inheritedInfo.ClassInfo.Category == ClassCategory.Interface) ? RelationType.Realization : RelationType.Generalization;
-					relations.Add(new Relation(cls.Name, inheritedInfo.ClassName, type));
+					var type = (inheritedClass.Category == ClassCategory.Interface) ? RelationType.Realization : RelationType.Generalization;
+					relations.Add(new Relation(cls, inheritedClass, type));
 				}
 
 				// Inner classes
 				GetNestedRelationsRecursively(cls, relations);
 				
 				// Types used in fields -> Association
-				foreach(var typeName in cls.Fields.Select(f => f.GetRelatedTypeNames()).SelectMany(t => t))
+				foreach(var type in cls.Fields.Select(f => f.GetRelatedTypes()).SelectMany(t => t))
 				{
-					var typeInfo = SearchClassName(typeName, allClassNames);
+					var relatedClass = classSearcher.Search(type);
 
-					if(typeInfo == null)
+					if(relatedClass == null)
 						continue;
 
-					relations.Add(new Relation(cls.Name, typeInfo.ClassName, RelationType.Association));
+					relations.Add(new Relation(cls, relatedClass, RelationType.Association));
 				}
 
 				// Types used in methods -> Dependency
-				foreach(var typeName in cls.Methods.Select(m => m.GetRelatedTypeNames()).SelectMany(t => t))
+				foreach(var type in cls.Methods.Select(m => m.GetRelatedTypes()).SelectMany(t => t))
 				{
-					var typeInfo = SearchClassName(typeName, allClassNames);
+					var relatedClass = classSearcher.Search(type);
 
-					if(typeInfo == null)
+					if(relatedClass == null)
 						continue;
 
 					// Uses a corresponding type name in the ClassInfo collection, instead of using a type name described in the function definition.
-					relations.Add(new Relation(cls.Name, typeInfo.ClassName, RelationType.Dependency));
+					relations.Add(new Relation(cls, relatedClass, RelationType.Dependency));
 				}
 			}
 
@@ -83,24 +83,11 @@ namespace ClassDiagramGenerator.Models.Diagram
 
 			foreach(var innerClass in parentClass.InnerClasses)
 			{
-				results.Add(new Relation(innerClass.Name, parentClass.Name, RelationType.Nested));
+				results.Add(new Relation(innerClass, parentClass, RelationType.Nested));
 				GetNestedRelationsRecursively(innerClass, results);
 			}
 		}
-
-		/// <summary>
-		/// Returns a <see cref="NameInfo"/> that matches <paramref name="targetName"/> included in <paramref name="names"/>.
-		/// <para>If no class name matching the argument '<paramref name="targetName"/>' found, returns null.</para>
-		/// <para>If <paramref name = "targetName" /> partially matches one of the <paramref name="names"/>, returns it.</para>
-		/// </summary>
-		/// <param name="targetName">Class name confirmed to be included in <paramref name="names"/></param>
-		/// <param name="names">Collection of class names</param>
-		/// <returns>A value of whether <paramref name="targetName"/> is contained in <paramref name="names"/> or not</returns>
-		private static NameInfo SearchClassName(string targetName, IEnumerable<NameInfo> names)
-		{
-			return names.FirstOrDefault(n => n.IsMatch(targetName));
-		}
-
+		
 		/// <summary>
 		/// Removes Redundant ralations.
 		/// </summary>
@@ -123,71 +110,57 @@ namespace ClassDiagramGenerator.Models.Diagram
 			}
 		}
 
-		/// <summary>
-		/// The class possessing name information (and class information itself).
-		/// </summary>
-		private class NameInfo
+		private class ClassSearcher
 		{
+			private readonly IEnumerable<ClassInfo> classes;
+
 			/// <summary>
 			/// Constructor.
 			/// </summary>
-			/// <param name="classInfo"></param>
-			public NameInfo(ClassInfo classInfo)
+			/// <param name="classes">A collection of <see cref="ClassInfo"/></param>
+			public ClassSearcher(IEnumerable<ClassInfo> classes)
 			{
-				this.ClassInfo = classInfo;
+				this.classes = classes ?? throw new ArgumentNullException();
 			}
 
 			/// <summary>
-			/// Gets a class name.
+			/// Searches a <see cref="ClassInfo"/> matched with an argument from this instance.
+			/// <para>If no matched <see cref="ClassInfo"/> is found, returns null.</para>
 			/// </summary>
-			public string ClassName
+			/// <param name="type">A target <see cref="TypeInfo"/> to be searched</param>
+			/// <returns>A <see cref="ClassInfo"/> matched with an argument</returns>
+			public ClassInfo Search(TypeInfo type)
 			{
-				get => this.ClassInfo.Name ?? string.Empty;
-			}
+				if(type == null)
+					return null;
 
-			/// <summary>
-			/// Gets a package name or namespace.
-			/// </summary>
-			public string PackageName
-			{
-				get => this.ClassInfo.Package ?? string.Empty;
-			}
-
-			/// <summary>
-			/// Gets a full name of this class name.
-			/// </summary>
-			public string FullName
-			{
-				get
+				foreach(var cls in this.classes)
 				{
-					var package = (this.PackageName != null) ? this.PackageName + "." : string.Empty;
-					return package + (this.ClassName ?? string.Empty);
+					if(IsNameMached(type, cls))
+						return cls;
 				}
+
+				return null;
 			}
 
 			/// <summary>
-			/// Gets a <see cref="ClassInfo"/>.
+			/// Returns a value whether <paramref name="typeInfo"/> name and <paramref name="classInfo"/> name are the same or not.
 			/// </summary>
-			public ClassInfo ClassInfo { get; }
-
-			/// <summary>
-			/// Returns a value of whether this class name matches an argument <paramref name="name"/> or not.
-			/// </summary>
-			/// <param name="name">A class name confirmed to match this class name</param>
-			/// <returns>Whether this class name matches a argument <paramref name="name"/> or not</returns>
-			public bool IsMatch(string name)
+			/// <param name="typeInfo"><see cref="TypeInfo"/></param>
+			/// <param name="classInfo"><see cref="ClassInfo"/></param>
+			/// <returns>Whether <paramref name="typeInfo"/> name and <paramref name="classInfo"/> name are the same or not</returns>
+			private static bool IsNameMached(TypeInfo typeInfo, ClassInfo classInfo)
 			{
-				if(name == null)
-					return false;
+				var package = (classInfo.Package != null) ? classInfo.Package + "." : string.Empty;
+				var exactName = package + (classInfo.Type?.ExactName ?? string.Empty);
+				var clsSegs = exactName.Split('.').Reverse().ToList();
+				var argSegs = typeInfo.ExactName.Split('.').Reverse().ToList();
+				var length = Math.Min(clsSegs.Count, argSegs.Count);
 
-				var thisSegs = this.FullName.Split('.').Reverse().ToList();
-				var argSegs = name.Split('.').Reverse().ToList();
-				var length = Math.Min(thisSegs.Count, argSegs.Count);
-				
 				// Confirms all segments of class name (included in shorter one) matches other's with reverse order.
 				for(var i = 0; i < length; i++)
 				{
-					if(thisSegs[i] != argSegs[i])
+					if(clsSegs[i] != argSegs[i])
 						return false;
 				}
 

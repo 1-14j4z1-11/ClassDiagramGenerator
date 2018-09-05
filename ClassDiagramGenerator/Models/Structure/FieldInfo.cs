@@ -61,14 +61,14 @@ namespace ClassDiagramGenerator.Models.Structure
 		public IReadOnlyList<ArgumentInfo> IndexerArguments { get; }
 
 		/// <summary>
-		/// Returns a collection of type names related with this field.
+		/// Returns a collection of types related with this field.
 		/// </summary>
-		/// <returns>A collection of type names related with this field</returns>
-		public IEnumerable<string> GetRelatedTypeNames()
+		/// <returns>A collection of types related with this field</returns>
+		public IEnumerable<TypeInfo> GetRelatedTypes()
 		{
-			var allTypeNames = new List<string>(this.Type.GetContainedTypeNames());
-			allTypeNames.AddRange(this.IndexerArguments.Select(a => a.Type.GetContainedTypeNames()).SelectMany(t => t));
-			return allTypeNames;
+			var allTypes = new List<TypeInfo>(this.Type.GetContainedTypes());
+			allTypes.AddRange(this.IndexerArguments.Select(a => a.Type.GetContainedTypes()).SelectMany(t => t));
+			return allTypes;
 		}
 
 		public override bool Equals(object obj)
