@@ -15,7 +15,7 @@ namespace ClassDiagramGenerator.Models.Parser
 {
 	public class EnumValuesParser : ComponentParser<IEnumerable<FieldInfo>>
 	{
-		private static readonly Regex EnumValueRegex = new Regex($"(?:({NamePattern})(?:\\s*=\\s*{NamePattern})?)");
+		private static readonly Regex EnumValueRegex = new Regex($"({NamePattern})(?:\\s*=\\s*{NamePattern})?");
 		private readonly ClassInfo classInfo;
 
 		/// <summary>

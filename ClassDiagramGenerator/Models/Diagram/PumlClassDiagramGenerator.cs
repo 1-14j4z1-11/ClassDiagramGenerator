@@ -48,12 +48,12 @@ namespace ClassDiagramGenerator.Models.Diagram
 			var groups = classInfoList?.GroupBy(cls => cls.Package)
 				?? Enumerable.Empty<IGrouping<string, ClassInfo>>();
 
-			foreach(var group in groups)
+			foreach(var group in groups.OrderBy(g => g.Key))
 			{
 				writer.Write($"package {group.Key} {{").NewLine().NewLine();
 				writer.IncreaseIndent();
 
-				foreach(var cls in group)
+				foreach(var cls in group.OrderBy(c => c.Name))
 				{
 					WriteClass(writer, cls, accessFilter, excludedClasses);
 				}
