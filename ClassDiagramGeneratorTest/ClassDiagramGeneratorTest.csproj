@@ -53,6 +53,7 @@
     <Compile Include="Models\Diagram\PumlClassDiagramGeneratorTest.cs" />
     <Compile Include="Models\Parser\ClassParserTest.cs" />
     <Compile Include="Models\Parser\ComponentParserTest.cs" />
+    <Compile Include="Models\Parser\EnumValuesParserTest.cs" />
     <Compile Include="Models\Parser\SourceCodeReaderTest.cs" />
     <Compile Include="Models\PlainRelation.cs" />
     <Compile Include="Models\TestSupport.cs" />

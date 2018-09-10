@@ -108,7 +108,54 @@ namespace Sample1
 					new MethodInfo(Modifier.Private | Modifier.Static, "Output", Type("int"), List(Arg(Type("int"), "x")))
 				));
 		}
-		
+
+		[TestMethod]
+		public void TestParseWithJavaCode1()
+		{
+			var code = @"
+public enum Values
+{
+	A(1, ""a""),
+	B(2, ""a""),
+	C(4, ""a""),
+	D(8, ""a"");
+
+	private final int value;
+	private final String str;
+	
+	private Values(int value, String str)
+	{
+		this.value = value;
+		this.str = str;
+	}
+
+	public int getValue()
+	{
+		return this.value;
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.str;
+	}
+}
+";
+
+			TestcaseParseClassAll(code, 0, true, 11, Modifier.Public, ClassCategory.Enum, Type("Values"),
+				Enumerable.Empty<TypeInfo>(),
+				List(new FieldInfo(Modifier.Public | Modifier.Static, "A", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "B", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "C", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "D", Type("int")),
+					new FieldInfo(Modifier.Private | Modifier.Final, "value", Type("int")),
+					new FieldInfo(Modifier.Private | Modifier.Final, "str", Type("String"))),
+				List(new MethodInfo(Modifier.Private, "Values", null, List(Arg(Type("int"), "value"), Arg(Type("String"), "str"))),
+					new MethodInfo(Modifier.Public, "getValue", Type("int"), List<ArgumentInfo>()),
+					new MethodInfo(Modifier.Public, "toString", Type("String"), List<ArgumentInfo>())
+				));
+		}
+
 		private static void TestcaseParseClassAll(string code,
 			int startPos,
 			bool isSuccess,

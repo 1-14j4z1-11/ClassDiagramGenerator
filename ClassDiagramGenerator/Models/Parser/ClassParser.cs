@@ -114,7 +114,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			var endOfClass = reader.Position + GetMoreDeepLineCount(reader, definitionDepth);
 			var methodParser = new MethodParser(classInfo);
 			var fieldParser = new FieldParser(classInfo);
-			var enumParser = new EnumValuesParser(classInfo);
+			var enumParser = new EnumValuesParser(classInfo, definitionDepth);
 
 			while(reader.Position < endOfClass)
 			{
@@ -124,11 +124,7 @@ namespace ClassDiagramGenerator.Models.Parser
 					continue;
 				}
 
-				if((classInfo.Category == ClassCategory.Enum) && enumParser.TryParse(reader, out var values))
-				{
-					classInfo.Fields.AddRange(values);
-				}
-				else if(this.TryParseInternal(reader, parentClassName, out var innerInfo))
+				if(this.TryParseInternal(reader, parentClassName, out var innerInfo))
 				{
 					classInfo.InnerClasses.Add(innerInfo);
 				}
@@ -138,8 +134,13 @@ namespace ClassDiagramGenerator.Models.Parser
 				}
 				else if(fieldParser.TryParse(reader, out var fieldInfo))
 				{
-					// Parsing filed is executed after parsing method because field pattern also matches method
+					// Parsing filed is executed after trying to parse method because field pattern also matches method
 					classInfo.Fields.Add(fieldInfo);
+				}
+				else if((classInfo.Category == ClassCategory.Enum) && enumParser.TryParse(reader, out var values))
+				{
+					// Parsing enum values is executed after trying to parse method and field
+					classInfo.Fields.AddRange(values);
 				}
 				else
 				{
