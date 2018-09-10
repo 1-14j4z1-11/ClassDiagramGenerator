@@ -14,7 +14,7 @@ using ClassDiagramGenerator.Models.Structure;
 namespace ClassDiagramGenerator.Models.Parser
 {
 	/// <summary>
-	/// Class parsing a method of C# and Java.
+	/// The class to parse a method of C# and Java.
 	/// </summary>
 	public class MethodParser : ComponentParser<MethodInfo>
 	{

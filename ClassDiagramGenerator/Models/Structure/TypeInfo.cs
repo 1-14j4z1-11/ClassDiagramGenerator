@@ -61,14 +61,22 @@ namespace ClassDiagramGenerator.Models.Structure
 		public IReadOnlyList<TypeInfo> TypeArgs { get; }
 
 		/// <summary>
-		/// Gets a list containing all type names that make up this type (including this type name).
+		/// Gets a exact type name consisting of the type name and the number of type parameters.
 		/// </summary>
-		/// <returns>A list containing all type names that make up this type (including this type name)</returns>
-		public IReadOnlyList<string> GetContainedTypeNames()
+		public string ExactName
 		{
-			var typeNames = new List<string>() { this.Name };
-			typeNames.AddRange(this.TypeArgs.Select(t => t.GetContainedTypeNames()).SelectMany(t => t));
-			return new ReadOnlyCollection<string>(typeNames);
+			get => this.Name + ((this.TypeArgs.Count > 0) ? $"`{this.TypeArgs.Count}" : string.Empty);
+		}
+
+		/// <summary>
+		/// Gets a collection containing all <see cref="TypeInfo"/>(s) that make up this type (including this type itself).
+		/// </summary>
+		/// <returns>A collection containing all <see cref="TypeInfo"/>(s) that make up this type (including this type itself)</returns>
+		public IEnumerable<TypeInfo> GetContainedTypes()
+		{
+			var types = new List<TypeInfo>() { this };
+			types.AddRange(this.TypeArgs.Select(t => t.GetContainedTypes()).SelectMany(t => t));
+			return types;
 		}
 
 		public override bool Equals(object obj)

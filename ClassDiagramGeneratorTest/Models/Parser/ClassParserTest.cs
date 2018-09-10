@@ -21,8 +21,8 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Public, ClassCategory.Class, Type("TestClass"));
 			TestcaseParseClassDefinition("internal class Generic1<T>", true,
 				Modifier.Internal, ClassCategory.Class, Type("Generic1", Type("T")));
-			TestcaseParseClassDefinition("class Generic2<List<T1>,T2>", true,
-				Modifier.None, ClassCategory.Class, Type("Generic2", Type("List", Type("T1")), Type("T2")));
+			TestcaseParseClassDefinition("class Generic2<T1,T2>", true,
+				Modifier.None, ClassCategory.Class, Type("Generic2", Type("T1"), Type("T2")));
 			TestcaseParseClassDefinition("protected interface Generic3< T1, T2, T3 >", true,
 				Modifier.Protected, ClassCategory.Interface, Type("Generic3", Type("T1"), Type("T2"), Type("T3")));
 			TestcaseParseClassDefinition("private struct Derived1 : IDisposable", true,
@@ -53,6 +53,14 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.None, ClassCategory.Class, Type("Derived4"), List(Type("Closable"), Type("HashMap", Type("String"), Type("Integer"))));
 			TestcaseParseClassDefinition("class Derived5 extends HashMap< String , Integer> implements Closable", true,
 				Modifier.None, ClassCategory.Class, Type("Derived5"), List(Type("HashMap", Type("String"), Type("Integer")), Type("Closable")));
+
+			// Type argument appears twice
+			TestcaseParseClassDefinition("class MyList<T> : List<T>", true,
+				Modifier.None, ClassCategory.Class, Type("MyList", Type("T")), List(Type("List", Type("T"))));
+			TestcaseParseClassDefinition("class MyList<T> extends List<T>", true,
+				Modifier.None, ClassCategory.Class, Type("MyList", Type("T")), List(Type("List", Type("T"))));
+			TestcaseParseClassDefinition("class MyList<T> implements List<T>", true,
+				Modifier.None, ClassCategory.Class, Type("MyList", Type("T")), List(Type("List", Type("T"))));
 
 			TestcaseParseClassDefinition("public static TestClass", false);
 			TestcaseParseClassDefinition("public TestClass", false);
@@ -100,7 +108,54 @@ namespace Sample1
 					new MethodInfo(Modifier.Private | Modifier.Static, "Output", Type("int"), List(Arg(Type("int"), "x")))
 				));
 		}
-		
+
+		[TestMethod]
+		public void TestParseWithJavaCode1()
+		{
+			var code = @"
+public enum Values
+{
+	A(1, ""a""),
+	B(2, ""a""),
+	C(4, ""a""),
+	D(8, ""a"");
+
+	private final int value;
+	private final String str;
+	
+	private Values(int value, String str)
+	{
+		this.value = value;
+		this.str = str;
+	}
+
+	public int getValue()
+	{
+		return this.value;
+	}
+
+	@Override
+	public String toString()
+	{
+		return this.str;
+	}
+}
+";
+
+			TestcaseParseClassAll(code, 0, true, 11, Modifier.Public, ClassCategory.Enum, Type("Values"),
+				Enumerable.Empty<TypeInfo>(),
+				List(new FieldInfo(Modifier.Public | Modifier.Static, "A", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "B", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "C", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "D", Type("int")),
+					new FieldInfo(Modifier.Private | Modifier.Final, "value", Type("int")),
+					new FieldInfo(Modifier.Private | Modifier.Final, "str", Type("String"))),
+				List(new MethodInfo(Modifier.Private, "Values", null, List(Arg(Type("int"), "value"), Arg(Type("String"), "str"))),
+					new MethodInfo(Modifier.Public, "getValue", Type("int"), List<ArgumentInfo>()),
+					new MethodInfo(Modifier.Public, "toString", Type("String"), List<ArgumentInfo>())
+				));
+		}
+
 		private static void TestcaseParseClassAll(string code,
 			int startPos,
 			bool isSuccess,

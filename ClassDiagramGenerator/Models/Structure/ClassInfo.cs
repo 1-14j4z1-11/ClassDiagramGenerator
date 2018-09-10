@@ -62,19 +62,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// Gets a class name.
 		/// </summary>
 		public string Name { get => this.Type?.Name; }
-
-		/// <summary>
-		/// Gets a full name consisting of package name and type name.
-		/// </summary>
-		public string FullName
-		{
-			get
-			{
-				var package = (this.Package != null) ? this.Package + "." : string.Empty;
-				return package + (this.Name ?? string.Empty);
-			}
-		}
-
+		
 		/// <summary>
 		/// Gets inherited classes and interfaces.
 		/// <para>If this inherits no classes and interfaces, return empty list.</para>

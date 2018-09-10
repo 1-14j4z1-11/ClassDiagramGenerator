@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using UnitTestSupport.MSTest;
@@ -26,7 +27,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			});
 
 			// Note that relation of 'IF3' is not contained
-			relations.IsCollectionUnorderly(
+			AreEqualRelations(relations,
 				Relation("ClassA", "Base1", Generalization),
 				Relation("ClassA", "IF1", Realization),
 				Relation("ClassA", "IF2", Realization));
@@ -43,8 +44,8 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				Interface(Type("Outer.Inner2.IF2")),
 				InterfaceFully("Internal", Type("Outer.Inner.IF3"))
 			});
-			
-			relations.IsCollectionUnorderly(
+
+			AreEqualRelations(relations,
 				Relation("Outer.Inner.ClassA", "Base1", Generalization),
 				Relation("Outer.Inner.ClassA", "Outer.Inner.IF1", Realization),
 				Relation("Outer.Inner.ClassA", "Outer.Inner2.IF2", Realization),
@@ -66,8 +67,8 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			root.InnerClasses.Add(Class(Type("In2")));
 
 			var relations = RelationFactory.CreateFromClasses(new[] { root });
-			
-			relations.IsCollectionUnorderly(
+
+			AreEqualRelations(relations,
 				Relation("In1", "Root", Nested),
 				Relation("In2", "Root", Nested),
 				Relation("In1-1", "In1", Nested),
@@ -94,8 +95,8 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				Class(Type("F2")),
 				Class(Type("F3"))
 			});
-			
-			relations.IsCollectionUnorderly(
+
+			AreEqualRelations(relations,
 				Relation("MainClass", "F1", Association),
 				Relation("MainClass", "F2", Association),
 				Relation("MainClass", "F3", Association));
@@ -121,7 +122,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				ClassFully("Internal", Type("Outer.Inner.F4"))
 			});
 
-			relations.IsCollectionUnorderly(
+			AreEqualRelations(relations,
 				Relation("Outer.Inner.MainClass", "F1", Association),
 				Relation("Outer.Inner.MainClass", "Inner2.F2", Association),
 				Relation("Outer.Inner.MainClass", "Outer.Inner.F3", Association),
@@ -147,7 +148,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				Class(Type("A3a")),
 			});
 
-			relations.IsCollectionUnorderly(
+			AreEqualRelations(relations,
 				Relation("MainClass", "R2", Dependency),
 				Relation("MainClass", "A2", Dependency),
 				Relation("MainClass", "R3", Dependency),
@@ -176,12 +177,48 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			});
 
 			// Note that relation of A3b does not contain
-			relations.IsCollectionUnorderly(
+			AreEqualRelations(relations,
 				Relation("Outer.Inner.MainClass", "R1", Dependency),
 				Relation("Outer.Inner.MainClass", "Inner2.R2", Dependency),
 				Relation("Outer.Inner.MainClass", "Outer2.Inner.A2", Dependency),
 				Relation("Outer.Inner.MainClass", "Outer.Inner.R3", Dependency),
 				Relation("Outer.Inner.MainClass", "Outer.Inner.A3a", Dependency));
+		}
+
+		[TestMethod]
+		public void TestGenericRelations()
+		{
+			var cls = Class(Type("MainClass", Type("T")), List(Type("BaseClass", Type("T")), Type("IF", Type("T"))));
+			cls.Methods.Add(new MethodInfo(Modifier.Public, "Method", Type("R", Type("T"), Type("T")), List(Arg(Type("A1", Type("T")), "arg1"), Arg(Type("A2", Type("T")), "arg2"))));
+			cls.Fields.Add(new FieldInfo(Modifier.Private, "field", Type("F1", Type("T"), Type("T"))));
+
+			var relations = RelationFactory.CreateFromClasses(new[]
+			{
+				cls,
+				Class(Type("BaseClass", Type("X"))),
+				Interface(Type("IF", Type("X"), Type("Y"))),
+				Class(Type("R", Type("X"), Type("Y"))),
+				Class(Type("A1", Type("X"))),
+				Class(Type("A2", Type("X"), Type("Y"))),
+				Class(Type("F1", Type("X"), Type("Y"))),
+			});
+
+			AreEqualRelations(relations,
+				Relation("MainClass`1", "BaseClass`1", Generalization),
+				Relation("MainClass`1", "R`2", Dependency),
+				Relation("MainClass`1", "A1`1", Dependency),
+				Relation("MainClass`1", "F1`2", Association));
+		}
+
+		/// <summary>
+		/// Confirms <paramref name="actualRelations"/> are the same as <paramref name="expectedRelations"/> regardless of their order.
+		/// <para>If they are different, this test is treated as failure.</para>
+		/// </summary>
+		/// <param name="actualRelations">Actual relations</param>
+		/// <param name="expectedRelations">Expected relations</param>
+		private static void AreEqualRelations(IEnumerable<Relation> actualRelations, params PlainRelation[] expectedRelations)
+		{
+			actualRelations.Select(r => new PlainRelation(r)).IsCollectionUnorderly(expectedRelations);
 		}
 	}
 }

@@ -15,22 +15,32 @@ namespace ClassDiagramGenerator.Models.Parser
 {
 	public class EnumValuesParser : ComponentParser<IEnumerable<FieldInfo>>
 	{
-		private static readonly Regex EnumValueRegex = new Regex($"(?:({NamePattern})(?:\\s*=\\s*{NamePattern})?)");
+		private static readonly Regex EnumValueRegex = new Regex($"({NamePattern})(?:\\s*=\\s*{NamePattern})?");
 		private readonly ClassInfo classInfo;
+		private readonly int definitionDepth;
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="classInfo"><see cref="ClassInfo"/> containing enum values</param>
-		public EnumValuesParser(ClassInfo classInfo)
+		/// <param name="classInfo"><see cref="ClassInfo"/> indicating enum type</param>
+		/// <param name="definitionDepth">Depth of enum type definition line</param>
+		public EnumValuesParser(ClassInfo classInfo, int definitionDepth)
 		{
 			this.classInfo = classInfo;
+			this.definitionDepth = definitionDepth;
 		}
 
 		public override bool TryParse(SourceCodeReader reader, out IEnumerable<FieldInfo> values)
 		{
 			if(!reader.TryRead(out var text))
 			{
+				values = null;
+				return false;
+			}
+			
+			if(text.Depth != this.definitionDepth + 1)
+			{
+				reader.Position--;
 				values = null;
 				return false;
 			}
