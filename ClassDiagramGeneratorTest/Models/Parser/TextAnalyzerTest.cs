@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UnitTestSupport.MSTest;
 
 using ClassDiagramGenerator.Models.Parser;
-using static ClassDiagramGeneratorTest.Models.TestSupport;
+using static ClassDiagramGeneratorTest.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {

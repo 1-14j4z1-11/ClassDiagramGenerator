@@ -48,15 +48,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\Cui\CmdParserTest.cs" />
+    <Compile Include="Cui\CmdParserTest.cs" />
     <Compile Include="Models\Diagram\RelationFactoryTest.cs" />
     <Compile Include="Models\Diagram\PumlClassDiagramGeneratorTest.cs" />
     <Compile Include="Models\Parser\ClassParserTest.cs" />
     <Compile Include="Models\Parser\ComponentParserTest.cs" />
     <Compile Include="Models\Parser\EnumValuesParserTest.cs" />
     <Compile Include="Models\Parser\SourceCodeReaderTest.cs" />
-    <Compile Include="Models\PlainRelation.cs" />
-    <Compile Include="Models\TestSupport.cs" />
+    <Compile Include="Support\PlainRelation.cs" />
+    <Compile Include="Support\TestSupport.cs" />
     <Compile Include="Models\Parser\FieldParserTest.cs" />
     <Compile Include="Models\Parser\MethodParserTest.cs" />
     <Compile Include="Models\Parser\TextAnalyzerTest.cs" />

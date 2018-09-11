@@ -8,7 +8,7 @@ using ClassDiagramGenerator.Models.Diagram;
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
 
-namespace ClassDiagramGeneratorTest.Models
+namespace ClassDiagramGeneratorTest
 {
 	/// <summary>
 	/// The test support class.

@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UnitTestSupport.MSTest;
 using ClassDiagramGenerator.Cui;
 
-namespace ClassDiagramGeneratorTest.Models.Cui
+namespace ClassDiagramGeneratorTest.Cui
 {
 	[TestClass]
 	public class CmdParserTest

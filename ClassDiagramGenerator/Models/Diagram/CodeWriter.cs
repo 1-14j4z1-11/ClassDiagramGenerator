@@ -36,6 +36,12 @@ namespace ClassDiagramGenerator.Models.Diagram
 		public int Indent { get; private set; }
 
 		/// <summary>
+		/// Gets or sets a symbol string to be written at each new line head (after indentation).
+		/// <para>If writing a symbol is not needed, sets a null.</para>
+		/// </summary>
+		public string HeaderSymbol { get; set; }
+
+		/// <summary>
 		/// Increases indent.
 		/// <para>If an argument is omitted, increases indent by 1.</para>
 		/// </summary>
@@ -94,6 +100,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 					this.builder.Append(Indentation);
 				}
 
+				this.builder.Append(this.HeaderSymbol ?? string.Empty);
 				this.isNewLine = false;
 			}
 

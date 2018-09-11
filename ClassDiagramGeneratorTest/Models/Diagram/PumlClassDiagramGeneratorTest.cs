@@ -9,6 +9,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UnitTestSupport.MSTest;
 using ClassDiagramGenerator.Models.Diagram;
 using ClassDiagramGenerator.Models.Parser;
+using ClassDiagramGenerator.Models.Structure;
+using static ClassDiagramGeneratorTest.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Diagram
 {
@@ -16,13 +18,14 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 	[TestClass]
 	public class PumlClassDiagramGeneratorTest
 	{
+		private static readonly string CommentSymbol = "'";
 		private static readonly ISourceCodeParser CSParser = new CSharpCodeParser();
 		private static readonly ISourceCodeParser JavaParser = new JavaCodeParser();
 
 		[TestMethod]
 		public void TestGenerateFromCSharpCode1()
 		{
-			TestcaseGenerate(CSParser, LoadCode("Base.cs"),
+			var baseExpected = List(
 				"package CSharp.Testcase1",
 
 				"class Base<T>",
@@ -35,6 +38,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"class Derived",
 				"+ Derived(value : X)",
 				"+ Method2() : string",
+				"~ Method3(x : int, y : int) : object",
 
 				"enum EnumValues",
 				"+ {static} A : int",
@@ -45,19 +49,35 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"interface IInterface",
 				"+ {abstract} Method2() : string",
 
+				"Derived --|> Base",
+				"Derived ..|> IInterface");
+
+			var expectedXClass = List(
 				"class X",
 				"+ <<get,set>> Value : EnumValues",
-
-				"Derived --|> Base",
-				"Derived ..|> IInterface",
 				"Derived ..> X",
 				"X --> EnumValues");
+
+			var expectedAll = baseExpected.Concat(expectedXClass);
+
+			TestcaseGenerate(CSParser, LoadCode("Base.cs"), expectedAll);
+			TestcaseGenerate(CSParser, LoadCode("Base.cs"), baseExpected, expectedXClass, Modifier.AllAccessLevels, List("X"));
+			TestcaseGenerate(CSParser, LoadCode("Base.cs"),
+				expectedAll.Where(s => !s.StartsWith("-")),
+				expectedAll.Where(s => s.StartsWith("-")),
+				Modifier.Public | Modifier.Protected | Modifier.Internal,
+				null);
+			TestcaseGenerate(CSParser, LoadCode("Base.cs"),
+				 baseExpected.Where(s => !s.StartsWith("+")),
+				 baseExpected.Where(s => s.StartsWith("+")).Concat(expectedXClass),
+				 Modifier.Protected | Modifier.Internal | Modifier.Private,
+				 List("X"));
 		}
 
 		[TestMethod]
 		public void TestGenerateFromJavaCode1()
 		{
-			TestcaseGenerate(JavaParser, LoadCode("Base.java"),
+			var baseExpected = List(
 				"package java.testcase1",
 
 				"class Base<T extends Object>",
@@ -72,6 +92,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"class Derived",
 				"+ Derived(value : X)",
 				"+ Method2() : String",
+				"~ Method3(x : int, y : int) : Object",
 
 				"interface IInterface",
 				"+ {abstract} Method2() : String",
@@ -81,18 +102,34 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"+ {static} B : int",
 				"+ {static} C : int",
 				"+ {static} D : int",
-				//"+ value : int",
-				//"- EnumValues(value : int)",
+				"+ value : int",
+				"- EnumValues(value : int)",
 
+				"Derived --|> Base",
+				"Derived ..|> IInterface");
+
+			var expectedXClass = List(
 				"class X",
 				"- value : EnumValues",
 				"+ getValue() : EnumValues",
 				"+ setValue(value : EnumValues) : void",
-
-				"Derived --|> Base",
-				"Derived ..|> IInterface",
 				"Derived ..> X",
 				"X --> EnumValues");
+
+			var expectedAll = baseExpected.Concat(expectedXClass);
+
+			TestcaseGenerate(JavaParser, LoadCode("Base.java"), baseExpected.Concat(expectedXClass));
+			TestcaseGenerate(JavaParser, LoadCode("Base.java"), baseExpected, expectedXClass, Modifier.AllAccessLevels, List("X"));
+			TestcaseGenerate(JavaParser, LoadCode("Base.java"),
+				expectedAll.Where(s => !s.StartsWith("~") && !s.StartsWith("#")),
+				expectedAll.Where(s => s.StartsWith("~") || s.StartsWith("#")),
+				Modifier.Public | Modifier.Private,
+				null);
+			TestcaseGenerate(JavaParser, LoadCode("Base.java"),
+				 baseExpected.Where(s => !s.StartsWith("#")),
+				 baseExpected.Where(s => s.StartsWith("#")).Concat(expectedXClass),
+				 Modifier.Public | Modifier.Package | Modifier.Private,
+				 List("X"));
 		}
 
 		/// <summary>
@@ -104,17 +141,27 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 		/// <param name="parser">Parser to parse <paramref name="inputCode"/></param>
 		/// <param name="inputCode">Input source code text to generate a class diagram</param>
 		/// <param name="expectedLines">Text lines which is expected to be included in a generated class diagram</param>
-		private static void TestcaseGenerate(ISourceCodeParser parser, string inputCode, params string[] expectedLines)
+		/// <param name="expectedIgnoreLines">Text lines which is expected to be included as commented line in a generated class diagram</param>
+		/// <param name="accessFilter">Access level filter</param>
+		/// <param name="excludedClasses">Class names to be excluded in a diagram (actually they are included as commented lines in a diagram)</param>
+		private static void TestcaseGenerate(ISourceCodeParser parser,
+			string inputCode,
+			IEnumerable<string> expectedLines,
+			IEnumerable<string> expectedIgnoreLines = null,
+			Modifier accessFilter = Modifier.AllAccessLevels,
+			IEnumerable<string> excludedClasses = null)
 		{
 			var title = "test_title";
 
 			var classes = parser.Parse(inputCode);
 			var relations = RelationFactory.CreateFromClasses(classes);
 
-			var diag = PumlClassDiagramGenerator.Generate(title, classes, relations);
+			var diag = PumlClassDiagramGenerator.Generate(title, classes, relations, accessFilter, excludedClasses);
 			diag = Regex.Replace(diag, "\\s+", string.Empty);
 
-			var allExpLines = expectedLines.Concat(new[] { $"@startuml {title}", "@enduml" })
+			var allExpLines = expectedLines
+				.Concat(new[] { $"@startuml {title}", "@enduml" })
+				.Concat(expectedIgnoreLines?.Select(s => CommentSymbol + s) ?? Enumerable.Empty<string>())
 				.Select(s => Regex.Replace(s, "\\s+", string.Empty));
 
 			foreach(var line in allExpLines)
@@ -169,6 +216,20 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 		private static string LoadCode(string fileName)
 		{
 			return File.ReadAllText(fileName);
+		}
+
+		/// <summary>
+		/// Splits a sequence into a sequence matched with <paramref name="predicate"/> and a sequence unmatched with it.
+		/// </summary>
+		/// <typeparam name="T">Type of sequence</typeparam>
+		/// <param name="seq">A sequence to be splitted</param>
+		/// <param name="predicate">A function that determines whether a item in sequence matches a conditioin or not</param>
+		/// <param name="matchedSeq">[out] A sequence that matches a condition</param>
+		/// <param name="unmatchedSeq">[out] A sequence that does not match a condition</param>
+		private static void SplitSequence<T>(IEnumerable<T> seq, Func<T, bool> predicate, out IEnumerable<T> matchedSeq, out IEnumerable<T> unmatchedSeq)
+		{
+			matchedSeq = seq.Where(predicate);
+			unmatchedSeq = seq.Where(item => !predicate(item));
 		}
 	}
 }

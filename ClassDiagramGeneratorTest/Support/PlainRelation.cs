@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using ClassDiagramGenerator.Models.Diagram;
 
-namespace ClassDiagramGeneratorTest.Models
+namespace ClassDiagramGeneratorTest
 {
 	public class PlainRelation
 	{

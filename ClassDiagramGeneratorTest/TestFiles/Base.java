@@ -41,6 +41,8 @@ class Derived extends Base<X> implements IInterface
 	}
 
 	public String Method2() { return null; }
+
+	final Object Method3(int x, int y) { return null; }
 }
 
 class X

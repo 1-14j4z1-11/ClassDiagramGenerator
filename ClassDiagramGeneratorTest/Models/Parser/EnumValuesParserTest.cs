@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UnitTestSupport.MSTest;
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
-using static ClassDiagramGeneratorTest.Models.TestSupport;
+using static ClassDiagramGeneratorTest.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
@@ -18,7 +18,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		[TestMethod]
 		public void TestParseEnumValues()
 		{
-			TestcaseParse("A,B,C", "A", "B", "C");
+			TestcaseParse("A,B,C,", "A", "B", "C");
 			TestcaseParse("A = 1,B = 2,C = 4", "A", "B", "C");
 			TestcaseParse("A(1),B(2),C(4)", "A", "B", "C");
 			TestcaseParse("A(1, \"a\"),B(2, \"b\"),C(4, \"c\")", "A", "B", "C");

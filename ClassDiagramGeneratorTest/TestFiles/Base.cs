@@ -32,6 +32,8 @@ namespace CSharp.Testcase1
 		{ }
 
 		public string Method2() { return null; }
+
+		internal virtual object Method3(int x, int y) { return null; }
 	}
 
 	internal class X
