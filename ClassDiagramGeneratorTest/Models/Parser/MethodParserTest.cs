@@ -41,7 +41,9 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Public, Type("bool"), "Generic", List(Arg(Type("T"), "value")));
 			TestcaseParseMethodDefinition("internal static int Where < T > ( T value ) where T : IDisposable", true,
 				Modifier.Internal | Modifier.Static, Type("int"), "Where", List(Arg(Type("T"), "value")));
-			
+			TestcaseParseMethodDefinition("public bool Generic<T>(T[] value)", true,
+				Modifier.Public, Type("bool"), "Generic", List(Arg(TypeArray("T"), "value")));
+
 			// Java Generic
 			TestcaseParseMethodDefinition("protected <T> bool Generic(T value)", true,
 				Modifier.Protected, Type("bool"), "Generic", List(Arg(Type("T"), "value")));
@@ -64,6 +66,26 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Private, null, "Func", List(Arg(Type("int"), "x")));
 			TestcaseParseMethodDefinition("internal static Func ( int  x ) ", true,
 				Modifier.Internal | Modifier.Static, null, "Func", List(Arg(Type("int"), "x")));
+
+			// Attribute / Annotation
+			TestcaseParseMethodDefinition("private void Func([Attribute1] int x)", true,
+				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x")));
+			TestcaseParseMethodDefinition("[Attribute0(\"X\")] private void Func([Attribute1][Attribute2]int x)", true,
+				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x")));
+			TestcaseParseMethodDefinition("private void Func( [Attribute1(X)] [Attribute2] [Attribute3(\"Y\")] int x, [Attribute4]int y)", true,
+				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+
+			TestcaseParseMethodDefinition("private void Func(@Annotation1 int x)", true,
+				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x")));
+			TestcaseParseMethodDefinition("@Annotation0(\"X\") private void Func(@Annotation1 @Annotation2 int x)", true,
+				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x")));
+			TestcaseParseMethodDefinition("private void Func(@Annotation1(X) @Annotation2 @Annotation3(\"Y\") int x, @Annotation4 int y)", true,
+				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+
+			TestcaseParseMethodDefinition("[Attribute0]public Func( [Attribute1(X)] [Attribute2] [Attribute3(\"Y\")] int x, [Attribute4]int y)", true,
+				Modifier.Public, null, "Func", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+			TestcaseParseMethodDefinition("@Annotation0 public Func(@Annotation1(X) @Annotation2 @Annotation3(\"Y\") int x, @Annotation4 int y)", true,
+				Modifier.Public, null, "Func", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
 
 			// Not method
 			TestcaseParseMethodDefinition("public void", false);
