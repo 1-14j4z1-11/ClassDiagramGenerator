@@ -7,7 +7,7 @@ using UnitTestSupport.MSTest;
 
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
-using static ClassDiagramGeneratorTest.Models.TestSupport;
+using static ClassDiagramGeneratorTest.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
@@ -156,6 +156,88 @@ public enum Values
 				));
 		}
 
+		[TestMethod]
+		public void TestParseWithJavaCode2()
+		{
+			var code = @"
+public enum Values
+{
+    A(),
+    B(),
+    C(),
+    D();
+
+    private Values()
+    { }
+
+    public char getValue()
+    {
+        return this.toString().charAt(0);
+    }
+}
+";
+
+			TestcaseParseClassAll(code, 0, true, 5, Modifier.Public, ClassCategory.Enum, Type("Values"),
+				Enumerable.Empty<TypeInfo>(),
+				List(new FieldInfo(Modifier.Public | Modifier.Static, "A", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "B", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "C", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "D", Type("int"))),
+				List(new MethodInfo(Modifier.Private, "Values", null, List<ArgumentInfo>()),
+					new MethodInfo(Modifier.Public, "getValue", Type("char"), List<ArgumentInfo>()))
+				);
+		}
+
+		[TestMethod]
+		public void TestParseWithJavaCode3()
+		{
+			var code = @"
+public enum Values
+{
+    A()
+	{
+        @Override
+        char getChar() { return 'a'; }
+    },
+    B()
+	{
+        @Override
+        char getChar() { return 'b'; }
+    },
+    C
+	{
+        char getChar() { return 'c'; }
+    },
+    D()
+	{
+        @Override
+        char getChar() { return 'd'; }
+    };
+
+    Values()
+    { }
+
+    public String getValue()
+    {
+        return String.valueOf(this.getChar());
+    }
+
+    abstract char getChar();
+}
+";
+
+			TestcaseParseClassAll(code, 0, true, 17, Modifier.Public, ClassCategory.Enum, Type("Values"),
+				Enumerable.Empty<TypeInfo>(),
+				List(new FieldInfo(Modifier.Public | Modifier.Static, "A", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "B", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "C", Type("int")),
+					new FieldInfo(Modifier.Public | Modifier.Static, "D", Type("int"))),
+				List(new MethodInfo(Modifier.None, "Values", null, List<ArgumentInfo>()),
+					new MethodInfo(Modifier.Public, "getValue", Type("String"), List<ArgumentInfo>()),
+					new MethodInfo(Modifier.Abstract, "getChar", Type("char"), List<ArgumentInfo>()))
+				);
+		}
+
 		private static void TestcaseParseClassAll(string code,
 			int startPos,
 			bool isSuccess,
@@ -166,12 +248,13 @@ public enum Values
 			IEnumerable<TypeInfo> inheriteds = null,
 			IEnumerable<FieldInfo> fields = null,
 			IEnumerable<MethodInfo> methods = null,
-			IEnumerable<string> innerClassNames = null)
+			IEnumerable<string> innerClassNames = null,
+			Modifier defaultAL = Modifier.None)
 		{
 			var reader = ReaderFromCode(code);
 			Enumerable.Range(0, startPos).ToList().ForEach(_ => reader.TryRead(out var _));
 
-			new ClassParser("test-namespace").TryParse(reader, out var info).Is(isSuccess);
+			new ClassParser("test-namespace", defaultAL).TryParse(reader, out var info).Is(isSuccess);
 
 			if(isSuccess)
 			{
@@ -182,6 +265,8 @@ public enum Values
 				info.Fields.IsCollection(fields ?? Enumerable.Empty<FieldInfo>());
 				info.Methods.IsCollection(methods ?? Enumerable.Empty<MethodInfo>());
 				info.InnerClasses.Select(ic => ic.Name).IsCollection(innerClassNames ?? Enumerable.Empty<string>());
+				
+				reader.Position.Is(startPos + expectedReadLines.Value);
 			}
 			else
 			{

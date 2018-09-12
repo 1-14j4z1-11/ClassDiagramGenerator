@@ -6,13 +6,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UnitTestSupport.MSTest;
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
-using static ClassDiagramGeneratorTest.Models.TestSupport;
+using static ClassDiagramGeneratorTest.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
 	[TestClass]
 	public class ComponentParserTest : ComponentParser<object>
 	{
+		public ComponentParserTest()
+			: base(Modifier.None)
+		{ }
+
 		[TestMethod]
 		public void TestParseType()
 		{

@@ -18,6 +18,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 	public static class PumlClassDiagramGenerator
 	{
 		private const string NewLine = "\r\n";
+		private const string CommentSymbol = "'";
 		private static Dictionary<RelationType, string> Arrows = new Dictionary<RelationType, string>()
 		{
 			[RelationType.Dependency] = ".down.>",
@@ -111,8 +112,12 @@ namespace ClassDiagramGenerator.Models.Diagram
 			if(classInfo == null)
 				throw new ArgumentNullException();
 
-			if(excludedClasses?.Contains(classInfo.Name) ?? false)
-				return;
+			var isExcludedClass = excludedClasses?.Contains(classInfo.Name) ?? false;
+
+			if(isExcludedClass)
+			{
+				StartCommentMode(writer);
+			}
 
 			var stereoType = (classInfo.Category == ClassCategory.Struct) ? "<<struct>> " : string.Empty;
 			var modifier = (classInfo.Modifier.HasFlag(Modifier.Abstract)) ? "abstract " : string.Empty;
@@ -122,17 +127,33 @@ namespace ClassDiagramGenerator.Models.Diagram
 			foreach(var field in classInfo.Fields ?? Enumerable.Empty<FieldInfo>())
 			{
 				if(!IsTargetAccessModifier(field.Modifier, accessFilter))
-					continue;
+				{
+					StartCommentMode(writer);
+				}
 
 				WriteField(writer, field);
+
+				// Ends comment mode only if this class is NOT excluded target
+				if(!isExcludedClass)
+				{
+					EndCommentMode(writer);
+				}
 			}
 
 			foreach(var method in classInfo.Methods ?? Enumerable.Empty<MethodInfo>())
 			{
 				if(!IsTargetAccessModifier(method.Modifier, accessFilter))
-					continue;
+				{
+					StartCommentMode(writer);
+				}
 
 				WriteMethod(writer, method);
+
+				// Ends comment mode only if this class is NOT excluded target
+				if(!isExcludedClass)
+				{
+					EndCommentMode(writer);
+				}
 			}
 
 			writer.DecreaseIndent();
@@ -143,6 +164,8 @@ namespace ClassDiagramGenerator.Models.Diagram
 			{
 				WriteClass(writer, innerClass, accessFilter, excludedClasses);
 			}
+
+			EndCommentMode(writer);
 		}
 
 		/// <summary>
@@ -202,16 +225,18 @@ namespace ClassDiagramGenerator.Models.Diagram
 				throw new ArgumentNullException();
 
 			if(excludedClasses?.Any(c => (c == relation.Class1.Name) || (c == relation.Class2.Name)) ?? false)
-				return;
-
-			var arrow = Arrows[relation.Type];
-
+			{
+				StartCommentMode(writer);
+			}
+			
 			writer.Write(relation.Class1.Name)
 				.Write(" ")
-				.Write(arrow)
+				.Write(Arrows[relation.Type])
 				.Write(" ")
 				.Write(relation.Class2.Name)
 				.NewLine();
+
+			EndCommentMode(writer);
 		}
 
 		/// <summary>
@@ -300,6 +325,24 @@ namespace ClassDiagramGenerator.Models.Diagram
 				append("static");
 
 			return builder.ToString();
+		}
+
+		/// <summary>
+		/// Starts comment mode.
+		/// </summary>
+		/// <param name="writer">A <see cref="CodeWriter"/> to be changed into comment mode</param>
+		private static void StartCommentMode(CodeWriter writer)
+		{
+			writer.HeaderSymbol = CommentSymbol;
+		}
+
+		/// <summary>
+		/// Ends comment mode.
+		/// </summary>
+		/// <param name="writer">A <see cref="CodeWriter"/> to be changed into normal mode</param>
+		private static void EndCommentMode(CodeWriter writer)
+		{
+			writer.HeaderSymbol = null;
 		}
 	}
 }

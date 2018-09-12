@@ -32,28 +32,41 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected static readonly string NamePattern = "[^\\s,:\\[\\]\\(\\)<>=]+";
 
 		/// <summary>Pattern string that matches type argument enclosed in &lt;&gt; (no grouping)</summary>
-		protected static readonly string TypeArgPattern = "[^:\\[\\]\\(\\)=]+";
+		protected static readonly string TypeArgPattern = "[^:\\(\\)=]+";
+
+		/// <summary>Pattern string that matches Attributes of C# (no grouping)</summary>
+		protected static readonly string AttributePattern = "(?:\\s*\\[[^\\[\\]]*\\]\\s*)*";
+
+		/// <summary>Pattern string that matches Annotations of Java (no grouping)</summary>
+		protected static readonly string AnnotationPattern = $"(?:\\s*@{NamePattern}\\s*(?:\\([^\\(\\)]*\\))?\\s*)*";
 
 		/// <summary>Pattern string that matches type (no grouping)</summary>
 		protected static readonly string TypePattern = $"{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?(?:\\s*\\[\\s*\\]\\s*)?";
 
 		/// <summary>Pattern string that matches single argument (no grouping)</summary>
-		protected static readonly string ArgumentPattern = $"(?:(?:(?:this|in|out|ref)\\s+)?(?:{TypePattern})\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
-
-		/// <summary>Pattern string that matches Attributes of C#</summary>
-		protected static readonly string AttributePattern = "(?:\\[[^\\[\\]]*\\]\\s*)*";
-
-		/// <summary>Pattern string that matches Annotations of Java</summary>
-		protected static readonly string AnnotationPattern = $"(?:@{NamePattern}\\s*(?:\\([^\\(\\)]*\\))?\\s*)*";
-
+		protected static readonly string ArgumentPattern = $"(?:{AttributePattern}{AnnotationPattern}(?:(?:this|in|out|ref)\\s+)?(?:{TypePattern})\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
+		
 		/// <summary>
 		/// Regex that matches single argument
-		/// <para>- [3] : this / in / out / ref</para>
-		/// <para>- [4] : Type name(Groups[5],[6] is used in <see cref="TypePattern"/>)</para>
-		/// <para>- [7] : Argument name</para>
-		/// <para>- [8] : Default argument</para>
+		/// <para>- [1] : Type name</para>
+		/// <para>- [2] : Argument name</para>
 		/// </summary>
-		private static readonly Regex ArgumentRegex = new Regex(ArgumentPattern.Replace("(?:", "("));
+		private static readonly Regex ArgumentRegex = new Regex(ArgumentPattern.Replace($"(?:{TypePattern})", $"({TypePattern})").Replace($"(?:{NamePattern})", $"({NamePattern})"));
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="defaultAccessLevel">Default access level attached to components without access level modifier
+		/// (Modifiers not indicating access level are ignored)</param>
+		public ComponentParser(Modifier defaultAccessLevel)
+		{
+			this.DefaultAccessLevel = defaultAccessLevel & Modifier.AllAccessLevels;
+		}
+
+		/// <summary>
+		/// Gets a default access level.
+		/// </summary>
+		public Modifier DefaultAccessLevel { get; }
 
 		/// <summary>
 		/// Tries to parse component of source code.
@@ -79,8 +92,10 @@ namespace ClassDiagramGenerator.Models.Parser
 			
 			return argText.Split(",",  "<", ">", d => d == 0)
 				.Select(a => ArgumentRegex.Match(a))
-				.Where(m => m.Success)
-				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[4].Value), m.Groups[7].Value));
+				.Where(m => {
+					return m.Success;
+					})
+				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[1].Value), m.Groups[2].Value));
 		}
 
 		/// <summary>
@@ -110,6 +125,7 @@ namespace ClassDiagramGenerator.Models.Parser
 
 		/// <summary>
 		/// Parse <see cref="Modifier"/> from string.
+		/// <para>If no access level modifier is included, attaches default access level (specified at a constructor)</para>
 		/// </summary>
 		/// <param name="modifierText">String that indicates modifier</param>
 		/// <returns><see cref="Modifier"/> parsed from string</returns>
@@ -122,6 +138,9 @@ namespace ClassDiagramGenerator.Models.Parser
 			{
 				mod |= Structure.Modifiers.Parse(word);
 			}
+
+			if((mod & Modifier.AllAccessLevels) == Modifier.None)
+				mod |= this.DefaultAccessLevel;
 
 			return mod;
 		}

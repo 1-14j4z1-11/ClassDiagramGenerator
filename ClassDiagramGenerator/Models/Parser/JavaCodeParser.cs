@@ -24,13 +24,13 @@ namespace ClassDiagramGenerator.Models.Parser
 
 			var reader = new SourceCodeReader(code);
 			var classList = new List<ClassInfo>();
-			var classParser = new ClassParser(string.Empty);
+			var classParser = new ClassParser(string.Empty, Modifier.Package);
 
 			while(!reader.IsEndOfLines)
 			{
-				if(TryParsePackage(reader, out var nameSpace))
+				if(TryParsePackage(reader, out var package))
 				{
-					classParser = new ClassParser(nameSpace);
+					classParser = new ClassParser(package, Modifier.Package);
 					continue;
 				}
 

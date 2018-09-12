@@ -24,7 +24,7 @@ namespace ClassDiagramGenerator.Models.Parser
 
 			var reader = new SourceCodeReader(code);
 			var classList = new List<ClassInfo>();
-			var classParser = new ClassParser(string.Empty);
+			var classParser = new ClassParser(string.Empty, Modifier.Internal);
 			var prevNS = new Dictionary<int, string>();
 
 			while(!reader.IsEndOfLines)
@@ -38,7 +38,7 @@ namespace ClassDiagramGenerator.Models.Parser
 					}
 
 					prevNS[depth] = nameSpace;
-					classParser = new ClassParser(nameSpace);
+					classParser = new ClassParser(nameSpace, Modifier.Internal);
 					continue;
 				}
 

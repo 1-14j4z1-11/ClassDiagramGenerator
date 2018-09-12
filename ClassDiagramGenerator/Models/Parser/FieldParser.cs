@@ -32,7 +32,10 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// Constructor.
 		/// </summary>
 		/// <param name="classInfo"><see cref="ClassInfo"/> containing fields</param>
-		public FieldParser(ClassInfo classInfo)
+		/// <param name="defaultAccessLevel">Default access level attached to fields without access level modifier
+		/// (Modifiers not indicating access level are ignored)</param>
+		public FieldParser(ClassInfo classInfo, Modifier defaultAccessLevel)
+			: base(defaultAccessLevel)
 		{
 			this.classInfo = classInfo;
 		}

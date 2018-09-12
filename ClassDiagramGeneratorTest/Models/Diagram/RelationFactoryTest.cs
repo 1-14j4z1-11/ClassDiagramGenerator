@@ -8,7 +8,7 @@ using UnitTestSupport.MSTest;
 using ClassDiagramGenerator.Models.Diagram;
 using ClassDiagramGenerator.Models.Structure;
 using static ClassDiagramGenerator.Models.Diagram.RelationType;
-using static ClassDiagramGeneratorTest.Models.TestSupport;
+using static ClassDiagramGeneratorTest.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Diagram
 {
