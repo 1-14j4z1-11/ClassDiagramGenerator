@@ -43,25 +43,26 @@ namespace ClassDiagramGenerator.Models.Diagram
 				GetNestedRelationsRecursively(cls, relations);
 				
 				// Types used in fields -> Association
-				foreach(var type in cls.Fields.Select(f => f.GetRelatedTypes()).SelectMany(t => t))
+				foreach(var type in cls.Fields.SelectMany(f => f.GetRelatedTypes()))
 				{
+					// Uses a corresponding type name in a ClassInfo collection, instead of using a type name described in a field definition.
 					var relatedClass = classSearcher.Search(type);
 
 					if(relatedClass == null)
 						continue;
-
+					
 					relations.Add(new Relation(cls, relatedClass, RelationType.Association));
 				}
 
 				// Types used in methods -> Dependency
-				foreach(var type in cls.Methods.Select(m => m.GetRelatedTypes()).SelectMany(t => t))
+				foreach(var type in cls.Methods.SelectMany(m => m.GetRelatedTypes()))
 				{
+					// Uses a corresponding type name in a ClassInfo collection, instead of using a type name described in a method definition.
 					var relatedClass = classSearcher.Search(type);
 
 					if(relatedClass == null)
 						continue;
 
-					// Uses a corresponding type name in the ClassInfo collection, instead of using a type name described in the function definition.
 					relations.Add(new Relation(cls, relatedClass, RelationType.Dependency));
 				}
 			}

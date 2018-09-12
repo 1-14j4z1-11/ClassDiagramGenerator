@@ -32,12 +32,12 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected static readonly string NamePattern = "[^\\s,:\\[\\]\\(\\)<>=]+";
 
 		/// <summary>Pattern string that matches type argument enclosed in &lt;&gt; (no grouping)</summary>
-		protected static readonly string TypeArgPattern = "[^:\\[\\]\\(\\)=]+";
+		protected static readonly string TypeArgPattern = "[^:\\(\\)=]+";
 
-		/// <summary>Pattern string that matches Attributes of C#</summary>
+		/// <summary>Pattern string that matches Attributes of C# (no grouping)</summary>
 		protected static readonly string AttributePattern = "(?:\\s*\\[[^\\[\\]]*\\]\\s*)*";
 
-		/// <summary>Pattern string that matches Annotations of Java</summary>
+		/// <summary>Pattern string that matches Annotations of Java (no grouping)</summary>
 		protected static readonly string AnnotationPattern = $"(?:\\s*@{NamePattern}\\s*(?:\\([^\\(\\)]*\\))?\\s*)*";
 
 		/// <summary>Pattern string that matches type (no grouping)</summary>
@@ -52,6 +52,21 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <para>- [2] : Argument name</para>
 		/// </summary>
 		private static readonly Regex ArgumentRegex = new Regex(ArgumentPattern.Replace($"(?:{TypePattern})", $"({TypePattern})").Replace($"(?:{NamePattern})", $"({NamePattern})"));
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="defaultAccessLevel">Default access level attached to components without access level modifier
+		/// (Modifiers not indicating access level are ignored)</param>
+		public ComponentParser(Modifier defaultAccessLevel)
+		{
+			this.DefaultAccessLevel = defaultAccessLevel & Modifier.AllAccessLevels;
+		}
+
+		/// <summary>
+		/// Gets a default access level.
+		/// </summary>
+		public Modifier DefaultAccessLevel { get; }
 
 		/// <summary>
 		/// Tries to parse component of source code.
@@ -110,6 +125,7 @@ namespace ClassDiagramGenerator.Models.Parser
 
 		/// <summary>
 		/// Parse <see cref="Modifier"/> from string.
+		/// <para>If no access level modifier is included, attaches default access level (specified at a constructor)</para>
 		/// </summary>
 		/// <param name="modifierText">String that indicates modifier</param>
 		/// <returns><see cref="Modifier"/> parsed from string</returns>
@@ -122,6 +138,9 @@ namespace ClassDiagramGenerator.Models.Parser
 			{
 				mod |= Structure.Modifiers.Parse(word);
 			}
+
+			if((mod & Modifier.AllAccessLevels) == Modifier.None)
+				mod |= this.DefaultAccessLevel;
 
 			return mod;
 		}

@@ -26,12 +26,15 @@ namespace ClassDiagramGenerator.Models.Parser
 			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");        // Arguments
 
 		private readonly ClassInfo classInfo;
-		
+
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="classInfo"><see cref="ClassInfo"/> containing methods</param>
-		public MethodParser(ClassInfo classInfo)
+		/// <param name="defaultAccessLevel">Default access level attached to methods without access level modifier
+		/// (Modifiers not indicating access level are ignored)</param>
+		public MethodParser(ClassInfo classInfo, Modifier defaultAccessLevel)
+			: base(defaultAccessLevel)
 		{
 			this.classInfo = classInfo;
 		}
@@ -108,6 +111,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				return mod;
 
 			// Method in interface is always Public and Abstract
+			mod &= ~Modifier.AllAccessLevels;
 			return Modifier.Public | Modifier.Abstract | mod;
 		}
 	}

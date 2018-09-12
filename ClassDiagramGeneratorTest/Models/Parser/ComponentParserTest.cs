@@ -13,6 +13,10 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 	[TestClass]
 	public class ComponentParserTest : ComponentParser<object>
 	{
+		public ComponentParserTest()
+			: base(Modifier.None)
+		{ }
+
 		[TestMethod]
 		public void TestParseType()
 		{

@@ -38,7 +38,10 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// Constructor.
 		/// </summary>
 		/// <param name="package">Package or namespace of classes to be parsed</param>
-		public ClassParser(string package)
+		/// <param name="defaultAccessLevel">Default access level attached to classes without access level modifier
+		/// (Modifiers not indicating access level are ignored)</param>
+		public ClassParser(string package, Modifier defaultAccessLevel)
+			: base(defaultAccessLevel)
 		{
 			this.package = package;
 		}
@@ -112,9 +115,10 @@ namespace ClassDiagramGenerator.Models.Parser
 		private void ParseImplementationLines(SourceCodeReader reader, ClassInfo classInfo, string parentClassName, int definitionDepth)
 		{
 			var endOfClass = reader.Position + GetMoreDeepLineCount(reader, definitionDepth);
-			var methodParser = new MethodParser(classInfo);
-			var fieldParser = new FieldParser(classInfo);
+			var methodParser = new MethodParser(classInfo, this.DefaultAccessLevel);
+			var fieldParser = new FieldParser(classInfo, this.DefaultAccessLevel);
 			var enumParser = new EnumValuesParser(classInfo, definitionDepth);
+			var isFirstLine = true;
 
 			while(reader.Position < endOfClass)
 			{
@@ -124,7 +128,12 @@ namespace ClassDiagramGenerator.Models.Parser
 					continue;
 				}
 
-				if(this.TryParseInternal(reader, parentClassName, out var innerInfo))
+				if(isFirstLine && (classInfo.Category == ClassCategory.Enum) && enumParser.TryParse(reader, out var valuesFL))
+				{
+					// Parsing enum values of first line is only executed at first
+					classInfo.Fields.AddRange(valuesFL);
+				}
+				else if(this.TryParseInternal(reader, parentClassName, out var innerInfo))
 				{
 					classInfo.InnerClasses.Add(innerInfo);
 				}
@@ -137,9 +146,9 @@ namespace ClassDiagramGenerator.Models.Parser
 					// Parsing filed is executed after trying to parse method because field pattern also matches method
 					classInfo.Fields.Add(fieldInfo);
 				}
-				else if((classInfo.Category == ClassCategory.Enum) && enumParser.TryParse(reader, out var values))
+				else if(!isFirstLine && (classInfo.Category == ClassCategory.Enum) && enumParser.TryParse(reader, out var values))
 				{
-					// Parsing enum values is executed after trying to parse method and field
+					// Parsing enum values is executed after trying to parse method and field just as with field parsing (except for first line)
 					classInfo.Fields.AddRange(values);
 				}
 				else
@@ -147,6 +156,8 @@ namespace ClassDiagramGenerator.Models.Parser
 					// Skip a line if it did not match any pattern
 					reader.TryRead(out var _);
 				}
+
+				isFirstLine = false;
 			}
 		}
 

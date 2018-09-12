@@ -35,8 +35,12 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			// Lambda format
 			TestcaseParseMethodDefinition("public int Max(int x, int y) => (x > y) ? x : y", true,
 				Modifier.Public, Type("int"), "Max", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+		}
 
-			// C# Generic
+		[TestMethod]
+		public void TestParseGenericMethodDefinition()
+		{
+			// C#
 			TestcaseParseMethodDefinition("public bool Generic<T>(T value)", true,
 				Modifier.Public, Type("bool"), "Generic", List(Arg(Type("T"), "value")));
 			TestcaseParseMethodDefinition("internal static int Where < T > ( T value ) where T : IDisposable", true,
@@ -44,7 +48,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("public bool Generic<T>(T[] value)", true,
 				Modifier.Public, Type("bool"), "Generic", List(Arg(TypeArray("T"), "value")));
 
-			// Java Generic
+			// Java
 			TestcaseParseMethodDefinition("protected <T> bool Generic(T value)", true,
 				Modifier.Protected, Type("bool"), "Generic", List(Arg(Type("T"), "value")));
 			TestcaseParseMethodDefinition("static < T extends String > String Extends ( T value )", true,
@@ -56,8 +60,27 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 
 			TestcaseParseMethodDefinition("internal static bool Where < T > ( T value ) where T : IDisposable", true,
 				Modifier.Internal | Modifier.Static, Type("bool"), "Where", List(Arg(Type("T"), "value")));
+		}
 
-			// Constructor format
+		[TestMethod]
+		public void TestParseMethodDefinitionUsingGenericAndArray()
+		{
+			TestcaseParseMethodDefinition("public List<string> Func()", true,
+				Modifier.Public, Type("List", Type("string")), "Func", null);
+			TestcaseParseMethodDefinition("public List<List<string>> Func(Dictionary<string, List<int>> values)", true,
+				Modifier.Public, Type("List", Type("List", Type("string"))), "Func", List(Arg(Type("Dictionary", Type("string"), Type("List", Type("int"))), "values")));
+			TestcaseParseMethodDefinition("public string[] Func(int[] values)", true,
+				Modifier.Public, TypeArray("string"), "Func", List(Arg(TypeArray("int"), "values")));
+
+			TestcaseParseMethodDefinition("public List<string[]> Func(List<int[]> values)", true,
+				Modifier.Public, Type("List", TypeArray("string")), "Func", List(Arg(Type("List", TypeArray("int")), "values")));
+			TestcaseParseMethodDefinition("public List<string>[] Func(List<int>[] values)", true,
+				Modifier.Public, TypeArray("List", Type("string")), "Func", List(Arg(TypeArray("List", Type("int")), "values")));
+		}
+
+		[TestMethod]
+		public void TestParseConstructorDefinition()
+		{
 			TestcaseParseMethodDefinition("Func()", true,
 				Modifier.None, null, "Func", null);
 			TestcaseParseMethodDefinition("public Func()", true,
@@ -66,8 +89,12 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Private, null, "Func", List(Arg(Type("int"), "x")));
 			TestcaseParseMethodDefinition("internal static Func ( int  x ) ", true,
 				Modifier.Internal | Modifier.Static, null, "Func", List(Arg(Type("int"), "x")));
+		}
 
-			// Attribute / Annotation
+		[TestMethod]
+		public void TestParseMethodDefinitionContainingAttributesOrAnnotations()
+		{
+			// Attribute
 			TestcaseParseMethodDefinition("private void Func([Attribute1] int x)", true,
 				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x")));
 			TestcaseParseMethodDefinition("[Attribute0(\"X\")] private void Func([Attribute1][Attribute2]int x)", true,
@@ -75,6 +102,10 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("private void Func( [Attribute1(X)] [Attribute2] [Attribute3(\"Y\")] int x, [Attribute4]int y)", true,
 				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
 
+			TestcaseParseMethodDefinition("[Attribute0]public Func( [Attribute1(X)] [Attribute2] [Attribute3(\"Y\")] int x, [Attribute4]int y)", true,
+				Modifier.Public, null, "Func", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+
+			// Annotation
 			TestcaseParseMethodDefinition("private void Func(@Annotation1 int x)", true,
 				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x")));
 			TestcaseParseMethodDefinition("@Annotation0(\"X\") private void Func(@Annotation1 @Annotation2 int x)", true,
@@ -82,12 +113,29 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("private void Func(@Annotation1(X) @Annotation2 @Annotation3(\"Y\") int x, @Annotation4 int y)", true,
 				Modifier.Private, Type("void"), "Func", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
 
-			TestcaseParseMethodDefinition("[Attribute0]public Func( [Attribute1(X)] [Attribute2] [Attribute3(\"Y\")] int x, [Attribute4]int y)", true,
-				Modifier.Public, null, "Func", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
 			TestcaseParseMethodDefinition("@Annotation0 public Func(@Annotation1(X) @Annotation2 @Annotation3(\"Y\") int x, @Annotation4 int y)", true,
 				Modifier.Public, null, "Func", List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+		}
 
-			// Not method
+		[TestMethod]
+		public void TestParseMethodDefinitionWithExplicitDefaultAccessLevel()
+		{
+			TestcaseParseMethodDefinition("void Func()", true,
+				Modifier.Internal, Type("void"), "Func", null, null, Modifier.Internal);
+			TestcaseParseMethodDefinition("void Func()", true,
+				Modifier.Package, Type("void"), "Func", null, null, Modifier.Package);
+			TestcaseParseMethodDefinition("void Func()", true,
+				Modifier.Private | Modifier.Protected, Type("void"), "Func", null, null, Modifier.Private | Modifier.Protected);
+
+			TestcaseParseMethodDefinition("void Func()", true,
+				Modifier.Public, Type("void"), "Func", null, null, Modifier.Public | Modifier.Abstract);
+			TestcaseParseMethodDefinition("void Func()", true,
+				Modifier.None, Type("void"), "Func", null, null, Modifier.Abstract | Modifier.Async);
+		}
+
+		[TestMethod]
+		public void TestParseNotMethod()
+		{
 			TestcaseParseMethodDefinition("public void", false);
 			TestcaseParseMethodDefinition("public void Func", false);
 			TestcaseParseMethodDefinition("public object obj = new object()", false);
@@ -125,7 +173,7 @@ protected virtual T SetValue<T>(string x, T value)
 		public void TestParseFailure()
 		{
 			var reader = ReaderFromCode(string.Empty);
-			var parser = new MethodParser(null);
+			var parser = new MethodParser(null, Modifier.None);
 
 			parser.TryParse(reader, out var _).IsFalse();
 		}
@@ -148,11 +196,12 @@ protected virtual T SetValue<T>(string x, T value)
 			TypeInfo returnType = null,
 			string methodName = null,
 			IEnumerable<ArgumentInfo> argTypes = null,
-			ClassInfo parserClassInfo = null)
+			ClassInfo parserClassInfo = null,
+			Modifier defaultAL = Modifier.None)
 		{
 			var reader = ReaderFromCode(code);
 
-			new MethodParser(parserClassInfo).TryParse(reader, out var info).Is(isSuccess);
+			new MethodParser(parserClassInfo, defaultAL).TryParse(reader, out var info).Is(isSuccess);
 
 			if(isSuccess)
 			{
@@ -175,9 +224,10 @@ protected virtual T SetValue<T>(string x, T value)
 			TypeInfo returnType = null,
 			string methodName = null,
 			IEnumerable<ArgumentInfo> argTypes = null,
-			ClassInfo parserClassInfo = null)
+			ClassInfo parserClassInfo = null,
+			Modifier defaultAL = Modifier.None)
 		{
-			TestcaseParseMethodAll(code, isSuccess, 1, mod, returnType, methodName, argTypes, parserClassInfo);
+			TestcaseParseMethodAll(code, isSuccess, 1, mod, returnType, methodName, argTypes, parserClassInfo, defaultAL);
 		}
 	}
 }
