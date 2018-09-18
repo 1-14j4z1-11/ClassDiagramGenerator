@@ -5,13 +5,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Diagram
 {
+	/// <summary>
+	/// Class to create relations between classes from a collection of classes.
+	/// </summary>
 	public static class RelationFactory
 	{
 		/// <summary>

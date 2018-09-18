@@ -6,14 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Diagram
 {
 	/// <summary>
-	/// The class to generate a class diagram written in PlantUML.
+	/// Class to generate a class diagram written in PlantUML.
 	/// </summary>
 	public static class PumlClassDiagramGenerator
 	{

@@ -6,13 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
+using ClassDiagramGenerator.Cui;
 using ClassDiagramGenerator.Models.Diagram;
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
-using ClassDiagramGenerator.Cui;
 
 namespace ClassDiagramGenerator
 {
@@ -24,11 +23,11 @@ namespace ClassDiagramGenerator
 		private static readonly CmdFlag AccessLevelFlag = new CmdFlag(false, 1, "-al", "-accesslevel");
 		private static readonly CmdFlag ExcludedClassFlag = new CmdFlag(false, 1, "-ec", "-excludedclass");
 		private static readonly CmdParser CmdParser = new CmdParser()
-			.AddFlag(InputFlag, "Input directory path")
-			.AddFlag(OutputFlag, "Output file path")
-			.AddFlag(LangFlag, "Programming language", " - C#   : 'cs' or 'csharp'", " - Java : 'java'")
-			.AddFlag(AccessLevelFlag, "Access level(s) of members written to an UML", "Default value is all access levels", "Use ',' as separator to specify multiple access levels")
-			.AddFlag(ExcludedClassFlag, "Excluded class names, which is not written to an UML", "Use ',' as separator to specify multiple classes");
+			.AddFlag(InputFlag, "Input directory path.")
+			.AddFlag(OutputFlag, "Output file path.")
+			.AddFlag(LangFlag, "Programming language.", " - C#   : 'cs' or 'csharp'", " - Java : 'java'")
+			.AddFlag(AccessLevelFlag, "Access levels of members displayed in a diagram.", "Default value is all access levels.", "Use ',' as separator to specify multiple access levels.")
+			.AddFlag(ExcludedClassFlag, "Excluded class names, which is not displayed in a diagram.", "Use ',' as separator to specify multiple classes.");
 
 		private static readonly Language[] Languages = new Language[]
 		{
@@ -38,6 +37,8 @@ namespace ClassDiagramGenerator
 
 		public static void Main(string[] args)
 		{
+			Console.WriteLine($"\nClassDiagramGenerator [Version {GetVersion()}]\n");
+
 			if(!CmdParser.TryParse(args, out var argMap))
 			{
 				Console.WriteLine(CmdParser.Usage());
@@ -55,7 +56,7 @@ namespace ClassDiagramGenerator
 
 			if(lang == null)
 			{
-				Console.WriteLine(CmdParser.Usage());
+				Console.Error.WriteLine($"Invalid language was specified : {langValue}");
 				return;
 			}
 
@@ -64,10 +65,11 @@ namespace ClassDiagramGenerator
 			try
 			{
 				sourceFiles = Directory.GetFiles(inputDir, lang.Extension, SearchOption.AllDirectories);
+				Console.WriteLine($"Read files ... {sourceFiles.Count()}");
 			}
 			catch
 			{
-				Console.WriteLine($"Could not get file list : {inputDir}");
+				Console.Error.WriteLine($"Could not get file list of the directory : {inputDir}");
 				return;
 			}
 
@@ -79,9 +81,11 @@ namespace ClassDiagramGenerator
 			}
 			catch
 			{
-				Console.WriteLine($"Could not open output file : {outputFile}");
+				Console.Error.WriteLine($"Could not open output file : {outputFile}");
 				return;
 			}
+
+			Console.WriteLine($"Completed generating a class diagram >> {outputFile}");
 		}
 
 		/// <summary>
@@ -106,9 +110,11 @@ namespace ClassDiagramGenerator
 				}
 				catch
 				{
-					Console.WriteLine($"Skipped (could not open file) : {file}");
+					Console.Error.WriteLine($"Skipped (could not open file) : {file}");
 				}
 			}
+
+			Console.WriteLine($"Parsed classes ... {classes.Count}");
 
 			var relations = RelationFactory.CreateFromClasses(classes);
 			return PumlClassDiagramGenerator.Generate(title ?? string.Empty, classes, relations, accessLevel, excludedClasses);
@@ -148,6 +154,16 @@ namespace ClassDiagramGenerator
 				return Enumerable.Empty<string>();
 
 			return str.Split(',', ' ', '|');
+		}
+		
+		/// <summary>
+		/// Gets a version of this application.
+		/// </summary>
+		/// <returns>A version of this application</returns>
+		private static string GetVersion()
+		{
+			var assembly = Assembly.GetExecutingAssembly();
+			return assembly.GetName().Version.ToString(3);
 		}
 
 		private class Language

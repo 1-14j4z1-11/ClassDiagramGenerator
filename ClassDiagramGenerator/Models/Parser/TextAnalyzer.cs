@@ -6,12 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
 	/// <summary>
-	/// The support class to analyze text.
+	/// Support class to analyze text.
 	/// </summary>
 	public static class TextAnalyzer
 	{

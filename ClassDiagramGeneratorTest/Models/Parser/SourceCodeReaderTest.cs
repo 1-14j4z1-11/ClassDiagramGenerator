@@ -1,10 +1,12 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using UnitTestSupport.MSTest;
-
 using ClassDiagramGenerator.Models.Parser;
-using static ClassDiagramGeneratorTest.TestSupport;
+using ClassDiagramGeneratorTest.Support;
+using static ClassDiagramGeneratorTest.Support.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
@@ -68,7 +70,7 @@ public class SampleClass
 
 			// [Note]
 			// - Doc comments are removed.
-			// - All Single character is removed.
+			// - All single character is removed.
 			// - String enclosed in '"' is removed.
 			TestcaseReader(code,
 				Text(0, "using System.Collections.Generic"),
@@ -94,8 +96,8 @@ public class SampleClass
 			foreach(var expText in expectedTexts)
 			{
 				reader.TryRead(out var actLine).IsTrue($"Expected line is {expText}, but Faield to read.");
-				actLine.Text.Is(expText.Text, Message.OfValueName("Read Text"));
-				actLine.Depth.Is(expText.Depth, Message.OfValueName("Read Text"));
+				actLine.Text.Is(expText.Text, $"Expected read text is {expText.Text}, but actual text is {actLine.Text}");
+				actLine.Depth.Is(expText.Depth, $"Expected depth of read text is {expText.Depth}, but actual text is {actLine.Depth}");
 			}
 
 			reader.TryRead(out var text).IsFalse($"Expected reader reached end of code, but read a text '{text}'");

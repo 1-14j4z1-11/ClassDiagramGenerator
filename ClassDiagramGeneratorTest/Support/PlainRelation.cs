@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
 
 using ClassDiagramGenerator.Models.Diagram;
 
-namespace ClassDiagramGeneratorTest
+namespace ClassDiagramGeneratorTest.Support
 {
+	/// <summary>
+	/// A simple relation class
+	/// </summary>
 	public class PlainRelation
 	{
 		public PlainRelation(string class1, string class2, RelationType type)

@@ -1,13 +1,15 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using UnitTestSupport.MSTest;
-
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
-using static ClassDiagramGeneratorTest.TestSupport;
+using ClassDiagramGeneratorTest.Support;
+using static ClassDiagramGeneratorTest.Support.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {

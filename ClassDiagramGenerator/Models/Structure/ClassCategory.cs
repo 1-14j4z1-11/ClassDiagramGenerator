@@ -4,14 +4,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Structure
 {
 	/// <summary>
-	/// Specifies the class category.
+	/// Enum of class category.
 	/// </summary>
 	public enum ClassCategory
 	{
@@ -28,6 +25,9 @@ namespace ClassDiagramGenerator.Models.Structure
 		Struct,
 	}
 
+	/// <summary>
+	/// Support class of <see cref="ClassCategory"/>
+	/// </summary>
 	public static class ClassCategories
 	{
 		private static readonly Dictionary<ClassCategory, string> StringMap = new Dictionary<ClassCategory, string>()

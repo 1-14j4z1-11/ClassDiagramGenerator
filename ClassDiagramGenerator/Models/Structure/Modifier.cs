@@ -6,13 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Structure
 {
 	/// <summary>
-	/// Specifies the modifiers.
+	/// Enum of modifier.
 	/// </summary>
 	[Flags]
 	public enum Modifier
@@ -129,7 +127,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		};
 
 		/// <summary>
-		/// Parse <see cref="Modifier"/> from string.
+		/// Parses <see cref="Modifier"/> from string.
 		/// <para>If argument string contains no modifiers or contains only texts that are not modifier, returns <see cref="Modifier.None"/>.</para>
 		/// </summary>
 		/// <param name="str">String to be parsed</param>
@@ -152,7 +150,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		}
 
 		/// <summary>
-		/// Convert <see cref="Modifier"/> into string.
+		/// Converts <see cref="Modifier"/> into string.
 		/// </summary>
 		/// <param name="modifier"></param>
 		/// <returns>String of <see cref="Modifier"/></returns>

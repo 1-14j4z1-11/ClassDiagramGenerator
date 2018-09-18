@@ -6,12 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Cui
 {
 	/// <summary>
-	/// The class to parse command line arguments.
+	/// Class to parse command line arguments.
 	/// </summary>
 	public class CmdParser
 	{

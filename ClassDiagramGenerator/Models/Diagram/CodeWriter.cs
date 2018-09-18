@@ -2,16 +2,12 @@
 // Copyright (c) 2018 Yasuhiro Hayashi
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Diagram
 {
 	/// <summary>
-	/// The class to write codes.
+	/// Class to write codes.
 	/// </summary>
 	public class CodeWriter
 	{

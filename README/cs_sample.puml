@@ -1,0 +1,50 @@
+@startuml class-diagram
+
+skinparam classAttributeIconSize 0
+
+package CSharpSample {
+
+	abstract class Base {
+		# v : Vector2
+		# Base(x : int, y : int)
+		+ BaseMethod() : Vector2
+	}
+
+	class Derived {
+		- z : int
+		+ Derived(x : int, y : int, z : int)
+		+ BaseMethod() : Vector2
+		+ IFMethod() : Item<Vector3>
+	}
+
+	interface Interface<T> {
+		+ {abstract} IFMethod() : Item<T>
+	}
+
+	class Item<T> {
+		+ <<get,set>> Key : string
+		+ <<get,set>> Value : T
+	}
+
+	class Vector2 <<struct>> {
+		+ <<get,set>> X : int
+		+ <<get,set>> Y : int
+	}
+
+	class Vector3 <<struct>> {
+		+ <<get,set>> X : int
+		+ <<get,set>> Y : int
+		+ <<get,set>> Z : int
+	}
+
+}
+
+Base -down-> Vector2
+Interface .down.> Item
+Derived -up-|> Base
+Derived .up.|> Interface
+Derived .down.> Vector2
+Derived .down.> Item
+Derived .down.> Vector3
+
+@enduml

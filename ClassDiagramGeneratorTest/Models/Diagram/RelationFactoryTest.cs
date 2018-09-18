@@ -1,14 +1,16 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using UnitTestSupport.MSTest;
-
 using ClassDiagramGenerator.Models.Diagram;
 using ClassDiagramGenerator.Models.Structure;
+using ClassDiagramGeneratorTest.Support;
 using static ClassDiagramGenerator.Models.Diagram.RelationType;
-using static ClassDiagramGeneratorTest.TestSupport;
+using static ClassDiagramGeneratorTest.Support.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Diagram
 {
@@ -176,7 +178,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				ClassFully("External", Type("Outer.Inner.A3b")),
 			});
 
-			// Note that relation of A3b does not contain
+			// Note that relation of 'A3b' is not contained
 			AreEqualRelations(relations,
 				Relation("Outer.Inner.MainClass", "R1", Dependency),
 				Relation("Outer.Inner.MainClass", "Inner2.R2", Dependency),

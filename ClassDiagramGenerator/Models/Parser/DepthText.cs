@@ -5,13 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
 	/// <summary>
-	/// The class possessing text and depth.
+	/// Class possessing text and depth.
 	/// </summary>
 	public class DepthText
 	{

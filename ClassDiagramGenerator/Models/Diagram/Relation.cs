@@ -5,8 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassDiagramGenerator.Models.Structure;
 using static ClassDiagramGenerator.Models.Diagram.RelationType;
@@ -14,7 +12,7 @@ using static ClassDiagramGenerator.Models.Diagram.RelationType;
 namespace ClassDiagramGenerator.Models.Diagram
 {
 	/// <summary>
-	/// Specifies the relation type.
+	/// Enum of relation type.
 	/// </summary>
 	public enum RelationType
 	{
@@ -34,7 +32,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 	}
 
 	/// <summary>
-	/// The class that indicates relation between two classes.
+	/// Class that indicates relation between two classes.
 	/// </summary>
 	public class Relation
 	{

@@ -1,0 +1,54 @@
+@startuml class-diagram
+
+skinparam classAttributeIconSize 0
+
+package java_sample {
+
+	abstract class Base {
+		# v : Vector2
+		# Base(x : int, y : int)
+		+ BaseMethod() : Vector2
+	}
+
+	class Derived {
+		- z : int
+		+ Derived(x : int, y : int, z : int)
+		+ BaseMethod() : Vector2
+		+ IFMethod() : Item<Vector3>
+	}
+
+	interface Interface<T> {
+		+ {abstract} IFMethod() : Item<T>
+	}
+
+	class Item<T> {
+		- key : String
+		- value : T
+		+ getKey() : String
+		+ setKey(key : String) : void
+		+ getValue() : T
+		+ setValue(value : T) : void
+	}
+
+	class Vector2 {
+		+ x : int
+		+ y : int
+	}
+
+	class Vector3 {
+		+ x : int
+		+ y : int
+		+ z : int
+	}
+
+}
+
+Base -down-> Vector2
+Derived -up-|> Base
+Derived .up.|> Interface
+Derived .down.> Vector2
+Derived .down.> Item
+Derived .down.> Vector3
+Interface .down.> Item
+
+@enduml

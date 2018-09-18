@@ -3,15 +3,11 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Structure
 {
 	/// <summary>
-	/// The class possessing argument information.
+	/// Class possessing argument information.
 	/// </summary>
 	public class ArgumentInfo
 	{

@@ -43,9 +43,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="UnitTestSupport.MSTest">
-      <HintPath>..\lib\UnitTestSupport.MSTest.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cui\CmdParserTest.cs" />
@@ -55,6 +52,7 @@
     <Compile Include="Models\Parser\ComponentParserTest.cs" />
     <Compile Include="Models\Parser\EnumValuesParserTest.cs" />
     <Compile Include="Models\Parser\SourceCodeReaderTest.cs" />
+    <Compile Include="Support\AssertEx.cs" />
     <Compile Include="Support\PlainRelation.cs" />
     <Compile Include="Support\TestSupport.cs" />
     <Compile Include="Models\Parser\FieldParserTest.cs" />

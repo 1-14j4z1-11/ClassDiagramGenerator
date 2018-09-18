@@ -6,14 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
 	/// <summary>
-	/// The class to read each line from source code.
+	/// Class to read each line from source code.
 	/// </summary>
 	public class SourceCodeReader
 	{

@@ -4,15 +4,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
+	/// <summary>
+	/// Class to parse a C# source code.
+	/// </summary>
 	public class CSharpCodeParser : ISourceCodeParser
 	{
 		private static readonly Regex NameSpaceRegex = new Regex("^\\s*namespace\\s+([^\\s,:\\[\\]\\(\\)<>=]+)\\s*");

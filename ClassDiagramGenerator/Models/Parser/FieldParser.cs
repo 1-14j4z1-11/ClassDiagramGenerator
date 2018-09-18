@@ -2,19 +2,15 @@
 // Copyright (c) 2018 Yasuhiro Hayashi
 //
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
 	/// <summary>
-	/// The class to parse a field of C# and Java.
+	/// Class to parse a field of C# and Java.
 	/// </summary>
 	public class FieldParser : ComponentParser<FieldInfo>
 	{

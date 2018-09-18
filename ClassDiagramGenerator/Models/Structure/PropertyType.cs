@@ -3,15 +3,11 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Structure
 {
 	/// <summary>
-	/// Specifies the property types.
+	/// Enum of property types.
 	/// </summary>
 	[Flags]
 	public enum PropertyType

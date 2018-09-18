@@ -2,17 +2,14 @@
 // Copyright (c) 2018 Yasuhiro Hayashi
 //
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Structure
 {
 	/// <summary>
-	/// The class possessing method information.
+	/// Class possessing method information.
 	/// </summary>
 	public class MethodInfo
 	{

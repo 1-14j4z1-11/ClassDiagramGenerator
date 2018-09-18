@@ -1,16 +1,19 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using UnitTestSupport.MSTest;
 using ClassDiagramGenerator.Models.Diagram;
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
-using static ClassDiagramGeneratorTest.TestSupport;
+using ClassDiagramGeneratorTest.Support;
+using static ClassDiagramGeneratorTest.Support.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Diagram
 {
@@ -159,8 +162,12 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			var diag = PumlClassDiagramGenerator.Generate(title, classes, relations, accessFilter, excludedClasses);
 			diag = Regex.Replace(diag, "\\s+", string.Empty);
 
+			var emptyDiag = PumlClassDiagramGenerator.Generate(title, null, null);
+			var emptyDiagLines = emptyDiag.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+				.Select(s => Regex.Replace(s, "\\s+", string.Empty));
+
 			var allExpLines = expectedLines
-				.Concat(new[] { $"@startuml {title}", "@enduml" })
+				.Concat(emptyDiagLines)		// To check common lines
 				.Concat(expectedIgnoreLines?.Select(s => CommentSymbol + s) ?? Enumerable.Empty<string>())
 				.Select(s => Regex.Replace(s, "\\s+", string.Empty));
 
@@ -172,14 +179,18 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 
 				if(matchedPattern == null)
 				{
-					TestResults.Fail($"Expected '{line}' is contained in a generated class diagram"
+					AssertEx.Fail($"Expected '{line}' is contained in a generated class diagram"
 						+ $", but actual diagram does not contain it.");
 				}
 
 				diag = diag.Remove(diag.IndexOf(matchedPattern), matchedPattern.Length);
 			}
+			
+			// Remove comment symbol attached to bracket.
+			diag = diag.Replace($"{CommentSymbol}{{", "{").Replace($"{CommentSymbol}}}", "}");
 
-			Console.WriteLine($"[Unchecked code]\n{diag}\n");
+			// If all texts are checked, diag is expected to contain only symbols.
+			Regex.IsMatch(diag, "^[\\s{}]*$").IsTrue($"Unexpected lines are contained {diag}");
 		}
 
 		/// <summary>

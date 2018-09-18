@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <TestSettings name="TestSettings" id="1a36136a-b366-44e0-8a30-6e53e3f29733" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
-  <Description>これらはローカル テスト実行用の既定のテスト設定です。</Description>
+  <Description>Local test setting</Description>
   <Deployment>
     <DeploymentItem filename="ClassDiagramGeneratorTest\TestFiles\" outputDirectory="TestFiles\" />
   </Deployment>

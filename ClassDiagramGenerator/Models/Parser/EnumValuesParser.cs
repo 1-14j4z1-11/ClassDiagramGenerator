@@ -2,17 +2,17 @@
 // Copyright (c) 2018 Yasuhiro Hayashi
 //
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
+	/// <summary>
+	/// Class to parse enum values.
+	/// </summary>
 	public class EnumValuesParser : ComponentParser<IEnumerable<FieldInfo>>
 	{
 		private static readonly Regex EnumValueRegex = new Regex($"({NamePattern})(?:\\s*=\\s*{NamePattern})?");
