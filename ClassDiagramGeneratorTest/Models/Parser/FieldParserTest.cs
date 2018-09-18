@@ -31,6 +31,13 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Private | Modifier.Protected | Modifier.Abstract, Type("IEnumerable", Type("string")), "this", PropertyType.Indexer, List(Arg(Type("int"), "i"), Arg(Type("string"), "j")));
 			TestcaseParseFieldDefinition("protected internal event Action EventHandler", true,
 				Modifier.Protected | Modifier.Internal | Modifier.Event, Type("Action"), "EventHandler", PropertyType.None);
+			
+			TestcaseParseFieldDefinition("internal Outer.Inner value", true,
+				Modifier.Internal, Type("Outer.Inner"), "value", PropertyType.None);
+			TestcaseParseFieldDefinition("internal Outer<int>.Inner value", true,
+				Modifier.Internal, Type("Outer.Inner"), "value", PropertyType.None);
+			TestcaseParseFieldDefinition("internal Outer<int>.Inner<int> value", true,
+				Modifier.Internal, Type("Outer.Inner", Type("int")), "value", PropertyType.None);
 		}
 
 		[TestMethod]
@@ -110,6 +117,9 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.None, Type("int"), "Property", PropertyType.Get | PropertyType.Set);
 			TestcaseParseFieldAll("int Property { get; protected internal set; }", true, 3,
 				Modifier.None, Type("int"), "Property", PropertyType.Get | PropertyType.Set);
+
+			TestcaseParseFieldAll("int Property => 0", true, 1,
+				Modifier.None, Type("int"), "Property", PropertyType.Get);
 		}
 
 		[TestMethod]
@@ -136,6 +146,9 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.None, Type("string"), "this", PropertyType.Get | PropertyType.Indexer, List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
 			TestcaseParseFieldAll("string this [ int x, int y ] { get { return values[x][y]; } internal set { values[x][y] = value; } }", true, 5,
 				Modifier.None, Type("string"), "this", PropertyType.Get | PropertyType.Set | PropertyType.Indexer, List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+
+			TestcaseParseFieldAll("int this[string x] => values[x]", true, 1,
+				Modifier.None, Type("int"), "this", PropertyType.Get | PropertyType.Indexer, List(Arg(Type("string"), "x")));
 		}
 
 		[TestMethod]

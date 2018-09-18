@@ -55,6 +55,15 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseTypes("List<string>[] ...", TypeArray("List", 2, Type("string")));
 		}
 
+		[TestMethod]
+		public void TestNestedTypes()
+		{
+			TestcaseParseTypes("Outer.Inner", Type("Outer.Inner"));
+			TestcaseParseTypes("Outer.Inner<int>", Type("Outer.Inner", Type("int")));
+			TestcaseParseTypes("Outer<int>.Inner", Type("Outer.Inner"));
+			TestcaseParseTypes("Outer<int>.Inner<int>", Type("Outer.Inner", Type("int")));
+		}
+
 		private void TestcaseParseTypes(string targetText, TypeInfo expextedType)
 		{
 			Action<IEnumerable<TypeInfo>, IEnumerable<TypeInfo>> recursiveCheck = null;

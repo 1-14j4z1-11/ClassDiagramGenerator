@@ -55,7 +55,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 
 				foreach(var cls in group.OrderBy(c => c.Name))
 				{
-					WriteClass(writer, cls, accessFilter, excludedClasses);
+					WriteClassAndUpdateExcludedClasses(writer, cls, accessFilter, ref excludedClasses);
 				}
 
 				writer.DecreaseIndent();
@@ -99,6 +99,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 
 		/// <summary>
 		/// Writes a class which structs class diagram into <paramref name="writer"/>.
+		/// And if the class is excluded target and it contains inner classes, adds the inner classes into <paramref name="excludedClasses"/>.
 		/// <para>If <paramref name="accessFilter"/> is specified,
 		/// contents that do not correspond to the filter are not described.</para>
 		/// </summary>
@@ -106,7 +107,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <param name="classInfo"><see cref="ClassInfo"/> to be written</param>
 		/// <param name="accessFilter">Access level filter</param>
 		/// <param name="excludedClasses">A collection of class names not to be written to a class diagram</param>
-		private static void WriteClass(CodeWriter writer, ClassInfo classInfo, Modifier accessFilter, IEnumerable<string> excludedClasses)
+		private static void WriteClassAndUpdateExcludedClasses(CodeWriter writer, ClassInfo classInfo, Modifier accessFilter, ref IEnumerable<string> excludedClasses)
 		{
 			if(classInfo == null)
 				throw new ArgumentNullException();
@@ -157,14 +158,16 @@ namespace ClassDiagramGenerator.Models.Diagram
 
 			writer.DecreaseIndent();
 			writer.Write("}").NewLine().NewLine();
+			
+			EndCommentMode(writer);
 
 			// Writes inner classes in this class
 			foreach(var innerClass in classInfo.InnerClasses)
 			{
-				WriteClass(writer, innerClass, accessFilter, excludedClasses);
+				// If an outer class is excluded target, its inner class is also excluded.
+				excludedClasses = isExcludedClass ? excludedClasses.Concat(new[] { innerClass.Name }) : excludedClasses;
+				WriteClassAndUpdateExcludedClasses(writer, innerClass, accessFilter, ref excludedClasses);
 			}
-
-			EndCommentMode(writer);
 		}
 
 		/// <summary>

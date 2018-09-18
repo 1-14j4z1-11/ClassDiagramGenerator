@@ -42,7 +42,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected static readonly string AnnotationPattern = $"(?:\\s*@{NamePattern}\\s*(?:\\([^\\(\\)]*\\))?\\s*)*";
 
 		/// <summary>Pattern string that matches type (no grouping)</summary>
-		protected static readonly string TypePattern = $"{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?(?:\\s*\\[[\\s,]*\\]\\s*)*";
+		protected static readonly string TypePattern = $"{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?(?:\\.{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?)*(?:\\s*\\[[\\s,]*\\]\\s*)*";
 
 		/// <summary>Pattern string that matches single argument (no grouping)</summary>
 		protected static readonly string ArgumentPattern = $"(?:{AttributePattern}{AnnotationPattern}(?:(?:this|in|out|ref|params)\\s+)?(?:{TypePattern}(?:{VarArgPattern})?)\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
@@ -54,8 +54,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// </summary>
 		private static readonly Regex ArgumentRegex = new Regex(ArgumentPattern
 			.Replace($"(?:{TypePattern}", $"({TypePattern}")
-			.Replace($"(?:{NamePattern}", $"({NamePattern}")
-			.Replace($"(?:{VarArgPattern}", $"({VarArgPattern}"));
+			.Replace($"(?:{NamePattern}", $"({NamePattern}"));
 
 		/// <summary>
 		/// Constructor.
@@ -99,7 +98,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			return argText.Split(",",  "<", ">", d => d == 0)
 				.Select(a => ArgumentRegex.Match(a))
 				.Where(m => m.Success)
-				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[1].Value), m.Groups[3].Value));
+				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[1].Value), m.Groups[2].Value));
 		}
 
 		/// <summary>
@@ -158,7 +157,17 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected static TypeInfo ParseType(string typeText)
 		{
 			typeText = EscapeMultiDimensionalArray(Regex.Replace(typeText, VarArgPattern, "[]"));
-			var words = TextAnalyzer.SplitWithDepth(typeText, "<", ">")
+			var typeSegments = typeText.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
+			if(!typeSegments.Any())
+				return null;
+			
+			// Extracts an outer class names, and its type arguments are removed
+			var outerName = string.Join(".", typeSegments.Take(typeSegments.Count() - 1));
+			outerName = TextAnalyzer.SplitWithDepth(outerName, "<", ">").Where(t => t.Depth == 0).Marge("<", ">");
+
+			// Parses an inner class name (including its type arguments)
+			var words = TextAnalyzer.SplitWithDepth(typeSegments.Last(), "<", ">")
 				.SplitEach(",")
 				.SplitEach("[") // Use '[' as a separator, and ']' is treated as an array descriptor.
 				.Where(w => !string.IsNullOrWhiteSpace(w.Text))
@@ -168,8 +177,9 @@ namespace ClassDiagramGenerator.Models.Parser
 			if(words.Count == 0)
 				return null;
 
-			var rightBracketRegex = new Regex("^[\\s,]*\\]\\s*$");
-			var rootType = new TypeInfo.Mutable(words[0].Text);
+			var rootFullName = !string.IsNullOrEmpty(outerName) ? outerName + "." + words[0].Text : words[0].Text;
+			var rightBracketRegex = new Regex("^\\s*\\]\\s*$");
+			var rootType = new TypeInfo.Mutable(rootFullName);
 			var rootDepth = words[0].Depth;
 
 			for(var i = 1; i < words.Count; i++)

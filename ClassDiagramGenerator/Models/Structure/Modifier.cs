@@ -145,7 +145,7 @@ namespace ClassDiagramGenerator.Models.Structure
 
 			foreach(var enumValue in StringMap.Keys.Cast<Modifier>())
 			{
-				if((string)StringMap[enumValue] == str)
+				if(((string)StringMap[enumValue]).ToLower() == str.ToLower())
 				{
 					return enumValue;
 				}
