@@ -40,7 +40,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <param name="accessFilter">Access level filter</param>
 		/// <param name="excludedClasses">A collection of class names not to be written to a class diagram</param>
 		/// <returns>Class diagram text written in PlantUML</returns>
-		public static string Generate(string title, IEnumerable<ClassInfo> classInfoList, IEnumerable<Relation> relations, Modifier accessFilter = Modifier.AllAccessLevels, IEnumerable<string> excludedClasses = null)
+		public static string Generate(string title, IEnumerable<ClassInfo> classInfoList, IEnumerable<Relation> relations, Modifier accessFilter = Modifiers.AllAccessLevels, IEnumerable<string> excludedClasses = null)
 		{
 			var writer = new CodeWriter(NewLine);
 			WriteHeader(writer, title);
@@ -247,7 +247,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <returns>whether access level of <paramref name="target"/> is included in <paramref name="filter"/></returns>
 		private static bool IsTargetAccessModifier(Modifier target, Modifier filter)
 		{
-			return (target & filter & Modifier.AllAccessLevels) != Modifier.None;
+			return (target & filter & Modifiers.AllAccessLevels) != Modifier.None;
 		}
 
 		/// <summary>

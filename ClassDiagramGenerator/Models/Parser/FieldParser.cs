@@ -63,7 +63,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			// Parsing must be treated as failure if parsed type name matches modifier,
 			// because field regex pattern matches invalid pattern below.
 			// ex) "public int" -> Type : public, FiledName : int
-			if(Modifiers.Contains(type.Name))
+			if(AllModifiers.Contains(type.Name))
 			{
 				reader.Position--;
 				info = null;

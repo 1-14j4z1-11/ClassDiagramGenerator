@@ -19,12 +19,12 @@ namespace ClassDiagramGenerator.Models.Parser
 	public abstract class ComponentParser<T>
 	{
 		/// <summary>A list containing strings to be used as modifier</summary>
-		protected static readonly IReadOnlyList<string> Modifiers
-			= new ReadOnlyCollection<string>(new List<string>(
-				Enum.GetValues(typeof(Modifier)).Cast<Modifier>().Select(m => m.ToModifierString()).Where(m => !string.IsNullOrEmpty(m))));
+		protected static readonly IReadOnlyList<string> AllModifiers
+			= new ReadOnlyCollection<string>(
+				new List<string>(Modifiers.AllModifiers.Select(m => m.ToModifierString()).Where(m => !string.IsNullOrEmpty(m))));
 
 		/// <summary>Pattern string that matches modifiers (no grouping)</summary>
-		protected static readonly string ModifierPattern = "(?:" + string.Join("|", Modifiers) + ")";
+		protected static readonly string ModifierPattern = "(?:" + string.Join("|", AllModifiers) + ")";
 
 		/// <summary>Pattern string that matches name (no grouping)</summary>
 		protected static readonly string NamePattern = "[^\\s,:\\[\\]\\(\\)<>=]+";
@@ -58,7 +58,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// (Modifiers not indicating access level are ignored)</param>
 		public ComponentParser(Modifier defaultAccessLevel)
 		{
-			this.DefaultAccessLevel = defaultAccessLevel & Modifier.AllAccessLevels;
+			this.DefaultAccessLevel = defaultAccessLevel & Modifiers.AllAccessLevels;
 		}
 
 		/// <summary>
@@ -137,7 +137,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				mod |= Structure.Modifiers.Parse(word);
 			}
 
-			if((mod & Modifier.AllAccessLevels) == Modifier.None)
+			if((mod & Modifiers.AllAccessLevels) == Modifier.None)
 				mod |= this.DefaultAccessLevel;
 
 			return mod;

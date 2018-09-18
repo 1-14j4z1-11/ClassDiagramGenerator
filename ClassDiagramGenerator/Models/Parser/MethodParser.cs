@@ -106,7 +106,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				return mod;
 
 			// Method in interface is always Public and Abstract
-			mod &= ~Modifier.AllAccessLevels;
+			mod &= ~Modifiers.AllAccessLevels;
 			return Modifier.Public | Modifier.Abstract | mod;
 		}
 	}

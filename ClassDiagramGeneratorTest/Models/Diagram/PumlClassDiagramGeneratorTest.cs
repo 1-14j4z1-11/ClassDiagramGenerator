@@ -64,7 +64,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			var expectedAll = baseExpected.Concat(expectedXClass);
 
 			TestcaseGenerate(CSParser, LoadCode("Base.cs"), expectedAll);
-			TestcaseGenerate(CSParser, LoadCode("Base.cs"), baseExpected, expectedXClass, Modifier.AllAccessLevels, List("X"));
+			TestcaseGenerate(CSParser, LoadCode("Base.cs"), baseExpected, expectedXClass, Modifiers.AllAccessLevels, List("X"));
 			TestcaseGenerate(CSParser, LoadCode("Base.cs"),
 				expectedAll.Where(s => !s.StartsWith("-")),
 				expectedAll.Where(s => s.StartsWith("-")),
@@ -122,7 +122,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			var expectedAll = baseExpected.Concat(expectedXClass);
 
 			TestcaseGenerate(JavaParser, LoadCode("Base.java"), baseExpected.Concat(expectedXClass));
-			TestcaseGenerate(JavaParser, LoadCode("Base.java"), baseExpected, expectedXClass, Modifier.AllAccessLevels, List("X"));
+			TestcaseGenerate(JavaParser, LoadCode("Base.java"), baseExpected, expectedXClass, Modifiers.AllAccessLevels, List("X"));
 			TestcaseGenerate(JavaParser, LoadCode("Base.java"),
 				expectedAll.Where(s => !s.StartsWith("~") && !s.StartsWith("#")),
 				expectedAll.Where(s => s.StartsWith("~") || s.StartsWith("#")),
@@ -151,7 +151,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			string inputCode,
 			IEnumerable<string> expectedLines,
 			IEnumerable<string> expectedIgnoreLines = null,
-			Modifier accessFilter = Modifier.AllAccessLevels,
+			Modifier accessFilter = Modifiers.AllAccessLevels,
 			IEnumerable<string> excludedClasses = null)
 		{
 			var title = "test_title";

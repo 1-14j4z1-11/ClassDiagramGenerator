@@ -88,9 +88,6 @@ namespace ClassDiagramGenerator.Models.Structure
 
 		/// <summary>synchronized (Java only)</summary>
 		Synchronized = 1 << 23,
-
-		/// <summary>All access levels</summary>
-		AllAccessLevels = Public | Protected | Internal | Package | Private,
 	}
 
 	/// <summary>
@@ -98,6 +95,9 @@ namespace ClassDiagramGenerator.Models.Structure
 	/// </summary>
 	public static class Modifiers
 	{
+		/// <summary>All access levels</summary>
+		public const Modifier AllAccessLevels = Modifier.Public | Modifier.Protected | Modifier.Internal | Modifier.Package | Modifier.Private;
+
 		private static readonly OrderedDictionary StringMap = new OrderedDictionary()
 		{
 			[Modifier.Public] = "public",
@@ -125,6 +125,11 @@ namespace ClassDiagramGenerator.Models.Structure
 			[Modifier.Native] = "native",
 			[Modifier.Synchronized] = "synchronized",
 		};
+
+		/// <summary>
+		/// Gets all <see cref="Modifier"/> values.
+		/// </summary>
+		public static IEnumerable<Modifier> AllModifiers { get; } = Enum.GetValues(typeof(Modifier)).Cast<Modifier>();
 
 		/// <summary>
 		/// Parses <see cref="Modifier"/> from string.
