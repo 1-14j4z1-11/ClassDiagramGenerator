@@ -48,7 +48,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("internal static int Where < T > ( T value ) where T : IDisposable", true,
 				Modifier.Internal | Modifier.Static, Type("int"), "Where", List(Arg(Type("T"), "value")));
 			TestcaseParseMethodDefinition("public bool Generic<T>(T[] value)", true,
-				Modifier.Public, Type("bool"), "Generic", List(Arg(TypeArray("T"), "value")));
+				Modifier.Public, Type("bool"), "Generic", List(Arg(TypeArray("T", 1), "value")));
 
 			// Java
 			TestcaseParseMethodDefinition("protected <T> bool Generic(T value)", true,
@@ -72,12 +72,23 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("public List<List<string>> Func(Dictionary<string, List<int>> values)", true,
 				Modifier.Public, Type("List", Type("List", Type("string"))), "Func", List(Arg(Type("Dictionary", Type("string"), Type("List", Type("int"))), "values")));
 			TestcaseParseMethodDefinition("public string[] Func(int[] values)", true,
-				Modifier.Public, TypeArray("string"), "Func", List(Arg(TypeArray("int"), "values")));
+				Modifier.Public, TypeArray("string", 1), "Func", List(Arg(TypeArray("int", 1), "values")));
+			TestcaseParseMethodDefinition("public string[][] Func(int[] ... values)", true,
+				Modifier.Public, TypeArray("string", 2), "Func", List(Arg(TypeArray("int", 2), "values")));
+			TestcaseParseMethodDefinition("public string[][] Func(params int[] values)", true,
+				Modifier.Public, TypeArray("string", 2), "Func", List(Arg(TypeArray("int", 1), "values")));
 
 			TestcaseParseMethodDefinition("public List<string[]> Func(List<int[]> values)", true,
-				Modifier.Public, Type("List", TypeArray("string")), "Func", List(Arg(Type("List", TypeArray("int")), "values")));
+				Modifier.Public, Type("List", TypeArray("string", 1)), "Func", List(Arg(Type("List", TypeArray("int", 1)), "values")));
 			TestcaseParseMethodDefinition("public List<string>[] Func(List<int>[] values)", true,
-				Modifier.Public, TypeArray("List", Type("string")), "Func", List(Arg(TypeArray("List", Type("int")), "values")));
+				Modifier.Public, TypeArray("List", 1, Type("string")), "Func", List(Arg(TypeArray("List", 1, Type("int")), "values")));
+			TestcaseParseMethodDefinition("public List<string>[][] Func(List<int>[][] ... values)", true,
+				Modifier.Public, TypeArray("List", 2, Type("string")), "Func", List(Arg(TypeArray("List", 3, Type("int")), "values")));
+			TestcaseParseMethodDefinition("public List<string>[][] Func(params List<int>[][] values)", true,
+				Modifier.Public, TypeArray("List", 2, Type("string")), "Func", List(Arg(TypeArray("List", 2, Type("int")), "values")));
+			
+			TestcaseParseMethodDefinition("public string[,] Func(int[,] values)", true,
+				Modifier.Public, TypeArray("string", 2), "Func", List(Arg(TypeArray("int", 2), "values")));
 		}
 
 		[TestMethod]
@@ -151,7 +162,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		public void TestParseMethodAll()
 		{
 			TestcaseParseMethodAll(@"public static void Main(string[] args) { Console.WriteLine(""Hello world.""); }", true, 2,
-				Modifier.Public | Modifier.Static, Type("void"), "Main", List(Arg(TypeArray("string"), "args")));
+				Modifier.Public | Modifier.Static, Type("void"), "Main", List(Arg(TypeArray("string", 1), "args")));
 
 			TestcaseParseMethodAll(@"
 protected virtual T SetValue<T>(string x, T value)

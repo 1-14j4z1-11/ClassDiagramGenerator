@@ -22,7 +22,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		{ }
 
 		[TestMethod]
-		public void TestParseType()
+		public void TestParseGenericTypes()
 		{
 			TestcaseParseTypes("string", Type("string"));
 			TestcaseParseTypes("List<string>", Type("List", Type("string")));
@@ -32,15 +32,27 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Type("Dictionary", Type("string"), Type("int")));
 			TestcaseParseTypes("Dictionary<List<Dictionary<List<string>, int>>, Dictionary<int, List<int>>>",
 				Type("Dictionary", Type("List", Type("Dictionary", Type("List", Type("string")), Type("int"))), Type("Dictionary", Type("int"), Type("List", Type("int")))));
+		}
 
-			TestcaseParseTypes("string[]", TypeArray("string"));
-			TestcaseParseTypes("List<string>[]", TypeArray("List", Type("string")));
+		[TestMethod]
+		public void TestParseArrayTypes()
+		{
+			TestcaseParseTypes("string[]", TypeArray("string", 1));
+			TestcaseParseTypes("List<string>[]", TypeArray("List", 1, Type("string")));
 			TestcaseParseTypes("List < List < int [ ] > > [ ]",
-				TypeArray("List", Type("List", TypeArray("int"))));
+				TypeArray("List", 1, Type("List", TypeArray("int", 1))));
 			TestcaseParseTypes("Dictionary<string[],int[]>[]",
-				TypeArray("Dictionary", TypeArray("string"), TypeArray("int")));
+				TypeArray("Dictionary", 1, TypeArray("string", 1), TypeArray("int", 1)));
 			TestcaseParseTypes("Dictionary < List<Dictionary<List<string>, int>> [] , Dictionary<int[], List<int>[]> > [ ]",
-				TypeArray("Dictionary", TypeArray("List", Type("Dictionary", Type("List", Type("string")), Type("int"))), Type("Dictionary", TypeArray("int"), TypeArray("List", Type("int")))));
+				TypeArray("Dictionary", 1, TypeArray("List", 1, Type("Dictionary", Type("List", Type("string")), Type("int"))), Type("Dictionary", TypeArray("int", 1), TypeArray("List", 1, Type("int")))));
+
+			TestcaseParseTypes("string[][]", TypeArray("string", 2));
+			TestcaseParseTypes("string[][][]", TypeArray("string", 3));
+			TestcaseParseTypes("string...", TypeArray("string", 1));
+			TestcaseParseTypes("string[] ...", TypeArray("string", 2));
+			TestcaseParseTypes("List<string> ...", TypeArray("List", 1, Type("string")));
+			TestcaseParseTypes("List<string>[] ...", TypeArray("List", 2, Type("string")));
+			TestcaseParseTypes("List<string>[] ...", TypeArray("List", 2, Type("string")));
 		}
 
 		private void TestcaseParseTypes(string targetText, TypeInfo expextedType)

@@ -92,16 +92,17 @@ namespace ClassDiagramGeneratorTest.Support
 		{
 			return new TypeInfo(type, typeArgs);
 		}
-
+		
 		/// <summary>
-		/// Creates a Array <see cref="TypeInfo"/>.
+		/// Creates an Array <see cref="TypeInfo"/>.
 		/// </summary>
 		/// <param name="type">Type name</param>
+		/// <param name="dim">Array dimension</param>
 		/// <param name="typeArgs">Type arguments</param>
 		/// <returns><see cref="TypeInfo"/></returns>
-		public static TypeInfo TypeArray(string type, params TypeInfo[] typeArgs)
+		public static TypeInfo TypeArray(string type, int dim, params TypeInfo[] typeArgs)
 		{
-			return new TypeInfo(true, type, typeArgs);
+			return new TypeInfo(type, dim, typeArgs);
 		}
 
 		/// <summary>
