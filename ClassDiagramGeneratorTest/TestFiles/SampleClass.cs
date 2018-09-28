@@ -12,7 +12,7 @@ namespace CSharp.Testcase2
 
 		protected SampleClass(List<int[,]> x, List<string[][][]> y) { }
 
-		protected internal int[][] X { get;set; }
+		protected internal int[][] X { get; set; }
 		
 		internal string[,,] Y => null;
 
@@ -45,6 +45,12 @@ namespace CSharp.Testcase2
 			{
 				get => this.y;
 				set => this.y = value;
+			}
+
+			string Func<U, V>(U i, out V o) where V : new()
+			{
+				o = new V();
+				return null;
 			}
 		}
 	}

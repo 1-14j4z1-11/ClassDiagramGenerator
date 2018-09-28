@@ -19,9 +19,6 @@ namespace ClassDiagramGenerator.Models.Parser
 		private static readonly IEnumerable<string> Categories = Enum.GetValues(typeof(ClassCategory)).Cast<ClassCategory>().Select(c => c.ToCategoryString());
 		private static readonly string ClassCategoryPattern = "(?:" + string.Join("|", Categories) + ")";
 
-		// Pattern string that matches type parameter enclosed in &lt;&gt; (no grouping)</summary>
-		private static readonly string TypeParamPattern = "[^:\\[\\]\\(\\)=<>]+";
-
 		// Pattern string that matches class type (Note that it differs from TypePattern, no grouping)</summary>
 		private static readonly string ClassTypePattern = $"{NamePattern}(?:\\s*<{TypeParamPattern}>\\s*)?";
 

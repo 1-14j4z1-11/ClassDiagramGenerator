@@ -21,7 +21,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <summary>A list containing strings to be used as modifier</summary>
 		protected static readonly IReadOnlyList<string> AllModifiers
 			= new ReadOnlyCollection<string>(
-				new List<string>(Modifiers.AllModifiers.Select(m => m.ToModifierString()).Where(m => !string.IsNullOrEmpty(m))));
+				Modifiers.AllModifiers.Select(m => m.ToModifierString()).Where(m => !string.IsNullOrEmpty(m)).ToList());
 
 		/// <summary>Pattern string that matches variable arguments mark '...'</summary>
 		private static readonly string VarArgPattern = "\\s*\\.\\.\\.\\s*";
@@ -32,7 +32,10 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <summary>Pattern string that matches name (no grouping)</summary>
 		protected static readonly string NamePattern = "[^\\s,:\\[\\]\\(\\)<>=]+";
 
-		/// <summary>Pattern string that matches type argument enclosed in &lt;&gt; (no grouping)</summary>
+		/// <summary>Pattern string that matches type 'parameter' enclosed in &lt;&gt; (no grouping)</summary>
+		protected static readonly string TypeParamPattern = "[^:\\[\\]\\(\\)<>=]+";
+		
+		/// <summary>Pattern string that matches type 'argument' enclosed in &lt;&gt; (no grouping)</summary>
 		protected static readonly string TypeArgPattern = "[^:\\(\\)=]+";
 
 		/// <summary>Pattern string that matches Attributes of C# (no grouping)</summary>

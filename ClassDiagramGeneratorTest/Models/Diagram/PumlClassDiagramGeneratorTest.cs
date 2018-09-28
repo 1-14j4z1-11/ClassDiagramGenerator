@@ -161,6 +161,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"+ Inner(x : double, y : double)",
 				"+ <<get>> X : double",
 				"+ <<get,set>> Y : double",
+				"~ Func(i : U, o : V) : string",
 
 				"SampleClass.Inner --+ SampleClass",
 				"Inner --> SampleClass.Inner");

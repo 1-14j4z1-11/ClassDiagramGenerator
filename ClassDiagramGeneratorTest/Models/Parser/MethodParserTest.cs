@@ -56,19 +56,27 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Internal | Modifier.Static, Type("int"), "Where", List(Arg(Type("T"), "value")));
 			TestcaseParseMethodDefinition("public bool Generic<T>(T[] value)", true,
 				Modifier.Public, Type("bool"), "Generic", List(Arg(TypeArray("T", 1), "value")));
+			TestcaseParseMethodDefinition("public List<T> Generic<T>(T[] value)", true,
+				Modifier.Public, Type("List", Type("T")), "Generic", List(Arg(TypeArray("T", 1), "value")));
+			TestcaseParseMethodDefinition("public List<T> Generic<T, U>(T[] value, out Dictionary<T, U> map)", true,
+				Modifier.Public, Type("List", Type("T")), "Generic", List(Arg(TypeArray("T", 1), "value"), Arg(Type("Dictionary", Type("T"), Type("U")), "map")));
+
+			TestcaseParseMethodDefinition("internal static bool Where < T > ( T value ) where T : IDisposable", true,
+				Modifier.Internal | Modifier.Static, Type("bool"), "Where", List(Arg(Type("T"), "value")));
 
 			// Java
 			TestcaseParseMethodDefinition("protected <T> bool Generic(T value)", true,
 				Modifier.Protected, Type("bool"), "Generic", List(Arg(Type("T"), "value")));
 			TestcaseParseMethodDefinition("static < T extends String > String Extends ( T value )", true,
 				Modifier.Static, Type("String"), "Extends", List(Arg(Type("T"), "value")));
-			TestcaseParseMethodDefinition("static <T> String Extends(List<? extends T> values)", true,
-				Modifier.Static, Type("String"), "Extends", List(Arg(Type("List", Type("? extends T")), "values")));
 			TestcaseParseMethodDefinition("static <T> String Super(List < ? super T > values)", true,
 				Modifier.Static, Type("String"), "Super", List(Arg(Type("List", Type("? super T")), "values")));
-
-			TestcaseParseMethodDefinition("internal static bool Where < T > ( T value ) where T : IDisposable", true,
-				Modifier.Internal | Modifier.Static, Type("bool"), "Where", List(Arg(Type("T"), "value")));
+			TestcaseParseMethodDefinition("static <T> List<T> Extends(List<? extends T> values)", true,
+				Modifier.Static, Type("List", Type("T")), "Extends", List(Arg(Type("List", Type("? extends T")), "values")));
+			TestcaseParseMethodDefinition("static < T > List<T> Generic(T[][] values)", true,
+				Modifier.Static, Type("List", Type("T")), "Generic", List(Arg(TypeArray("T", 2), "values")));
+			TestcaseParseMethodDefinition("public <T, U> List<T> Generic(T[] value, Dictionary<T, U> map)", true,
+				Modifier.Public, Type("List", Type("T")), "Generic", List(Arg(TypeArray("T", 1), "value"), Arg(Type("Dictionary", Type("T"), Type("U")), "map")));
 		}
 
 		[TestMethod]
@@ -96,6 +104,8 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			
 			TestcaseParseMethodDefinition("public string[,] Func(int[,] values)", true,
 				Modifier.Public, TypeArray("string", 2), "Func", List(Arg(TypeArray("int", 2), "values")));
+			TestcaseParseMethodDefinition("public string[][,,][] Func(int[,,,][][,] values)", true,
+				Modifier.Public, TypeArray("string", 5), "Func", List(Arg(TypeArray("int", 7), "values")));
 		}
 
 		[TestMethod]
