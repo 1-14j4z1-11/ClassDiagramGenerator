@@ -16,8 +16,8 @@ namespace ClassDiagramGenerator.Models.Parser
 		// In order to support both Java and C# methods, Type argument declarations are included twice.
 		// Groups : [1] Modifier, [2] Return type, [3] Method name, [4] Arguments
 		private static readonly Regex MethodRegex = new Regex(
-			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)(?:<{TypeArgPattern}>\\s*)?"	// Attributes + Modifier + TypeArgDeclaration
-			+ $"(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeArgPattern}>\\s*)?"         // ReturnType + Name + TypeArgDeclaration
+			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)(?:<{TypeParamPattern}>\\s*)?"	// Attributes + Modifier + TypeArgDeclaration
+			+ $"(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeParamPattern}>\\s*)?"         // ReturnType + Name + TypeArgDeclaration
 			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");        // Arguments
 
 		private readonly ClassInfo classInfo;
@@ -106,7 +106,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				return mod;
 
 			// Method in interface is always Public and Abstract
-			mod &= ~Modifier.AllAccessLevels;
+			mod &= ~Modifiers.AllAccessLevels;
 			return Modifier.Public | Modifier.Abstract | mod;
 		}
 	}

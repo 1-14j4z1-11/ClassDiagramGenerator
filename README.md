@@ -38,10 +38,10 @@ ClassDiagramGenerator.exe -i <input_path> -o <output_path> -l <language> -al <ac
 * Limitations
     * Classes that have the same name and different type parameters cannot be written correctly.
         * All of them are written, but only one of them is displayed in a diagram.
+	* Multidimensional arrays in C# (such as int[,]) are written as jagged arrays.
+		* ex) int[,] -> int[][]
 
 ## Examples
-
-### C#
 
 * Source code
 
@@ -100,94 +100,6 @@ namespace CSharpSample
 * Class diagram
 
 ![](./README/cs_sample.png)
-
-
---------
-
-### Java
-
-* Source codes
-
-```
-package java_sample;
-
-public abstract class Base
-{
-	protected Vector2 v;
-	
-	protected Base(int x, int y) { }
-	
-	public Vector2 BaseMethod() { return null; }
-}
-
---------------------------------
-
-package java_sample;
-
-class Derived extends Base implements Interface<Vector3>
-{
-	private int z;
-	
-	public Derived(int x, int y, int z) { super(x, y); }
-	
-	@Override
-	public Vector2 BaseMethod() { return null; }
-	
-	@Override
-	public Item<Vector3> IFMethod() { return null;}
-}
-
---------------------------------
-
-package java_sample;
-
-public interface Interface<T>
-{
-	Item<T> IFMethod();
-}
-
---------------------------------
-
-package java_sample;
-
-public class Item<T>
-{
-	private String key;
-	private T value;
-	
-	public String getKey() { return key; }
-	public void setKey(String key) { this.key = key; }
-	public T getValue() { return value; }
-	public void setValue(T value) { this.value = value; }
-}
-
---------------------------------
-
-package java_sample;
-
-public class Vector2
-{
-	public int x;
-	public int y;
-}
-
---------------------------------
-
-package java_sample;
-
-public class Vector3
-{
-	public int x;
-	public int y;
-	public int z;
-}
-```
-
---------
-
-* Class diagram
-
-![](./README/java_sample.png)
 
 
 ## License

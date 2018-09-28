@@ -31,6 +31,13 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Private | Modifier.Protected | Modifier.Abstract, Type("IEnumerable", Type("string")), "this", PropertyType.Indexer, List(Arg(Type("int"), "i"), Arg(Type("string"), "j")));
 			TestcaseParseFieldDefinition("protected internal event Action EventHandler", true,
 				Modifier.Protected | Modifier.Internal | Modifier.Event, Type("Action"), "EventHandler", PropertyType.None);
+			
+			TestcaseParseFieldDefinition("internal Outer.Inner value", true,
+				Modifier.Internal, Type("Outer.Inner"), "value", PropertyType.None);
+			TestcaseParseFieldDefinition("internal Outer<int>.Inner value", true,
+				Modifier.Internal, Type("Outer.Inner"), "value", PropertyType.None);
+			TestcaseParseFieldDefinition("internal Outer<int>.Inner<int> value", true,
+				Modifier.Internal, Type("Outer.Inner", Type("int")), "value", PropertyType.None);
 		}
 
 		[TestMethod]
@@ -57,21 +64,28 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.Private, Type("List", Type("String")), "list");
 
 			TestcaseParseFieldDefinition("private List<String[]> list = null", true,
-				Modifier.Private, Type("List", TypeArray("String")), "list");
+				Modifier.Private, Type("List", TypeArray("String", 1)), "list");
 		}
 
 		[TestMethod]
 		public void TestParseArrayFieldDefinition()
 		{
 			TestcaseParseFieldDefinition("private string[] array = new [] ", true,
-				Modifier.Private, TypeArray("string"), "array");
-			TestcaseParseFieldDefinition("private String[] array = new String[] ", true,
-				Modifier.Private, TypeArray("String"), "array");
+				Modifier.Private, TypeArray("string", 1), "array");
+			TestcaseParseFieldDefinition("private String[] array = new String[]", true,
+				Modifier.Private, TypeArray("String", 1), "array");
+			TestcaseParseFieldDefinition("private String[][] array = new String[5][7]", true,
+				Modifier.Private, TypeArray("String", 2), "array");
 
 			TestcaseParseFieldDefinition("private List<string>[] array = null", true,
-				Modifier.Private, TypeArray("List", Type("string")), "array");
-		}
+				Modifier.Private, TypeArray("List", 1, Type("string")), "array");
+			TestcaseParseFieldDefinition("private List<string>[][][] array = null", true,
+				Modifier.Private, TypeArray("List", 3, Type("string")), "array");
 
+			TestcaseParseFieldDefinition("private string[,] array = new string[5, 5]", true,
+				Modifier.Private, TypeArray("string", 2), "array");
+		}
+		
 		[TestMethod]
 		public void TestParseNotField()
 		{
@@ -87,7 +101,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseFieldAll("int field = 0;", true, 1,
 				Modifier.None, Type("int"), "field", PropertyType.None);
 			TestcaseParseFieldAll("int[] field = new [] { 1, 2 };", true, 2,
-				Modifier.None, TypeArray("int"), "field", PropertyType.None);
+				Modifier.None, TypeArray("int", 1), "field", PropertyType.None);
 		}
 
 		[TestMethod]
@@ -103,6 +117,9 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.None, Type("int"), "Property", PropertyType.Get | PropertyType.Set);
 			TestcaseParseFieldAll("int Property { get; protected internal set; }", true, 3,
 				Modifier.None, Type("int"), "Property", PropertyType.Get | PropertyType.Set);
+
+			TestcaseParseFieldAll("int Property => 0", true, 1,
+				Modifier.None, Type("int"), "Property", PropertyType.Get);
 		}
 
 		[TestMethod]
@@ -129,6 +146,9 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.None, Type("string"), "this", PropertyType.Get | PropertyType.Indexer, List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
 			TestcaseParseFieldAll("string this [ int x, int y ] { get { return values[x][y]; } internal set { values[x][y] = value; } }", true, 5,
 				Modifier.None, Type("string"), "this", PropertyType.Get | PropertyType.Set | PropertyType.Indexer, List(Arg(Type("int"), "x"), Arg(Type("int"), "y")));
+
+			TestcaseParseFieldAll("int this[string x] => values[x]", true, 1,
+				Modifier.None, Type("int"), "this", PropertyType.Get | PropertyType.Indexer, List(Arg(Type("string"), "x")));
 		}
 
 		[TestMethod]
@@ -136,11 +156,11 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		{
 			// 'get =>' text is contained, but it is a field, not a property
 			TestcaseParseFieldAll("Func<int, string>[] field = new Func<int, string>[] { get => null };", true, 2,
-				Modifier.None, TypeArray("Func", Type("int"), Type("string")), "field", PropertyType.None);
+				Modifier.None, TypeArray("Func", 1, Type("int"), Type("string")), "field", PropertyType.None);
 
 			// This is a property
 			TestcaseParseFieldAll("Func<int, string>[] Property { get => null; }", true, 2,
-				Modifier.None, TypeArray("Func", Type("int"), Type("string")), "Property", PropertyType.Get);
+				Modifier.None, TypeArray("Func", 1, Type("int"), Type("string")), "Property", PropertyType.Get);
 		}
 
 		[TestMethod]

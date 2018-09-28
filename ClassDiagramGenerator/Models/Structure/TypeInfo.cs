@@ -19,24 +19,24 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// <param name="name">Type name</param>
 		/// <param name="typeArgs">Collection of type arguments</param>
 		public TypeInfo(string name, IEnumerable<TypeInfo> typeArgs = null)
-			: this(false, name, typeArgs)
+			: this(name, 0, typeArgs)
 		{ }
 
 		/// <summary>
 		/// Constructor.
-		/// <para>If <paramref name="isArray"/> is true, this instance indicates an Array type.</para>
+		/// <para>If <paramref name="arrayDimension"/> is not 0, this instance indicates an Array type.</para>
 		/// <para>For example</para>
-		/// <para>- isArray=false, name="string" -> string</para>
-		/// <para>- isArray=true, name="string" -> string[]</para>
-		/// <para>- isArray=true, name="List", typeArgs=[string] -> List&lt;string&gt;[]</para>
+		/// <para>- <paramref name="arrayDimension"/>=0, name="string" -> string</para>
+		/// <para>- <paramref name="arrayDimension"/>=1, name="string" -> string[]</para>
+		/// <para>- <paramref name="arrayDimension"/>=2, name="List", typeArgs=[string] -> List&lt;string&gt;[][]</para>
 		/// </summary>
-		/// <param name="isArray">Value of whether this type indicates an Array type or not.</param>
 		/// <param name="name">Type name</param>
+		/// <param name="arrayDimension">A dimension of array</param>
 		/// <param name="typeArgs">Collection of type arguments</param>
-		public TypeInfo(bool isArray, string name, IEnumerable<TypeInfo> typeArgs = null)
+		public TypeInfo(string name, int arrayDimension, IEnumerable<TypeInfo> typeArgs = null)
 		{
 			this.Name = name;
-			this.IsArray = IsArray;
+			this.ArrayDimension = arrayDimension;
 			this.TypeArgs = new ReadOnlyCollection<TypeInfo>(
 				new List<TypeInfo>(typeArgs ?? Enumerable.Empty<TypeInfo>()));
 		}
@@ -47,9 +47,10 @@ namespace ClassDiagramGenerator.Models.Structure
 		public string Name { get; }
 
 		/// <summary>
-		/// Gets a value of whether this type indicates an Array type or not.
+		/// Gets or sets a dimension of array.
+		/// <para>If this type is not an array type, returns 0.</para>
 		/// </summary>
-		public bool IsArray { get; }
+		public int ArrayDimension { get; }
 
 		/// <summary>
 		/// Gets a list of type arguments.
@@ -82,20 +83,21 @@ namespace ClassDiagramGenerator.Models.Structure
 				return false;
 
 			return (this.Name == other.Name)
-				&& (this.IsArray == other.IsArray)
+				&& (this.ArrayDimension == other.ArrayDimension)
 				&& (this.TypeArgs.SequenceEqual(other.TypeArgs));
 		}
 
 		public override int GetHashCode()
 		{
 			var argsHash = (this.TypeArgs.Count > 0) ? this.TypeArgs.Select(t => t?.GetHashCode() ?? 0).Aggregate((h1, h2) => h1 ^ h2) : 0;
-			return this.Name.GetHashCode() ^ this.IsArray.GetHashCode() ^ argsHash;
+			return this.Name.GetHashCode() ^ this.ArrayDimension.GetHashCode() ^ argsHash;
 		}
 
 		public override string ToString()
 		{
 			var typeArgs = (this.TypeArgs.Count > 0) ? $"<{string.Join(",", this.TypeArgs)}>" : string.Empty;
-			return this.Name + typeArgs + (this.IsArray ? "[]" : string.Empty);
+			var arrayBrackets = string.Join(string.Empty, Enumerable.Range(0, this.ArrayDimension).Select(_ => "[]"));
+			return this.Name + typeArgs + arrayBrackets;
 		}
 
 		/// <summary>
@@ -120,9 +122,10 @@ namespace ClassDiagramGenerator.Models.Structure
 			public string Name { get; set; }
 
 			/// <summary>
-			/// Gets or sets a value of whether this type indicates an Array type or not.
+			/// Gets or sets a dimension of array.
+			/// <para>If this type is not an array type, returns 0.</para>
 			/// </summary>
-			public bool IsArray { get; set; }
+			public int ArrayDimension { get; set; }
 
 			/// <summary>
 			/// Gets a mutable list of type arguments.
@@ -135,7 +138,7 @@ namespace ClassDiagramGenerator.Models.Structure
 			/// <returns><see cref="TypeInfo"/></returns>
 			public TypeInfo ToImmutable()
 			{
-				return new TypeInfo(this.IsArray, this.Name, this.TypeArgs.Select(m => m.ToImmutable()));
+				return new TypeInfo(this.Name, this.ArrayDimension, this.TypeArgs.Select(m => m.ToImmutable()));
 			}
 		}
 	}

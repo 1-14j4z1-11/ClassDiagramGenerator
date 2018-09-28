@@ -14,12 +14,12 @@ namespace ClassDiagramGenerator.Models.Parser
 	/// </summary>
 	public class FieldParser : ComponentParser<FieldInfo>
 	{
-		// Groups : [1] Modifier, [2] Return type, [3] Field name,
+		// Groups : [1] Modifier, [2] Field type, [3] Field name,
 		//          [4] Indexer's arguments includeing "[ ]", [5] Lambda arrow, [6] Default value assign
 		private static readonly Regex FieldRegex = new Regex(
 			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)({TypePattern})\\s+({NamePattern})\\s*"
-			+ $"(\\[\\s*(?:{ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\])?[^=]*(=)?[^=]*(=>)?");
-
+			+ $"(\\[\\s*(?:{ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\])?[^=]*(=>)?[^=]*(=)?");
+		
 		private static readonly Regex GetterRegex = new Regex($"^\\s*(?:{ModifierPattern}\\s+)*\\s*(get|get\\s*=>)");
 		private static readonly Regex SetterRegex = new Regex($"^\\s*(?:{ModifierPattern}\\s+)*\\s*(set|set\\s*=>)");
 		private readonly ClassInfo classInfo;
@@ -63,7 +63,7 @@ namespace ClassDiagramGenerator.Models.Parser
 			// Parsing must be treated as failure if parsed type name matches modifier,
 			// because field regex pattern matches invalid pattern below.
 			// ex) "public int" -> Type : public, FiledName : int
-			if(Modifiers.Contains(type.Name))
+			if(AllModifiers.Contains(type.Name))
 			{
 				reader.Position--;
 				info = null;
@@ -73,8 +73,8 @@ namespace ClassDiagramGenerator.Models.Parser
 			this.ParseImplementationLines(reader, depth, out var propTypeFromImpl);
 			var propType = PropertyType.None;
 			var isIndexer = !string.IsNullOrEmpty(idxrArgs);
-			var hasDefault = !string.IsNullOrEmpty(match.Groups[5].Value);
-			var hasGetter = !string.IsNullOrEmpty(match.Groups[6].Value);
+			var hasGetter = !string.IsNullOrEmpty(match.Groups[5].Value);
+			var hasDefault = !string.IsNullOrEmpty(match.Groups[6].Value);
 
 			if(isIndexer)
 			{

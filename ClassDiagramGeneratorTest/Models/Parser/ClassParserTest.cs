@@ -21,12 +21,6 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		{
 			TestcaseParseClassDefinition("public class TestClass", true,
 				Modifier.Public, ClassCategory.Class, Type("TestClass"));
-			TestcaseParseClassDefinition("internal class Generic1<T>", true,
-				Modifier.Internal, ClassCategory.Class, Type("Generic1", Type("T")));
-			TestcaseParseClassDefinition("class Generic2<T1,T2>", true,
-				Modifier.None, ClassCategory.Class, Type("Generic2", Type("T1"), Type("T2")));
-			TestcaseParseClassDefinition("protected interface Generic3< T1, T2, T3 >", true,
-				Modifier.Protected, ClassCategory.Interface, Type("Generic3", Type("T1"), Type("T2"), Type("T3")));
 			TestcaseParseClassDefinition("private struct Derived1 : IDisposable", true,
 				Modifier.Private, ClassCategory.Struct, Type("Derived1"), List(Type("IDisposable")));
 			TestcaseParseClassDefinition("protected internal interface Derived2 : IDisposable, IComparable<Derived2>", true,
@@ -55,6 +49,17 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Modifier.None, ClassCategory.Class, Type("Derived4"), List(Type("Closable"), Type("HashMap", Type("String"), Type("Integer"))));
 			TestcaseParseClassDefinition("class Derived5 extends HashMap< String , Integer> implements Closable", true,
 				Modifier.None, ClassCategory.Class, Type("Derived5"), List(Type("HashMap", Type("String"), Type("Integer")), Type("Closable")));
+		}
+
+		[TestMethod]
+		public void TestParseGenericClassDefinition()
+		{
+			TestcaseParseClassDefinition("internal class Generic1<T>", true,
+				Modifier.Internal, ClassCategory.Class, Type("Generic1", Type("T")));
+			TestcaseParseClassDefinition("class Generic2<T1,T2>", true,
+				Modifier.None, ClassCategory.Class, Type("Generic2", Type("T1"), Type("T2")));
+			TestcaseParseClassDefinition("protected interface Generic3< T1, T2, T3 >", true,
+				Modifier.Protected, ClassCategory.Interface, Type("Generic3", Type("T1"), Type("T2"), Type("T3")));
 
 			// Type argument appears twice
 			TestcaseParseClassDefinition("class MyList<T> : List<T>", true,
@@ -64,6 +69,16 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseClassDefinition("class MyList<T> implements List<T>", true,
 				Modifier.None, ClassCategory.Class, Type("MyList", Type("T")), List(Type("List", Type("T"))));
 
+			// in / out (C#)
+			TestcaseParseClassDefinition("interface In<in T>", true,
+				Modifier.None, ClassCategory.Interface, Type("In", Type("in T")));
+			TestcaseParseClassDefinition("interface Out<out T>", true,
+				Modifier.None, ClassCategory.Interface, Type("Out", Type("out T")));
+		}
+		
+		[TestMethod]
+		public void TestParseNotClass()
+		{
 			TestcaseParseClassDefinition("public static TestClass", false);
 			TestcaseParseClassDefinition("public TestClass", false);
 			TestcaseParseClassDefinition("public static class ", false);

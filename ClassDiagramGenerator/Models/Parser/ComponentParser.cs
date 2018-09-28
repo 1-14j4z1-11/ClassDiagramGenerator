@@ -19,17 +19,23 @@ namespace ClassDiagramGenerator.Models.Parser
 	public abstract class ComponentParser<T>
 	{
 		/// <summary>A list containing strings to be used as modifier</summary>
-		protected static readonly IReadOnlyList<string> Modifiers
-			= new ReadOnlyCollection<string>(new List<string>(
-				Enum.GetValues(typeof(Modifier)).Cast<Modifier>().Select(m => m.ToModifierString()).Where(m => !string.IsNullOrEmpty(m))));
+		protected static readonly IReadOnlyList<string> AllModifiers
+			= new ReadOnlyCollection<string>(
+				Modifiers.AllModifiers.Select(m => m.ToModifierString()).Where(m => !string.IsNullOrEmpty(m)).ToList());
+
+		/// <summary>Pattern string that matches variable arguments mark '...'</summary>
+		private static readonly string VarArgPattern = "\\s*\\.\\.\\.\\s*";
 
 		/// <summary>Pattern string that matches modifiers (no grouping)</summary>
-		protected static readonly string ModifierPattern = "(?:" + string.Join("|", Modifiers) + ")";
+		protected static readonly string ModifierPattern = "(?:" + string.Join("|", AllModifiers) + ")";
 
 		/// <summary>Pattern string that matches name (no grouping)</summary>
 		protected static readonly string NamePattern = "[^\\s,:\\[\\]\\(\\)<>=]+";
 
-		/// <summary>Pattern string that matches type argument enclosed in &lt;&gt; (no grouping)</summary>
+		/// <summary>Pattern string that matches type 'parameter' enclosed in &lt;&gt; (no grouping)</summary>
+		protected static readonly string TypeParamPattern = "[^:\\[\\]\\(\\)<>=]+";
+		
+		/// <summary>Pattern string that matches type 'argument' enclosed in &lt;&gt; (no grouping)</summary>
 		protected static readonly string TypeArgPattern = "[^:\\(\\)=]+";
 
 		/// <summary>Pattern string that matches Attributes of C# (no grouping)</summary>
@@ -39,17 +45,19 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected static readonly string AnnotationPattern = $"(?:\\s*@{NamePattern}\\s*(?:\\([^\\(\\)]*\\))?\\s*)*";
 
 		/// <summary>Pattern string that matches type (no grouping)</summary>
-		protected static readonly string TypePattern = $"{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?(?:\\s*\\[\\s*\\]\\s*)?";
+		protected static readonly string TypePattern = $"{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?(?:\\.{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?)*(?:\\s*\\[[\\s,]*\\]\\s*)*";
 
 		/// <summary>Pattern string that matches single argument (no grouping)</summary>
-		protected static readonly string ArgumentPattern = $"(?:{AttributePattern}{AnnotationPattern}(?:(?:this|in|out|ref)\\s+)?(?:{TypePattern})\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
+		protected static readonly string ArgumentPattern = $"(?:{AttributePattern}{AnnotationPattern}(?:(?:this|in|out|ref|params)\\s+)?(?:{TypePattern}(?:{VarArgPattern})?)\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
 		
 		/// <summary>
 		/// Regex that matches single argument
-		/// <para>- [1] : Type name</para>
+		/// <para>- [1] : Type name (including type args, array brackets)</para>
 		/// <para>- [2] : Argument name</para>
 		/// </summary>
-		private static readonly Regex ArgumentRegex = new Regex(ArgumentPattern.Replace($"(?:{TypePattern})", $"({TypePattern})").Replace($"(?:{NamePattern})", $"({NamePattern})"));
+		private static readonly Regex ArgumentRegex = new Regex(ArgumentPattern
+			.Replace($"(?:{TypePattern}", $"({TypePattern}")
+			.Replace($"(?:{NamePattern}", $"({NamePattern}"));
 
 		/// <summary>
 		/// Constructor.
@@ -58,7 +66,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// (Modifiers not indicating access level are ignored)</param>
 		public ComponentParser(Modifier defaultAccessLevel)
 		{
-			this.DefaultAccessLevel = defaultAccessLevel & Modifier.AllAccessLevels;
+			this.DefaultAccessLevel = defaultAccessLevel & Modifiers.AllAccessLevels;
 		}
 
 		/// <summary>
@@ -88,11 +96,11 @@ namespace ClassDiagramGenerator.Models.Parser
 			if(string.IsNullOrEmpty(argText))
 				return Enumerable.Empty<ArgumentInfo>();
 			
+			argText = EscapeMultiDimensionalArray(argText);
+
 			return argText.Split(",",  "<", ">", d => d == 0)
 				.Select(a => ArgumentRegex.Match(a))
-				.Where(m => {
-					return m.Success;
-					})
+				.Where(m => m.Success)
 				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[1].Value), m.Groups[2].Value));
 		}
 
@@ -134,10 +142,10 @@ namespace ClassDiagramGenerator.Models.Parser
 
 			foreach(var word in words)
 			{
-				mod |= Structure.Modifiers.Parse(word);
+				mod |= Modifiers.Parse(word);
 			}
 
-			if((mod & Modifier.AllAccessLevels) == Modifier.None)
+			if((mod & Modifiers.AllAccessLevels) == Modifier.None)
 				mod |= this.DefaultAccessLevel;
 
 			return mod;
@@ -151,7 +159,18 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <returns><see cref="TypeInfo"/> parsed from string, or null</returns>
 		protected static TypeInfo ParseType(string typeText)
 		{
-			var words = TextAnalyzer.SplitWithDepth(typeText, "<", ">")
+			typeText = EscapeMultiDimensionalArray(Regex.Replace(typeText, VarArgPattern, "[]"));
+			var typeSegments = typeText.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
+			if(!typeSegments.Any())
+				return null;
+			
+			// Extracts an outer class names, and its type arguments are removed
+			var outerName = string.Join(".", typeSegments.Take(typeSegments.Count() - 1));
+			outerName = TextAnalyzer.SplitWithDepth(outerName, "<", ">").Where(t => t.Depth == 0).Marge("<", ">");
+
+			// Parses an inner class name (including its type arguments)
+			var words = TextAnalyzer.SplitWithDepth(typeSegments.Last(), "<", ">")
 				.SplitEach(",")
 				.SplitEach("[") // Use '[' as a separator, and ']' is treated as an array descriptor.
 				.Where(w => !string.IsNullOrWhiteSpace(w.Text))
@@ -161,8 +180,9 @@ namespace ClassDiagramGenerator.Models.Parser
 			if(words.Count == 0)
 				return null;
 
+			var rootFullName = !string.IsNullOrEmpty(outerName) ? outerName + "." + words[0].Text : words[0].Text;
 			var rightBracketRegex = new Regex("^\\s*\\]\\s*$");
-			var rootType = new TypeInfo.Mutable(words[0].Text);
+			var rootType = new TypeInfo.Mutable(rootFullName);
 			var rootDepth = words[0].Depth;
 
 			for(var i = 1; i < words.Count; i++)
@@ -174,7 +194,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				{
 					// Gets a type whose depth is the same as an array descriptor
 					var arrayType = GetLastTypeWithDepth(rootType, depth - rootDepth);
-					arrayType.IsArray = true;
+					arrayType.ArrayDimension++;
 				}
 				else
 				{
@@ -185,6 +205,17 @@ namespace ClassDiagramGenerator.Models.Parser
 			}
 
 			return rootType.ToImmutable();
+		}
+
+		/// <summary>
+		/// Escapes multidimensional array such as 'int[,]' into jagged array.
+		/// </summary>
+		/// <param name="text">Text to be escaped</param>
+		/// <returns>Escaped text</returns>
+		private static string EscapeMultiDimensionalArray(string text)
+		{
+			return Regex.Replace(text, "\\[\\s*(\\s*,\\s*)*\\s*\\]",
+				m => "[" + string.Join(string.Empty, Enumerable.Range(0, m.Value.Count(c => c == ',')).Select(_ => "][")) + "]");
 		}
 
 		/// <summary>

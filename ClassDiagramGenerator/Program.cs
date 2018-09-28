@@ -129,7 +129,7 @@ namespace ClassDiagramGenerator
 		private static Modifier ParseAccessLevel(string str)
 		{
 			if(string.IsNullOrEmpty(str))
-				return Modifier.AllAccessLevels;
+				return Modifiers.AllAccessLevels;
 
 			var words = str.Split(',', ' ', '|');
 			var modifier = Modifier.None;
@@ -139,7 +139,7 @@ namespace ClassDiagramGenerator
 				modifier |= Modifiers.Parse(word);
 			}
 
-			return (modifier == Modifier.None) ? Modifier.AllAccessLevels : modifier & Modifier.AllAccessLevels;
+			return (modifier == Modifier.None) ? Modifiers.AllAccessLevels : modifier & Modifiers.AllAccessLevels;
 		}
 
 		/// <summary>

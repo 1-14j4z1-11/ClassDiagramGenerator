@@ -28,7 +28,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 		[TestMethod]
 		public void TestGenerateFromCSharpCode1()
 		{
-			var baseExpected = List(
+			var expectedBase = List(
 				"package CSharp.Testcase1",
 
 				"class Base<T>",
@@ -61,18 +61,18 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"Derived ..> X",
 				"X --> EnumValues");
 
-			var expectedAll = baseExpected.Concat(expectedXClass);
+			var expectedAll = expectedBase.Concat(expectedXClass);
 
 			TestcaseGenerate(CSParser, LoadCode("Base.cs"), expectedAll);
-			TestcaseGenerate(CSParser, LoadCode("Base.cs"), baseExpected, expectedXClass, Modifier.AllAccessLevels, List("X"));
+			TestcaseGenerate(CSParser, LoadCode("Base.cs"), expectedBase, expectedXClass, Modifiers.AllAccessLevels, List("X"));
 			TestcaseGenerate(CSParser, LoadCode("Base.cs"),
 				expectedAll.Where(s => !s.StartsWith("-")),
 				expectedAll.Where(s => s.StartsWith("-")),
 				Modifier.Public | Modifier.Protected | Modifier.Internal,
 				null);
 			TestcaseGenerate(CSParser, LoadCode("Base.cs"),
-				 baseExpected.Where(s => !s.StartsWith("+")),
-				 baseExpected.Where(s => s.StartsWith("+")).Concat(expectedXClass),
+				 expectedBase.Where(s => !s.StartsWith("+")),
+				 expectedBase.Where(s => s.StartsWith("+")).Concat(expectedXClass),
 				 Modifier.Protected | Modifier.Internal | Modifier.Private,
 				 List("X"));
 		}
@@ -80,7 +80,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 		[TestMethod]
 		public void TestGenerateFromJavaCode1()
 		{
-			var baseExpected = List(
+			var expectedBase = List(
 				"package java.testcase1",
 
 				"class Base<T extends Object>",
@@ -119,20 +119,61 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"Derived ..> X",
 				"X --> EnumValues");
 
-			var expectedAll = baseExpected.Concat(expectedXClass);
+			var expectedAll = expectedBase.Concat(expectedXClass);
 
-			TestcaseGenerate(JavaParser, LoadCode("Base.java"), baseExpected.Concat(expectedXClass));
-			TestcaseGenerate(JavaParser, LoadCode("Base.java"), baseExpected, expectedXClass, Modifier.AllAccessLevels, List("X"));
+			TestcaseGenerate(JavaParser, LoadCode("Base.java"), expectedBase.Concat(expectedXClass));
+			TestcaseGenerate(JavaParser, LoadCode("Base.java"), expectedBase, expectedXClass, Modifiers.AllAccessLevels, List("X"));
 			TestcaseGenerate(JavaParser, LoadCode("Base.java"),
 				expectedAll.Where(s => !s.StartsWith("~") && !s.StartsWith("#")),
 				expectedAll.Where(s => s.StartsWith("~") || s.StartsWith("#")),
 				Modifier.Public | Modifier.Private,
 				null);
 			TestcaseGenerate(JavaParser, LoadCode("Base.java"),
-				 baseExpected.Where(s => !s.StartsWith("#")),
-				 baseExpected.Where(s => s.StartsWith("#")).Concat(expectedXClass),
+				 expectedBase.Where(s => !s.StartsWith("#")),
+				 expectedBase.Where(s => s.StartsWith("#")).Concat(expectedXClass),
 				 Modifier.Public | Modifier.Package | Modifier.Private,
 				 List("X"));
+		}
+
+		[TestMethod]
+		public void TestGenerateFromCSharpCode2()
+		{
+			var expectedBase = List(
+				"package CSharp.Testcase2",
+
+				"class Inner <<struct>>",
+				"~ value : SampleClass.Inner");
+
+			var expectedSampleClass = List(
+				"abstract class SampleClass<T>",
+				"- intArray2 : int[][]",
+				"# strArray3 : string[][][]",
+				"~ {static} Value : T",
+				"# SampleClass(x : List<int[][]>, y : List<string[][][]>)",
+				"# <<get,set>> X : int[][]",
+				"~ <<get>> Y : string[][][]",
+				"- <<get,set>> this[x : int, y : string] : object",
+				"+ Func1(x : int, objects : List<object>[]) : List<Dictionary<string[][][], int[][]>>",
+
+				"class SampleClass.Inner",
+				"- x : double",
+				"- y : double",
+				"+ Inner(x : double, y : double)",
+				"+ <<get>> X : double",
+				"+ <<get,set>> Y : double",
+				"~ Func(i : U, o : V) : string",
+
+				"SampleClass.Inner --+ SampleClass",
+				"Inner --> SampleClass.Inner");
+
+			var expectedAll = expectedBase.Concat(expectedSampleClass);
+
+			TestcaseGenerate(CSParser, LoadCode("SampleClass.cs"), expectedAll);
+			TestcaseGenerate(CSParser, LoadCode("SampleClass.cs"), expectedBase, expectedSampleClass, Modifiers.AllAccessLevels, List("SampleClass"));
+			TestcaseGenerate(CSParser, LoadCode("SampleClass.cs"),
+				expectedBase.Where(s => !s.StartsWith("-") && !s.StartsWith("~")),
+				expectedBase.Where(s => s.StartsWith("-") || s.StartsWith("~")).Concat(expectedSampleClass)
+				, Modifier.Public | Modifier.Protected, List("SampleClass"));
 		}
 
 		/// <summary>
@@ -151,7 +192,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 			string inputCode,
 			IEnumerable<string> expectedLines,
 			IEnumerable<string> expectedIgnoreLines = null,
-			Modifier accessFilter = Modifier.AllAccessLevels,
+			Modifier accessFilter = Modifiers.AllAccessLevels,
 			IEnumerable<string> excludedClasses = null)
 		{
 			var title = "test_title";
@@ -179,6 +220,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 
 				if(matchedPattern == null)
 				{
+					Console.WriteLine(diag);
 					AssertEx.Fail($"Expected '{line}' is contained in a generated class diagram"
 						+ $", but actual diagram does not contain it.");
 				}
