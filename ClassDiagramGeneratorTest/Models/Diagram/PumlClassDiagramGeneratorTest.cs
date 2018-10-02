@@ -142,7 +142,15 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"package CSharp.Testcase2",
 
 				"class Inner <<struct>>",
-				"~ value : SampleClass.Inner");
+				"~ value : SampleClass.Inner",
+				"~ Inner(value : SampleClass.Inner)",
+
+				"class Extension",
+				"+ {static} This(<<this>> obj : Inner) : string",
+				"~ {static} Out(<<out>> obj : SampleClass.Inner) : void",
+				"+ {static} Ref(<<ref>> obj : object) : void",
+
+				"Extension ..> Inner");
 
 			var expectedSampleClass = List(
 				"abstract class SampleClass<T>",
@@ -153,7 +161,7 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"# <<get,set>> X : int[][]",
 				"~ <<get>> Y : string[][][]",
 				"- <<get,set>> this[x : int, y : string] : object",
-				"+ Func1(x : int, objects : List<object>[]) : List<Dictionary<string[][][], int[][]>>",
+				"+ Func1(<<out>> x : int, objects : List<object>[]) : List<Dictionary<string[][][], int[][]>>",
 
 				"class SampleClass.Inner",
 				"- x : double",
@@ -161,10 +169,11 @@ namespace ClassDiagramGeneratorTest.Models.Diagram
 				"+ Inner(x : double, y : double)",
 				"+ <<get>> X : double",
 				"+ <<get,set>> Y : double",
-				"~ Func(i : U, o : V) : string",
+				"~ Func(i : U, <<out>> o : V) : string",
 
 				"SampleClass.Inner --+ SampleClass",
-				"Inner --> SampleClass.Inner");
+				"Inner --> SampleClass.Inner",
+				"Extension ..> SampleClass.Inner");
 
 			var expectedAll = expectedBase.Concat(expectedSampleClass);
 

@@ -26,6 +26,9 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <summary>Pattern string that matches variable arguments mark '...'</summary>
 		private static readonly string VarArgPattern = "\\s*\\.\\.\\.\\s*";
 
+		/// <summary>Pattern string that matches argument modifier</summary>
+		private static readonly string ArgModifierPattern = "(?:this|in|out|ref|params)";
+
 		/// <summary>Pattern string that matches modifiers (no grouping)</summary>
 		protected static readonly string ModifierPattern = "(?:" + string.Join("|", AllModifiers) + ")";
 
@@ -48,16 +51,18 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected static readonly string TypePattern = $"{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?(?:\\.{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?)*(?:\\s*\\[[\\s,]*\\]\\s*)*";
 
 		/// <summary>Pattern string that matches single argument (no grouping)</summary>
-		protected static readonly string ArgumentPattern = $"(?:{AttributePattern}{AnnotationPattern}(?:(?:this|in|out|ref|params)\\s+)?(?:{TypePattern}(?:{VarArgPattern})?)\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
+		protected static readonly string ArgumentPattern = $"(?:{AttributePattern}{AnnotationPattern}(?:(?:{ArgModifierPattern})\\s+)?(?:{TypePattern}(?:{VarArgPattern})?)\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
 		
 		/// <summary>
 		/// Regex that matches single argument
-		/// <para>- [1] : Type name (including type args, array brackets)</para>
-		/// <para>- [2] : Argument name</para>
+		/// <para>- [1] : Argument modifier</para>
+		/// <para>- [2] : Type name (including type args, array brackets)</para>
+		/// <para>- [3] : Argument name</para>
 		/// </summary>
 		private static readonly Regex ArgumentRegex = new Regex(ArgumentPattern
 			.Replace($"(?:{TypePattern}", $"({TypePattern}")
-			.Replace($"(?:{NamePattern}", $"({NamePattern}"));
+			.Replace($"(?:{NamePattern}", $"({NamePattern}")
+			.Replace($"(?:{ArgModifierPattern}", $"({ArgModifierPattern}"));
 
 		/// <summary>
 		/// Constructor.
@@ -101,7 +106,9 @@ namespace ClassDiagramGenerator.Models.Parser
 			return argText.Split(",",  "<", ">", d => d == 0)
 				.Select(a => ArgumentRegex.Match(a))
 				.Where(m => m.Success)
-				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[1].Value), m.Groups[2].Value));
+				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[2].Value),
+					m.Groups[3].Value,
+					ArgumentModifiers.Parse(m.Groups[1].Value)));
 		}
 
 		/// <summary>

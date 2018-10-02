@@ -59,6 +59,7 @@
     <Compile Include="Models\Parser\SourceCodeReader.cs" />
     <Compile Include="Models\Parser\TextAnalyzer.cs" />
     <Compile Include="Models\Structure\ArgumentInfo.cs" />
+    <Compile Include="Models\Structure\ArgumentModifier.cs" />
     <Compile Include="Models\Structure\ClassInfo.cs" />
     <Compile Include="Models\Structure\ClassCategory.cs" />
     <Compile Include="Models\Structure\FieldInfo.cs" />

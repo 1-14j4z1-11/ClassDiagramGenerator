@@ -117,6 +117,18 @@ namespace ClassDiagramGeneratorTest.Support
 		}
 
 		/// <summary>
+		/// Creates an <see cref="ArgumentInfo"/>.
+		/// </summary>
+		/// <param name="mod">Modifier</param>
+		/// <param name="type"><see cref="TypeInfo"/></param>
+		/// <param name="name">Argument name</param>
+		/// <returns><see cref="ArgumentInfo"/></returns>
+		public static ArgumentInfo Arg(ArgumentModifier mod, TypeInfo type, string name)
+		{
+			return new ArgumentInfo(type, name, mod);
+		}
+
+		/// <summary>
 		/// Creates a <see cref="PlainRelation"/>.
 		/// </summary>
 		/// <param name="class1">Class name 1</param>

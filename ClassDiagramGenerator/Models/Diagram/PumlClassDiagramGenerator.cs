@@ -260,7 +260,16 @@ namespace ClassDiagramGenerator.Models.Diagram
 		/// <returns>Text describing arguments</returns>
 		private static string ArgumentsText(IEnumerable<ArgumentInfo> args)
 		{
-			var argsText = args?.Select(a => $"{a.Name} : {a.Type}") ?? Enumerable.Empty<string>();
+			if(!(args?.Any() ?? false))
+				return string.Empty;
+
+			Func<ArgumentInfo, string> stereoType = a =>
+			{
+				var modText = a.Modifier.ToModifierString();
+				return !string.IsNullOrEmpty(modText) ? $"<<{modText}>> " : string.Empty;
+			};
+
+			var argsText = args.Select(arg => $"{stereoType(arg)}{arg.Name} : {arg.Type}");
 			return string.Join(", ", argsText);
 		}
 		
