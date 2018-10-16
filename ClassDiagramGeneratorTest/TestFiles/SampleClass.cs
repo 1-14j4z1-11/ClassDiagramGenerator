@@ -58,5 +58,19 @@ namespace CSharp.Testcase2
 	public struct Inner
 	{
 		internal SampleClass<object>.Inner value;
+
+		internal Inner(SampleClass<object>.Inner value)
+		{
+			this.value = value;
+		}
+	}
+
+	public static class Extension
+	{
+		public static string This(this Inner obj) => null;
+
+		internal static void Out(out SampleClass<int>.Inner obj) => obj = null;
+
+		public static void Ref(ref object obj) { }
 	}
 }

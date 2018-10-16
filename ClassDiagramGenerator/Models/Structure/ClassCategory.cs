@@ -39,7 +39,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		};
 
 		/// <summary>
-		/// Parse <see cref="ClassCategory"/> from string.
+		/// Parses <see cref="ClassCategory"/> from a string.
 		/// <para>If argument does not match any of the <see cref="ClassCategory"/>, returns null.</para>
 		/// </summary>
 		/// <param name="str">String to be parsed</param>
@@ -62,7 +62,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		}
 
 		/// <summary>
-		/// Convert <see cref="ClassCategory"/> into string.
+		/// Converts <see cref="ClassCategory"/> into a string.
 		/// </summary>
 		/// <param name="category"></param>
 		/// <returns>String of <see cref="ClassCategory"/></returns>

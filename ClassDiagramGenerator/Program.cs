@@ -23,11 +23,20 @@ namespace ClassDiagramGenerator
 		private static readonly CmdFlag AccessLevelFlag = new CmdFlag(false, 1, "-al", "-accesslevel");
 		private static readonly CmdFlag ExcludedClassFlag = new CmdFlag(false, 1, "-ec", "-excludedclass");
 		private static readonly CmdParser CmdParser = new CmdParser()
-			.AddFlag(InputFlag, "Input directory path.")
-			.AddFlag(OutputFlag, "Output file path.")
-			.AddFlag(LangFlag, "Programming language.", " - C#   : 'cs' or 'csharp'", " - Java : 'java'")
-			.AddFlag(AccessLevelFlag, "Access levels of members displayed in a diagram.", "Default value is all access levels.", "Use ',' as separator to specify multiple access levels.")
-			.AddFlag(ExcludedClassFlag, "Excluded class names, which is not displayed in a diagram.", "Use ',' as separator to specify multiple classes.");
+			.AddFlag(InputFlag, "input_dir", new[] { "Input directory path." })
+			.AddFlag(OutputFlag, "output_file", new[] { "Output file path." })
+			.AddFlag(LangFlag, "language", new[] { "Programming language.", " - C#   : 'cs' or 'csharp'", " - Java : 'java'" })
+			.AddFlag(AccessLevelFlag, "access_levels", new[]
+			{
+				"Access levels of members displayed in a diagram.",
+				"Default value is all access levels.",
+				"Use ',' as separator to specify multiple access levels."
+			})
+			.AddFlag(ExcludedClassFlag, "excluded_classes", new[]
+			{
+				"Excluded class names, which is not displayed in a diagram.",
+				"Use ',' as separator to specify multiple classes."
+			});
 
 		private static readonly Language[] Languages = new Language[]
 		{
@@ -41,6 +50,13 @@ namespace ClassDiagramGenerator
 
 			if(!CmdParser.TryParse(args, out var argMap))
 			{
+				if(args.Length > 0)
+				{
+					Console.Error.WriteLine("Error : Invalid arguments were specified. Please read usage.");
+					Console.WriteLine();
+					Console.WriteLine();
+				}
+
 				Console.WriteLine(CmdParser.Usage());
 				return;
 			}
@@ -56,7 +72,7 @@ namespace ClassDiagramGenerator
 
 			if(lang == null)
 			{
-				Console.Error.WriteLine($"Invalid language was specified : {langValue}");
+				Console.Error.WriteLine($"Error : Invalid language was specified : {langValue}");
 				return;
 			}
 
@@ -69,7 +85,7 @@ namespace ClassDiagramGenerator
 			}
 			catch
 			{
-				Console.Error.WriteLine($"Could not get file list of the directory : {inputDir}");
+				Console.Error.WriteLine($"Error : Could not get file list in the directory : {inputDir}");
 				return;
 			}
 
@@ -81,7 +97,7 @@ namespace ClassDiagramGenerator
 			}
 			catch
 			{
-				Console.Error.WriteLine($"Could not open output file : {outputFile}");
+				Console.Error.WriteLine($"Error : Could not open output file : {outputFile}");
 				return;
 			}
 

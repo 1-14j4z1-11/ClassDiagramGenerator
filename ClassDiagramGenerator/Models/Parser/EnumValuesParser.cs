@@ -25,7 +25,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <param name="classInfo"><see cref="ClassInfo"/> indicating enum type</param>
 		/// <param name="definitionDepth">Depth of enum type definition line</param>
 		public EnumValuesParser(ClassInfo classInfo, int definitionDepth)
-			: base(Modifier.None)	// Does not use modifier parsing in base class
+			: base(Modifier.None)	// Does not use default access level in this class's parsing
 		{
 			this.classInfo = classInfo;
 			this.definitionDepth = definitionDepth;

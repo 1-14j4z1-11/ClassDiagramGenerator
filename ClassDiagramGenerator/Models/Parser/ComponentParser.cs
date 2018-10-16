@@ -26,6 +26,9 @@ namespace ClassDiagramGenerator.Models.Parser
 		/// <summary>Pattern string that matches variable arguments mark '...'</summary>
 		private static readonly string VarArgPattern = "\\s*\\.\\.\\.\\s*";
 
+		/// <summary>Pattern string that matches argument modifier</summary>
+		private static readonly string ArgModifierPattern = "(?:this|in|out|ref|params)";
+
 		/// <summary>Pattern string that matches modifiers (no grouping)</summary>
 		protected static readonly string ModifierPattern = "(?:" + string.Join("|", AllModifiers) + ")";
 
@@ -48,16 +51,18 @@ namespace ClassDiagramGenerator.Models.Parser
 		protected static readonly string TypePattern = $"{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?(?:\\.{NamePattern}(?:\\s*<{TypeArgPattern}>\\s*)?)*(?:\\s*\\[[\\s,]*\\]\\s*)*";
 
 		/// <summary>Pattern string that matches single argument (no grouping)</summary>
-		protected static readonly string ArgumentPattern = $"(?:{AttributePattern}{AnnotationPattern}(?:(?:this|in|out|ref|params)\\s+)?(?:{TypePattern}(?:{VarArgPattern})?)\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
+		protected static readonly string ArgumentPattern = $"(?:{AttributePattern}{AnnotationPattern}(?:(?:{ArgModifierPattern})\\s+)?(?:{TypePattern}(?:{VarArgPattern})?)\\s+(?:{NamePattern})(?:\\s*=[^,]*)?)";
 		
 		/// <summary>
 		/// Regex that matches single argument
-		/// <para>- [1] : Type name (including type args, array brackets)</para>
-		/// <para>- [2] : Argument name</para>
+		/// <para>- [1] : Argument modifier</para>
+		/// <para>- [2] : Type name (including type args, array brackets)</para>
+		/// <para>- [3] : Argument name</para>
 		/// </summary>
 		private static readonly Regex ArgumentRegex = new Regex(ArgumentPattern
 			.Replace($"(?:{TypePattern}", $"({TypePattern}")
-			.Replace($"(?:{NamePattern}", $"({NamePattern}"));
+			.Replace($"(?:{NamePattern}", $"({NamePattern}")
+			.Replace($"(?:{ArgModifierPattern}", $"({ArgModifierPattern}"));
 
 		/// <summary>
 		/// Constructor.
@@ -101,7 +106,9 @@ namespace ClassDiagramGenerator.Models.Parser
 			return argText.Split(",",  "<", ">", d => d == 0)
 				.Select(a => ArgumentRegex.Match(a))
 				.Where(m => m.Success)
-				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[1].Value), m.Groups[2].Value));
+				.Select(m =>　new ArgumentInfo(ParseType(m.Groups[2].Value),
+					m.Groups[3].Value,
+					ArgumentModifiers.Parse(m.Groups[1].Value)));
 		}
 
 		/// <summary>
@@ -130,7 +137,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Parse <see cref="Modifier"/> from string.
+		/// Parses <see cref="Modifier"/> from string.
 		/// <para>If no access level modifier is included, attaches default access level (specified at a constructor)</para>
 		/// </summary>
 		/// <param name="modifierText">String that indicates modifier</param>
@@ -152,7 +159,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Parse <see cref="TypeInfo"/> from string.
+		/// Parses <see cref="TypeInfo"/> from string.
 		/// <para>If faield to parsing, returns null.</para>
 		/// </summary>
 		/// <param name="typeText">String that indicates type (that matches <see cref="TypePattern"/>)</param>
@@ -208,7 +215,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Escapes multidimensional array such as 'int[,]' into jagged array.
+		/// Escapes multidimensional array ('int[,]', etc.) into jagged array ('int[][]', etc.).
 		/// </summary>
 		/// <param name="text">Text to be escaped</param>
 		/// <returns>Escaped text</returns>

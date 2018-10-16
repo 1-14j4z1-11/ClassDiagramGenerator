@@ -7,7 +7,7 @@ using ClassDiagramGenerator.Models.Diagram;
 namespace ClassDiagramGeneratorTest.Support
 {
 	/// <summary>
-	/// A simple relation class
+	/// Simple relation class
 	/// </summary>
 	public class PlainRelation
 	{

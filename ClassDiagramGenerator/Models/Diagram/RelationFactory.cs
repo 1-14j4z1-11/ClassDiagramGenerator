@@ -136,13 +136,31 @@ namespace ClassDiagramGenerator.Models.Diagram
 				if(type == null)
 					return null;
 
+				// Extracts all classes matched with target type
+				var matchedClasses = new List<ClassInfo>();
+
 				foreach(var cls in this.classes)
 				{
 					if(IsNameMached(type, cls))
-						return cls;
+					{
+						matchedClasses.Add(cls);
+					}
 				}
 
-				return null;
+				// Gets a class with the smallest number of name segments.
+				// When multiple class are matched and are not confused in a code,
+				// only one of them is not required its name space or parent class name,
+				// and its class name length is least in all matched class names.
+				// ex)
+				//  Classes : [Outer.Inner, Inner]
+				//  Relation target : Inner
+				//  -> Should match Inner instead of Outer.Inner
+				var matchedClass = matchedClasses.Select(c => new { Class = c, Segs = c.Name.Split('.').Length })
+					.OrderBy(x => x.Segs)
+					.FirstOrDefault()?
+					.Class;
+
+				return matchedClass;
 			}
 
 			/// <summary>
@@ -153,9 +171,14 @@ namespace ClassDiagramGenerator.Models.Diagram
 			/// <returns>Whether <paramref name="typeInfo"/> name and <paramref name="classInfo"/> name are the same or not</returns>
 			private static bool IsNameMached(TypeInfo typeInfo, ClassInfo classInfo)
 			{
+				// Exact names are used in matching (distinguishes the number of type arguments)
 				var package = (classInfo.Package != null) ? classInfo.Package + "." : string.Empty;
-				var exactName = package + (classInfo.Type?.ExactName ?? string.Empty);
-				var clsSegs = exactName.Split('.').Reverse().ToList();
+				var fullName = package + (classInfo.Type?.ExactName ?? string.Empty);
+				
+				if(string.IsNullOrEmpty(fullName))
+					return false;
+
+				var clsSegs = fullName.Split('.').Reverse().ToList();
 				var argSegs = typeInfo.ExactName.Split('.').Reverse().ToList();
 				var length = Math.Min(clsSegs.Count, argSegs.Count);
 

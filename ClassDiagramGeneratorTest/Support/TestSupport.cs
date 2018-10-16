@@ -12,7 +12,7 @@ using ClassDiagramGenerator.Models.Structure;
 namespace ClassDiagramGeneratorTest.Support
 {
 	/// <summary>
-	/// The test support class.
+	/// Test support class.
 	/// </summary>
 	public static class TestSupport
 	{
@@ -94,7 +94,7 @@ namespace ClassDiagramGeneratorTest.Support
 		}
 		
 		/// <summary>
-		/// Creates an Array <see cref="TypeInfo"/>.
+		/// Creates an array <see cref="TypeInfo"/>.
 		/// </summary>
 		/// <param name="type">Type name</param>
 		/// <param name="dim">Array dimension</param>
@@ -114,6 +114,18 @@ namespace ClassDiagramGeneratorTest.Support
 		public static ArgumentInfo Arg(TypeInfo type, string name)
 		{
 			return new ArgumentInfo(type, name);
+		}
+
+		/// <summary>
+		/// Creates an <see cref="ArgumentInfo"/>.
+		/// </summary>
+		/// <param name="mod">Modifier</param>
+		/// <param name="type"><see cref="TypeInfo"/></param>
+		/// <param name="name">Argument name</param>
+		/// <returns><see cref="ArgumentInfo"/></returns>
+		public static ArgumentInfo Arg(ArgumentModifier mod, TypeInfo type, string name)
+		{
+			return new ArgumentInfo(type, name, mod);
 		}
 
 		/// <summary>

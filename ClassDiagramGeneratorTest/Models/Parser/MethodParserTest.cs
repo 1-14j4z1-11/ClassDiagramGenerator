@@ -28,12 +28,14 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("IEnumerable<int> arg2 ( IEnumerable < string > _ , Dictionary < string , int > map ) ", true,
 				Modifier.None, Type("IEnumerable", Type("int")), "arg2", List(Arg(Type("IEnumerable", Type("string")), "_"), Arg(Type("Dictionary", Type("string"), Type("int")), "map")));
 			TestcaseParseMethodDefinition("private protected bool Out\t(object x, out string y)", true,
-				Modifier.Private | Modifier.Protected, Type("bool"), "Out", List(Arg(Type("object"), "x"), Arg(Type("string"), "y")));
+				Modifier.Private | Modifier.Protected, Type("bool"), "Out", List(Arg(Type("object"), "x"), Arg(ArgumentModifier.Out, Type("string"), "y")));
 			TestcaseParseMethodDefinition("private bool Ref(ref in x, ref out y)", true,
-				Modifier.Private, Type("bool"), "Ref", List(Arg(Type("in"), "x"), Arg(Type("out"), "y")));
+				Modifier.Private, Type("bool"), "Ref", List(Arg(ArgumentModifier.Ref, Type("in"), "x"), Arg(ArgumentModifier.Ref, Type("out"), "y")));
 			TestcaseParseMethodDefinition("static bool InOut(in object x, out string y)", true,
-				Modifier.Static, Type("bool"), "InOut", List(Arg(Type("object"), "x"), Arg(Type("string"), "y")));
-			
+				Modifier.Static, Type("bool"), "InOut", List(Arg(ArgumentModifier.In, Type("object"), "x"), Arg(ArgumentModifier.Out, Type("string"), "y")));
+			TestcaseParseMethodDefinition("static string This(this object x, out string y)", true,
+				Modifier.Static, Type("string"), "This", List(Arg(ArgumentModifier.This, Type("object"), "x"), Arg(ArgumentModifier.Out, Type("string"), "y")));
+
 			TestcaseParseMethodDefinition("public Outer.Inner Func(Outer.Inner x)", true,
 				Modifier.Public, Type("Outer.Inner"), "Func", List(Arg(Type("Outer.Inner"), "x")));
 			TestcaseParseMethodDefinition("public Outer<int>.Inner Func(Outer<double>.Inner x)", true,
@@ -59,7 +61,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseParseMethodDefinition("public List<T> Generic<T>(T[] value)", true,
 				Modifier.Public, Type("List", Type("T")), "Generic", List(Arg(TypeArray("T", 1), "value")));
 			TestcaseParseMethodDefinition("public List<T> Generic<T, U>(T[] value, out Dictionary<T, U> map)", true,
-				Modifier.Public, Type("List", Type("T")), "Generic", List(Arg(TypeArray("T", 1), "value"), Arg(Type("Dictionary", Type("T"), Type("U")), "map")));
+				Modifier.Public, Type("List", Type("T")), "Generic", List(Arg(TypeArray("T", 1), "value"), Arg(ArgumentModifier.Out, Type("Dictionary", Type("T"), Type("U")), "map")));
 
 			TestcaseParseMethodDefinition("internal static bool Where < T > ( T value ) where T : IDisposable", true,
 				Modifier.Internal | Modifier.Static, Type("bool"), "Where", List(Arg(Type("T"), "value")));

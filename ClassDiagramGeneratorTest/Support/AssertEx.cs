@@ -10,6 +10,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClassDiagramGeneratorTest.Support
 {
+	/// <summary>
+	/// Assertion support class
+	/// </summary>
 	public static class AssertEx
 	{
 		/// <summary>

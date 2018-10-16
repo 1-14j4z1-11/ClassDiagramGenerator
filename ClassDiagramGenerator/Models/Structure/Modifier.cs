@@ -15,6 +15,7 @@ namespace ClassDiagramGenerator.Models.Structure
 	[Flags]
 	public enum Modifier
 	{
+		/// <summary>None</summary>
 		None = 0,
 
 		/// <summary>public</summary>
@@ -132,8 +133,8 @@ namespace ClassDiagramGenerator.Models.Structure
 		public static IEnumerable<Modifier> AllModifiers { get; } = Enum.GetValues(typeof(Modifier)).Cast<Modifier>();
 
 		/// <summary>
-		/// Parses <see cref="Modifier"/> from string.
-		/// <para>If argument string contains no modifiers or contains only texts that are not modifier, returns <see cref="Modifier.None"/>.</para>
+		/// Parses <see cref="Modifier"/> from a string.
+		/// <para>If an argument string contains no modifiers or contains only texts that are not modifier, returns <see cref="Modifier.None"/>.</para>
 		/// </summary>
 		/// <param name="str">String to be parsed</param>
 		/// <returns><see cref="Modifier"/> parsed from string</returns>
@@ -155,7 +156,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		}
 
 		/// <summary>
-		/// Converts <see cref="Modifier"/> into string.
+		/// Converts <see cref="Modifier"/> into a string.
 		/// </summary>
 		/// <param name="modifier"></param>
 		/// <returns>String of <see cref="Modifier"/></returns>
