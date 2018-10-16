@@ -15,6 +15,7 @@ namespace ClassDiagramGenerator.Models.Structure
 	[Flags]
 	public enum Modifier
 	{
+		/// <summary>None</summary>
 		None = 0,
 
 		/// <summary>public</summary>

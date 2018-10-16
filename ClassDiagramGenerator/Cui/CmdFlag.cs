@@ -2,6 +2,7 @@
 // Copyright (c) 2018 Yasuhiro Hayashi
 //
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -18,9 +19,13 @@ namespace ClassDiagramGenerator.Cui
 		/// </summary>
 		/// <param name="required">Whether this flag is always required or not</param>
 		/// <param name="dependentArgCount">Number of dependent arguments of this flag</param>
-		/// <param name="words">Flag words</param>
+		/// <param name="words">Strings that can be used as a flag</param>
+		/// <exception cref="ArgumentException">If <paramref name="words"/> is empty, or contains a null</exception>
 		public CmdFlag(bool required, int dependentArgCount, params string[] words)
 		{
+			if((words == null) || !words.Any() || !words.All(x => x != null))
+				throw new ArgumentNullException();
+
 			this.IsRequired = required;
 			this.DependentArgCount = dependentArgCount;
 			this.FlagWords = new ReadOnlyCollection<string>(new List<string>(words));

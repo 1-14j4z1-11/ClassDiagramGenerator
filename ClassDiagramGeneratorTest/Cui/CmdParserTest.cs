@@ -17,11 +17,17 @@ namespace ClassDiagramGeneratorTest.Cui
 		[TestMethod]
 		public void TestParse()
 		{
+			var emptyWords = Enumerable.Empty<string>();
+
 			var flag0 = new CmdFlag(true, 0, "-0");
 			var flag1 = new CmdFlag(true, 1, "-1");
 			var flag2 = new CmdFlag(true, 2, "-2", "-22");
 			var flag3 = new CmdFlag(false, 1, "-3");
-			var parser = new CmdParser().AddFlag(flag0).AddFlag(flag1).AddFlag(flag2).AddFlag(flag3);
+			var parser = new CmdParser()
+				.AddFlag(flag0, "0", emptyWords)
+				.AddFlag(flag1, "1", emptyWords)
+				.AddFlag(flag2, "2", emptyWords)
+				.AddFlag(flag3, "3", emptyWords);
 
 			{
 				var expected = new Dictionary<CmdFlag, IEnumerable<string>>()

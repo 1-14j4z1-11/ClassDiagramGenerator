@@ -36,7 +36,7 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseSplitWithDepthFilter("string<X,Y> xy, List<Z> z", ",", "<", ">", null, new[] { "string<X", "Y> xy", " List<Z> z" });
 			TestcaseSplitWithDepthFilter("string<X,Y> xy, List<Z> z", ",", "<", ">", d => d == 0, new[] { "string<X,Y> xy", " List<Z> z" });
 		}
-
+		
 		private static void TestcaseSplitWithDepthFilter(string target, string separator, string nest, string unnest, Func<int, bool> filter, IEnumerable<string> splittedWords)
 		{
 			target.Split(separator, nest, unnest, filter).IsCollection(splittedWords);

@@ -16,17 +16,20 @@ namespace ClassDiagramGenerator.Cui
 	{
 		private static readonly string NewLine = Environment.NewLine;
 		private readonly List<CmdFlag> flags = new List<CmdFlag>();
+		private readonly Dictionary<CmdFlag, string> dependentArgMap = new Dictionary<CmdFlag, string>();
 		private readonly Dictionary<CmdFlag, IEnumerable<string>> descMap = new Dictionary<CmdFlag, IEnumerable<string>>();
 
 		/// <summary>
 		/// Adds a command line flag.
 		/// </summary>
 		/// <param name="flag">Flag to be added</param>
-		/// <param name="descriptions">Description texts to be written as usage</param>
+		/// <param name="dependentArgName">Dependent argument name to be written in usage</param>
+		/// <param name="descriptions">Description texts to be written in usage</param>
 		/// <returns>Instance of itself</returns>
-		public CmdParser AddFlag(CmdFlag flag, params string[] descriptions)
+		public CmdParser AddFlag(CmdFlag flag, string dependentArgName, IEnumerable<string> descriptions)
 		{
 			this.flags.Add(flag);
+			this.dependentArgMap[flag] = dependentArgName;
 			this.descMap[flag] = (descriptions != null) ? new List<string>(descriptions) : Enumerable.Empty<string>();
 			
 			return this;
@@ -83,7 +86,22 @@ namespace ClassDiagramGenerator.Cui
 		{
 			var builder = new StringBuilder();
 
-			builder.Append("[Arguments]").Append(NewLine);
+			// Usage
+			builder.Append("[Usage]").Append(NewLine)
+				.Append("    ").Append(Environment.GetCommandLineArgs().FirstOrDefault());
+
+			foreach(var flag in this.flags)
+			{
+				builder
+					.Append(" ").Append(flag.IsRequired ? string.Empty : "[")
+					.Append(flag.FlagWords.FirstOrDefault())
+					.Append(!string.IsNullOrEmpty(this.dependentArgMap[flag]) ? $" <{this.dependentArgMap[flag]}>" : string.Empty)
+					.Append(flag.IsRequired ? string.Empty : "]");
+			}
+
+			// Arguments description
+			builder.Append(NewLine).Append(NewLine)
+				.Append("[Arguments]").Append(NewLine);
 
 			foreach(var flag in this.flags)
 			{

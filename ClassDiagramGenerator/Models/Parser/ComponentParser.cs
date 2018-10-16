@@ -137,7 +137,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Parse <see cref="Modifier"/> from string.
+		/// Parses <see cref="Modifier"/> from string.
 		/// <para>If no access level modifier is included, attaches default access level (specified at a constructor)</para>
 		/// </summary>
 		/// <param name="modifierText">String that indicates modifier</param>
@@ -159,7 +159,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Parse <see cref="TypeInfo"/> from string.
+		/// Parses <see cref="TypeInfo"/> from string.
 		/// <para>If faield to parsing, returns null.</para>
 		/// </summary>
 		/// <param name="typeText">String that indicates type (that matches <see cref="TypePattern"/>)</param>
@@ -215,7 +215,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Escapes multidimensional array such as 'int[,]' into jagged array.
+		/// Escapes multidimensional array ('int[,]', etc.) into jagged array ('int[][]', etc.).
 		/// </summary>
 		/// <param name="text">Text to be escaped</param>
 		/// <returns>Escaped text</returns>

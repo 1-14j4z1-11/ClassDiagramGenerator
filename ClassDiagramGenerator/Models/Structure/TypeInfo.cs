@@ -133,7 +133,7 @@ namespace ClassDiagramGenerator.Models.Structure
 			public List<Mutable> TypeArgs { get; }
 
 			/// <summary>
-			/// Create a immutable <see cref="TypeInfo"/> instance that is the same as this instance.
+			/// Creates a immutable <see cref="TypeInfo"/> instance that is the same as this instance.
 			/// </summary>
 			/// <returns><see cref="TypeInfo"/></returns>
 			public TypeInfo ToImmutable()

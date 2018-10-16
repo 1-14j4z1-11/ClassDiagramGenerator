@@ -72,7 +72,7 @@ namespace ClassDiagramGenerator.Models.Diagram
 		public ClassInfo Class2 { get; }
 
 		/// <summary>
-		/// Gets a <see cref="RelationType"/> from <see cref="class1"/> to <see cref="class2"/>.
+		/// Gets a <see cref="RelationType"/> from <see cref="Class1"/> to <see cref="Class2"/>.
 		/// </summary>
 		public RelationType Type { get; }
 

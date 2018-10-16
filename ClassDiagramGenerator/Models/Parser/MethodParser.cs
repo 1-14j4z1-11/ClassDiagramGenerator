@@ -17,8 +17,8 @@ namespace ClassDiagramGenerator.Models.Parser
 		// Groups : [1] Modifier, [2] Return type, [3] Method name, [4] Arguments
 		private static readonly Regex MethodRegex = new Regex(
 			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)(?:<{TypeParamPattern}>\\s*)?"	// Attributes + Modifier + TypeArgDeclaration
-			+ $"(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeParamPattern}>\\s*)?"         // ReturnType + Name + TypeArgDeclaration
-			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");        // Arguments
+			+ $"(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeParamPattern}>\\s*)?"							// ReturnType + Name + TypeArgDeclaration
+			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");							// Arguments
 
 		private readonly ClassInfo classInfo;
 
@@ -80,7 +80,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Parse implementation lines.
+		/// Parses implementation lines.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
 		/// <param name="info"><see cref="MethodInfo"/> to hold implementation contents</param>
