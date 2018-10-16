@@ -38,26 +38,33 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MSTest.TestFramework.1.1.11\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MSTest.TestFramework.1.1.11\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="UnitTestSupport.MSTest">
-      <HintPath>..\lib\UnitTestSupport.MSTest.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cui\CmdParserTest.cs" />
+    <Compile Include="Models\Diagram\RelationFactoryTest.cs" />
+    <Compile Include="Models\Diagram\PumlClassDiagramGeneratorTest.cs" />
     <Compile Include="Models\Parser\ClassParserTest.cs" />
     <Compile Include="Models\Parser\ComponentParserTest.cs" />
-    <Compile Include="Models\Parser\ComponentParserTestBase.cs" />
+    <Compile Include="Models\Parser\EnumValuesParserTest.cs" />
+    <Compile Include="Models\Parser\SourceCodeReaderTest.cs" />
+    <Compile Include="Support\AssertEx.cs" />
+    <Compile Include="Support\PlainRelation.cs" />
+    <Compile Include="Support\TestSupport.cs" />
     <Compile Include="Models\Parser\FieldParserTest.cs" />
     <Compile Include="Models\Parser\MethodParserTest.cs" />
     <Compile Include="Models\Parser\TextAnalyzerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestFiles\Base.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="TestFiles\SampleClass.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -69,7 +76,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\Diagram\" />
+    <Content Include="TestFiles\Base.java">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

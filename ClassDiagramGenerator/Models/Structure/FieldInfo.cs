@@ -1,14 +1,15 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Structure
 {
 	/// <summary>
-	/// The class possessing field (property, indexer) information.
+	/// Class possessing field (property, indexer) information.
 	/// </summary>
 	public class FieldInfo
 	{
@@ -18,12 +19,14 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// <param name="modifier">Modifier</param>
 		/// <param name="name">Field name</param>
 		/// <param name="type">Filed type</param>
+		/// <param name="propertyType">Property type</param>
 		/// <param name="indexerArgs">Collection containing indexer's arguments (Indexer only)</param>
-		public FieldInfo(Modifier modifier, string name, TypeInfo type, IEnumerable<ArgumentInfo> indexerArgs = null)
+		public FieldInfo(Modifier modifier, string name, TypeInfo type, PropertyType propertyType = PropertyType.None, IEnumerable<ArgumentInfo> indexerArgs = null)
 		{
 			this.Modifier = modifier;
 			this.Name = name;
 			this.Type = type;
+			this.PropertyType = propertyType;
 			this.IndexerArguments = new ReadOnlyCollection<ArgumentInfo>(
 				new List<ArgumentInfo>(indexerArgs ?? Enumerable.Empty<ArgumentInfo>()));
 		}
@@ -44,20 +47,25 @@ namespace ClassDiagramGenerator.Models.Structure
 		public TypeInfo Type { get; }
 
 		/// <summary>
+		/// Gets a <see cref="PropertyType"/>.
+		/// </summary>
+		public PropertyType PropertyType { get; }
+
+		/// <summary>
 		/// Gets a list of indexer's arguments.
 		/// <para>If this is not indexer, return empty list.</para>
 		/// </summary>
 		public IReadOnlyList<ArgumentInfo> IndexerArguments { get; }
 
 		/// <summary>
-		/// Returns a collection of type names related with this field.
+		/// Returns a collection of types related with this field.
 		/// </summary>
-		/// <returns>A collection of type names related with this field</returns>
-		public IEnumerable<string> GetRelatedTypeNames()
+		/// <returns>A collection of types related with this field</returns>
+		public IEnumerable<TypeInfo> GetRelatedTypes()
 		{
-			var allTypeNames = new List<string>(this.Type.GetContainedTypeNames());
-			allTypeNames.AddRange(this.IndexerArguments.Select(a => a.Type.GetContainedTypeNames()).SelectMany(t => t));
-			return allTypeNames;
+			var allTypes = new List<TypeInfo>(this.Type.GetContainedTypes());
+			allTypes.AddRange(this.IndexerArguments.Select(a => a.Type.GetContainedTypes()).SelectMany(t => t));
+			return allTypes;
 		}
 
 		public override bool Equals(object obj)

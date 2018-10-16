@@ -1,15 +1,17 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
 	/// <summary>
-	/// The class to read each line from source code.
+	/// Class to read each line from source code.
 	/// </summary>
 	public class SourceCodeReader
 	{
@@ -48,7 +50,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 		
 		/// <summary>
-		/// Gets the value whether the current position is end of reader.
+		/// Gets a value of whether the current position is end of reader.
 		/// </summary>
 		public bool IsEndOfLines
 		{
@@ -61,8 +63,8 @@ namespace ClassDiagramGenerator.Models.Parser
 		public IReadOnlyList<DepthText> Lines { get; }
 
 		/// <summary>
-		/// Try to read line with current position.
-		/// <para>Return false if this reader has finished all lines.</para>
+		/// Tries to read line with current position.
+		/// <para>If this reader has finished all lines, returns false.</para>
 		/// </summary>
 		/// <param name="line">[out] Line to be read</param>
 		/// <returns>Whether succeeded in reading</returns>
@@ -114,8 +116,9 @@ namespace ClassDiagramGenerator.Models.Parser
 			code = Regex.Replace(code, "[\\r\\n\\s]+", " ");
 			
 			return TextAnalyzer.SplitWithDepth(code, "{", "}")
-				.Split(";")
+				.SplitEach(";")
 				.Where(w => !string.IsNullOrWhiteSpace(w.Text))
+				.Select(w => new DepthText(w.Text.Trim(), w.Depth))
 				.ToList();
 		}
 

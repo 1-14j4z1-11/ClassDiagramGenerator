@@ -1,11 +1,14 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using UnitTestSupport.MSTest;
-
 using ClassDiagramGenerator.Models.Parser;
+using ClassDiagramGeneratorTest.Support;
+using static ClassDiagramGeneratorTest.Support.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
@@ -15,13 +18,13 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 		[TestMethod]
 		public void TestSplitAndMarge()
 		{
-			TestcaseSplitAndMarge(new[] { DP("A", 0), DP("B", 1), DP("C", 2), DP("D", 3), DP("E", 2), DP("F", 1), DP("G", 2), DP("H", 1), DP("I", 0) },
+			TestcaseSplitAndMarge(new[] { Text(0, "A"), Text(1, "B"), Text(2, "C"), Text(3, "D"), Text(2, "E"), Text(1, "F"), Text(2, "G"), Text(1, "H"), Text(0, "I") },
 				"A<B<C<D>E>F<G>H>I", "<", ">");
-			TestcaseSplitAndMarge(new[] { DP("Class", 0), DP("T", 1), DP("", 0) },
+			TestcaseSplitAndMarge(new[] { Text(0, "Class"), Text(1, "T"), Text(0, "") },
 				"Class<T>", "<", ">");
-			TestcaseSplitAndMarge(new[] { DP("", 0), DP("Dictionary", 1), DP("List", 2), DP("int", 3), DP(",string", 2), DP("", 1), DP("", 0) },
+			TestcaseSplitAndMarge(new[] { Text(0, ""), Text(1, "Dictionary"), Text(2, "List"), Text(3, "int"), Text(2, ",string"), Text(1, ""), Text(0, "") },
 				"<Dictionary<List<int>,string>>", "<", ">");
-			TestcaseSplitAndMarge(new[] { DP("int Sum(int n)", 0), DP("if(i == 0)", 1), DP("return 0;", 2), DP("else", 1), DP("return Sum(n-1)+n;", 2), DP("", 1), DP("", 0) },
+			TestcaseSplitAndMarge(new[] { Text(0, "int Sum(int n)"), Text(1, "if(i == 0)"), Text(2, "return 0;"), Text(1, "else"), Text(2, "return Sum(n-1)+n;"), Text(1, ""), Text(0, "") },
 				"int Sum(int n){if(i == 0){return 0;}else{return Sum(n-1)+n;}}", "{", "}");
 		}
 
@@ -33,21 +36,16 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			TestcaseSplitWithDepthFilter("string<X,Y> xy, List<Z> z", ",", "<", ">", null, new[] { "string<X", "Y> xy", " List<Z> z" });
 			TestcaseSplitWithDepthFilter("string<X,Y> xy, List<Z> z", ",", "<", ">", d => d == 0, new[] { "string<X,Y> xy", " List<Z> z" });
 		}
-
+		
 		private static void TestcaseSplitWithDepthFilter(string target, string separator, string nest, string unnest, Func<int, bool> filter, IEnumerable<string> splittedWords)
 		{
-			TextAnalyzer.Split(target, separator, nest, unnest, filter).IsCollection(splittedWords);
+			target.Split(separator, nest, unnest, filter).IsCollection(splittedWords);
 		}
 
 		private static void TestcaseSplitAndMarge(IEnumerable<DepthText> splittedTexts, string margedText, string nest, string unnest)
 		{
 			TextAnalyzer.SplitWithDepth(margedText, nest, unnest).IsCollection(splittedTexts);
 			splittedTexts.Marge(nest, unnest).Is(margedText);
-		}
-		
-		private static DepthText DP(string text, int depth)
-		{
-			return new DepthText(text, depth);
 		}
 	}
 }

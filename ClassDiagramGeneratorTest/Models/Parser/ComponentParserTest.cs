@@ -1,19 +1,28 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using UnitTestSupport.MSTest;
 using ClassDiagramGenerator.Models.Parser;
 using ClassDiagramGenerator.Models.Structure;
+using ClassDiagramGeneratorTest.Support;
+using static ClassDiagramGeneratorTest.Support.TestSupport;
 
 namespace ClassDiagramGeneratorTest.Models.Parser
 {
 	[TestClass]
 	public class ComponentParserTest : ComponentParser<object>
 	{
+		public ComponentParserTest()
+			: base(Modifier.None)
+		{ }
+
 		[TestMethod]
-		public void TestParseType()
+		public void TestParseGenericTypes()
 		{
 			TestcaseParseTypes("string", Type("string"));
 			TestcaseParseTypes("List<string>", Type("List", Type("string")));
@@ -21,8 +30,38 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 				Type("List", Type("List", Type("int"))));
 			TestcaseParseTypes("Dictionary<string,int>",
 				Type("Dictionary", Type("string"), Type("int")));
-			TestcaseParseTypes("Dictionary<string, Dictionary<int, int>>",
-				Type("Dictionary", Type("string"), Type("Dictionary", Type("int"), Type("int"))));
+			TestcaseParseTypes("Dictionary<List<Dictionary<List<string>, int>>, Dictionary<int, List<int>>>",
+				Type("Dictionary", Type("List", Type("Dictionary", Type("List", Type("string")), Type("int"))), Type("Dictionary", Type("int"), Type("List", Type("int")))));
+		}
+
+		[TestMethod]
+		public void TestParseArrayTypes()
+		{
+			TestcaseParseTypes("string[]", TypeArray("string", 1));
+			TestcaseParseTypes("List<string>[]", TypeArray("List", 1, Type("string")));
+			TestcaseParseTypes("List < List < int [ ] > > [ ]",
+				TypeArray("List", 1, Type("List", TypeArray("int", 1))));
+			TestcaseParseTypes("Dictionary<string[],int[]>[]",
+				TypeArray("Dictionary", 1, TypeArray("string", 1), TypeArray("int", 1)));
+			TestcaseParseTypes("Dictionary < List<Dictionary<List<string>, int>> [] , Dictionary<int[], List<int>[]> > [ ]",
+				TypeArray("Dictionary", 1, TypeArray("List", 1, Type("Dictionary", Type("List", Type("string")), Type("int"))), Type("Dictionary", TypeArray("int", 1), TypeArray("List", 1, Type("int")))));
+
+			TestcaseParseTypes("string[][]", TypeArray("string", 2));
+			TestcaseParseTypes("string[][][]", TypeArray("string", 3));
+			TestcaseParseTypes("string...", TypeArray("string", 1));
+			TestcaseParseTypes("string[] ...", TypeArray("string", 2));
+			TestcaseParseTypes("List<string> ...", TypeArray("List", 1, Type("string")));
+			TestcaseParseTypes("List<string>[] ...", TypeArray("List", 2, Type("string")));
+			TestcaseParseTypes("List<string>[] ...", TypeArray("List", 2, Type("string")));
+		}
+
+		[TestMethod]
+		public void TestNestedTypes()
+		{
+			TestcaseParseTypes("Outer.Inner", Type("Outer.Inner"));
+			TestcaseParseTypes("Outer.Inner<int>", Type("Outer.Inner", Type("int")));
+			TestcaseParseTypes("Outer<int>.Inner", Type("Outer.Inner"));
+			TestcaseParseTypes("Outer<int>.Inner<int>", Type("Outer.Inner", Type("int")));
 		}
 
 		private void TestcaseParseTypes(string targetText, TypeInfo expextedType)
@@ -49,11 +88,6 @@ namespace ClassDiagramGeneratorTest.Models.Parser
 			var actualType = ParseType(targetText);
 			actualType.Name.Is(expextedType.Name);
 			recursiveCheck(expextedType.TypeArgs, actualType.TypeArgs);
-		}
-
-		private static TypeInfo Type(string type, params TypeInfo[] typeArgs)
-		{
-			return new TypeInfo(type, typeArgs);
 		}
 		
 		public override bool TryParse(SourceCodeReader reader, out object obj)

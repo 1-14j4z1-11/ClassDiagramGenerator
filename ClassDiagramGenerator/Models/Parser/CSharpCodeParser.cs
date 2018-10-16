@@ -1,26 +1,30 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
-	public class SourceCodeParser
+	/// <summary>
+	/// Class to parse a C# source code.
+	/// </summary>
+	public class CSharpCodeParser : ISourceCodeParser
 	{
 		private static readonly Regex NameSpaceRegex = new Regex("^\\s*namespace\\s+([^\\s,:\\[\\]\\(\\)<>=]+)\\s*");
 
-		public List<ClassInfo> Parse(string code)
+		public IEnumerable<ClassInfo> Parse(string code)
 		{
 			if(code == null)
 				throw new ArgumentNullException();
 
 			var reader = new SourceCodeReader(code);
 			var classList = new List<ClassInfo>();
-			var classParser = new ClassParser(string.Empty);
+			var classParser = new ClassParser(string.Empty, Modifier.Internal);
 			var prevNS = new Dictionary<int, string>();
 
 			while(!reader.IsEndOfLines)
@@ -34,7 +38,7 @@ namespace ClassDiagramGenerator.Models.Parser
 					}
 
 					prevNS[depth] = nameSpace;
-					classParser = new ClassParser(nameSpace);
+					classParser = new ClassParser(nameSpace, Modifier.Internal);
 					continue;
 				}
 
@@ -51,7 +55,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Try to parse a namespace.
+		/// Tries to parse a namespace.
 		/// <para>If failed to parse, the position of <paramref name="reader"/> after this processing is the same as that of before this processing.</para>
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>

@@ -1,23 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 using ClassDiagramGenerator.Models.Structure;
 
 namespace ClassDiagramGenerator.Models.Parser
 {
+	/// <summary>
+	/// Class to parse a method of C# and Java.
+	/// </summary>
 	public class MethodParser : ComponentParser<MethodInfo>
 	{
+		// In order to support both Java and C# methods, Type argument declarations are included twice.
 		// Groups : [1] Modifier, [2] Return type, [3] Method name, [4] Arguments
 		private static readonly Regex MethodRegex = new Regex(
-			$"^\\s*{AttributePattern}?((?:{ModifierPattern}\\s+)*)(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeArgPattern}>\\s*)?"
-			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");
+			$"^\\s*{AttributePattern}{AnnotationPattern}((?:{ModifierPattern}\\s+)*)(?:<{TypeParamPattern}>\\s*)?"	// Attributes + Modifier + TypeArgDeclaration
+			+ $"(?:({TypePattern})\\s+)?({NamePattern})\\s*(?:<{TypeParamPattern}>\\s*)?"							// ReturnType + Name + TypeArgDeclaration
+			+ $"\\(\\s*({ArgumentPattern}?(?:\\s*,\\s*(?:{ArgumentPattern}))*)\\s*\\)");							// Arguments
 
-		private static readonly Regex CreateObjectRegex = new Regex($"\\s*new\\s+({NamePattern})\\s*");
-		
+		private readonly ClassInfo classInfo;
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="classInfo"><see cref="ClassInfo"/> containing methods</param>
+		/// <param name="defaultAccessLevel">Default access level attached to methods without access level modifier
+		/// (Modifiers not indicating access level are ignored)</param>
+		public MethodParser(ClassInfo classInfo, Modifier defaultAccessLevel)
+			: base(defaultAccessLevel)
+		{
+			this.classInfo = classInfo;
+		}
+
 		public override bool TryParse(SourceCodeReader reader, out MethodInfo info)
 		{
 			if(!this.TryParseDefinitionLine(reader, out info, out var depth))
@@ -28,7 +44,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Try to parse method definition line.
+		/// Tries to parse method definition line.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
 		/// <param name="info">[out] Parsed <see cref="MethodInfo"/> (only succeeded in parsing)</param>
@@ -54,7 +70,7 @@ namespace ClassDiagramGenerator.Models.Parser
 				return false;
 			}
 
-			var mod = ParseModifiers(match.Groups[1].Value);
+			var mod = this.ParseModifiers(match.Groups[1].Value);
 			var returnType = string.IsNullOrEmpty(match.Groups[2].Value) ? null : ParseType(match.Groups[2].Value);
 			var name = match.Groups[3].Value;
 			var args = ParseArguments(match.Groups[4].Value);
@@ -64,7 +80,7 @@ namespace ClassDiagramGenerator.Models.Parser
 		}
 
 		/// <summary>
-		/// Parse implementation lines.
+		/// Parses implementation lines.
 		/// </summary>
 		/// <param name="reader"><see cref="SourceCodeReader"/></param>
 		/// <param name="info"><see cref="MethodInfo"/> to hold implementation contents</param>
@@ -78,8 +94,20 @@ namespace ClassDiagramGenerator.Models.Parser
 				reader.TryRead(out var sub);
 
 				// Skip implementation lines
-				// TODO Gets using type in implementation lines
+				// TODO Gets used types in implementation lines
 			}
+		}
+
+		protected override Modifier ParseModifiers(string modifierText)
+		{
+			var mod = base.ParseModifiers(modifierText);
+
+			if((this.classInfo == null) || (this.classInfo.Category != ClassCategory.Interface))
+				return mod;
+
+			// Method in interface is always Public and Abstract
+			mod &= ~Modifiers.AllAccessLevels;
+			return Modifier.Public | Modifier.Abstract | mod;
 		}
 	}
 }

@@ -42,23 +42,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\Diagram\DiagramGenerator.cs" />
+    <Compile Include="Cui\CmdFlag.cs" />
+    <Compile Include="Cui\CmdParser.cs" />
+    <Compile Include="Models\Diagram\CodeWriter.cs" />
+    <Compile Include="Models\Diagram\PumlClassDiagramGenerator.cs" />
     <Compile Include="Models\Diagram\RelationFactory.cs" />
     <Compile Include="Models\Parser\ClassParser.cs" />
-    <Compile Include="Models\Parser\SourceCodeParser.cs" />
+    <Compile Include="Models\Parser\JavaCodeParser.cs" />
+    <Compile Include="Models\Parser\EnumValuesParser.cs" />
+    <Compile Include="Models\Parser\CSharpCodeParser.cs" />
     <Compile Include="Models\Parser\ComponentParser.cs" />
     <Compile Include="Models\Parser\DepthText.cs" />
     <Compile Include="Models\Parser\FieldParser.cs" />
+    <Compile Include="Models\Parser\ISourceCodeParser.cs" />
     <Compile Include="Models\Parser\MethodParser.cs" />
     <Compile Include="Models\Parser\SourceCodeReader.cs" />
     <Compile Include="Models\Parser\TextAnalyzer.cs" />
     <Compile Include="Models\Structure\ArgumentInfo.cs" />
+    <Compile Include="Models\Structure\ArgumentModifier.cs" />
     <Compile Include="Models\Structure\ClassInfo.cs" />
     <Compile Include="Models\Structure\ClassCategory.cs" />
     <Compile Include="Models\Structure\FieldInfo.cs" />
     <Compile Include="Models\Structure\MethodInfo.cs" />
     <Compile Include="Models\Structure\Modifier.cs" />
     <Compile Include="Models\Diagram\Relation.cs" />
+    <Compile Include="Models\Structure\PropertyType.cs" />
     <Compile Include="Models\Structure\TypeInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

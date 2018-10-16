@@ -1,14 +1,15 @@
-﻿using System;
+﻿//
+// Copyright (c) 2018 Yasuhiro Hayashi
+//
+
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassDiagramGenerator.Models.Structure
 {
 	/// <summary>
-	/// The class possessing method information.
+	/// Class possessing method information.
 	/// </summary>
 	public class MethodInfo
 	{
@@ -17,7 +18,7 @@ namespace ClassDiagramGenerator.Models.Structure
 		/// </summary>
 		/// <param name="modifier">Modifier</param>
 		/// <param name="name">Method name</param>
-		/// <param name="returnType">Return value type</param>
+		/// <param name="returnType">Return value type, or null to indicate a constructor</param>
 		/// <param name="arguments">Collection containing arguments</param>
 		public MethodInfo(Modifier modifier, string name, TypeInfo returnType, IEnumerable<ArgumentInfo> arguments)
 		{
@@ -51,14 +52,14 @@ namespace ClassDiagramGenerator.Models.Structure
 		public IReadOnlyList<ArgumentInfo> Arguments { get; }
 
 		/// <summary>
-		/// Returns a collection of type names related with this method.
+		/// Returns a collection of types related with this method.
 		/// </summary>
-		/// <returns>A collection of type names related with this method</returns>
-		public IEnumerable<string> GetRelatedTypeNames()
+		/// <returns>A collection of types related with this method</returns>
+		public IEnumerable<TypeInfo> GetRelatedTypes()
 		{
-			var allTypeNames = new List<string>(this.ReturnType?.GetContainedTypeNames() ?? Enumerable.Empty<string>());
-			allTypeNames.AddRange(this.Arguments.Select(a => a.Type.GetContainedTypeNames()).SelectMany(t => t));
-			return allTypeNames;
+			var allTypes = new List<TypeInfo>(this.ReturnType?.GetContainedTypes() ?? Enumerable.Empty<TypeInfo>());
+			allTypes.AddRange(this.Arguments.Select(a => a.Type.GetContainedTypes()).SelectMany(t => t));
+			return allTypes;
 		}
 
 		public override bool Equals(object obj)
